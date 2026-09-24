@@ -79,22 +79,24 @@ function gameTest(){
   const J=()=>w.eval('J'), STEPS=w.eval('STEPS'), vis=id=>d.getElementById(id).style.display!=='none';
   const click=el=>el.dispatchEvent(new w.MouseEvent('click',{bubbles:true}));
   let asked=0, kinds={}, round=1;
+  const only=new URLSearchParams(location.search).get('kind'); // test.html?kind=용역 → 그 업종 사건만
+  if(only) w.eval("SCN.splice(0,SCN.length,...SCN.filter(s=>s.kind==='"+only+"'))");
   $('.tab[data-v=board]').click(); click($('#bStartBtn'));
   ok(/— /.test($('#scnBrief').textContent),'여정: 사건 한 건 배정');
   const tick=setInterval(()=>{ try{
    const j=J();
    if(vis('bResult')){ clearInterval(tick);
-    if(round===1){ ok(j.idx===20&&j.hearts===3&&/완주/.test($('#bSub').textContent),'여정: 정답만 골라 20단계 완주 (문제 '+asked+'개: '+Object.keys(kinds).join('·')+')');
+    if(round===1){ ok(j.idx===j.tasks.length&&j.hearts===3&&/완주/.test($('#bSub').textContent),'여정: '+j.S.kind+'·'+j.S.method+' 사건 '+j.tasks.length+'개 업무 완주 (문제 '+asked+'개: '+Object.keys(kinds).join('·')+')');
      ok(kinds.multi&&kinds.num&&(kinds.ox||kinds.mc),'여정: 서류 고르기·계산·판단 모두 출제');
      round=2; click($('#bRetry')); return setTimeout(()=>{ // 틀린 카드만 3번 → 게임 끝
-      for(let k=0;k<3;k++){const b=[...d.querySelectorAll('.pcard:not([disabled])')].find(b=>b.textContent!==STEPS[J().idx].name); if(b) click(b);}
+      for(let k=0;k<3;k++){const b=[...d.querySelectorAll('.pcard:not([disabled])')].find(b=>b.textContent!==J().tasks[J().idx].n); if(b) click(b);}
       setTimeout(()=>{ ok(vis('bResult')&&J().hearts===0,'여정: 단계 순서 3번 틀리면 끝');
        ok(errs.length===0,'여정: JS 오류 없음 '+errs.join('|')); out.textContent=log.join('\n'); },1500);
      },300);
     }
    }
    if(j.busy) return;
-   if(vis('pickBox')){ const b=[...d.querySelectorAll('.pcard')].find(b=>b.textContent===STEPS[j.idx].name); if(b&&!b.classList.contains('right')) click(b); return; }
+   if(vis('pickBox')){ const b=[...d.querySelectorAll('.pcard')].find(b=>b.textContent===j.tasks[j.idx].n); if(b&&!b.classList.contains('right')) click(b); return; }
    if(!vis('qPanel')||j.answered) return;
    const q=w.eval('bCur'); asked++; kinds[q.t]=1;
    const btns=[...d.querySelectorAll('#bA .choice')];

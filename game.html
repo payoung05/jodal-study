@@ -162,6 +162,7 @@ body{-webkit-font-smoothing:antialiased}
 .pcard.right{background:#EAF6EE;border-color:var(--jade);color:var(--jade)}
 .pcard.wrong{background:#FDECEC;border-color:var(--red);color:var(--red)}
 .pick-msg{min-height:22px;margin-top:10px;color:var(--red);font-size:14px;font-weight:600}
+.pick-msg.ok{color:var(--jade)}
 .choice.sel{background:#EAF1FE;border-color:var(--gold);color:var(--gold)}
 .exp .next{display:block;margin-top:12px}
 .qpanel{margin:4px auto 0}
@@ -222,7 +223,7 @@ body{-webkit-font-smoothing:antialiased}
   <div class="lobby" id="bLobby">
     <div class="pxtitle">조달 여정</div>
     <canvas class="scene-cv" id="lobbyScene" width="200" height="80" aria-hidden="true"></canvas>
-    <p class="desc">매 판 발주 사건 하나를 받아 수요 발생부터 사후관리까지 간다.<br>섞인 단계 카드에서 <b>다음에 할 단계</b>를 고르면 한 칸 전진,<br>도착한 단계에서 서류·계산·판단을 처리한다. 하트 3개.</p>
+    <p class="desc">매 판 발주 사건 하나를 받아 수요 확인부터 납품 후까지 간다.<br>물품·공사·용역, 계약방법마다 해야 할 일이 다르다.<br>섞인 카드에서 <b>다음에 할 일</b>을 고르면 한 칸 전진,<br>그 일에 필요한 서류·계산·판단을 처리한다. 하트 3개.</p>
     <div class="statrow">
       <div class="statbox"><div class="v" id="bBestV">0</div><div class="k">최고 점수</div></div>
       <div class="statbox"><div class="v" id="bClearV">0</div><div class="k">완주 횟수</div></div>
@@ -234,12 +235,12 @@ body{-webkit-font-smoothing:antialiased}
   <div class="play" id="bPlay">
     <div class="brief" id="scnBrief"></div>
     <div class="playmeta">
-      <span>진행 <b id="bProg">0</b>/20 · <b id="bScore">0</b>점</span>
+      <span>진행 <b id="bProg">0</b>/<span id="bTotal">0</span> · <b id="bScore">0</b>점</span>
       <span class="hearts" id="bHearts" aria-label="남은 하트"></span>
     </div>
     <div class="scene"><canvas class="scene-cv" id="scene" width="200" height="80" aria-hidden="true"></canvas><div class="scene-lbl" id="sceneLbl"></div></div>
     <div id="pickBox">
-      <div class="pick-q">다음에 할 단계는?</div>
+      <div class="pick-q">다음에 할 일은?</div>
       <div class="pick-cards" id="pickCards"></div>
       <div class="pick-msg" id="pickMsg" aria-live="polite"></div>
     </div>
@@ -272,6 +273,7 @@ body{-webkit-font-smoothing:antialiased}
 </div>
 
 <script src="data/steps.js"></script>
+<script src="data/journey.js"></script>
 <script>
 
 const Q = [
@@ -731,25 +733,22 @@ function scnEvents(S){
  return ex;
 }
 
-/* ════════ 조달 여정: 섞인 단계 카드에서 다음 단계를 골라 도트 캐릭터를 전진시키고, 단계마다 할 일을 처리 ════════ */
-// 단계별 할 일 = GEN 문제 키 (docs = 서류 고르기). 사건(S) 조건에 따라 정답이 달라짐
-const MISSION={need:['docs'],budget:['calc_amt'],doc:['docs'],method:['method','detail'],pre:['docs'],notice:['notice'],
- submit:['calc_bid'],open:['open'],eval:['award'],win:['docs'],sign:['calc_perf'],start:['calc_adv'],perform:['perform'],
- change:['docs'],delay:['calc_delay'],inspect:['inspect'],claim:['calc_settle'],pay:['pay'],defect:['defect'],after:['post','appeal']};
-const EVENT_AFTER=new Set(['open','perform','inspect']); // 이 단계 뒤에 돌발 상황
-const ZONE_NAME=['발주','입찰','계약·이행','대금·사후'], ZONE_START=[0,5,10,16], ZONE_LEN=[5,5,6,4];
-const zoneOf=i=>i<5?0:i<10?1:i<16?2:3;
+/* ════════ 조달 여정: 사건의 업종·계약방법에 맞는 실제 업무를 순서대로 골라 도트 캐릭터를 전진시키고, 업무마다 문제를 처리 ════════ */
+// 업무 목록은 data/journey.js (업종별 · 계약방법 조건 g · 문제 m · 돌발 ev)
+const ZONE_NAME=['발주','입찰','계약·이행','대금·사후'];
+const zoneOfStep=s=>s<=5?0:s<=10?1:s<=16?2:3; // 앱의 20단계 구역과 같음
+const tasksFor=S=>JOURNEY[S.kind].filter(t=>!t.g||t.g.includes(JOURNEY_GROUP[S.method]));
 
 // 관련 문서 → 서류 고르기 (이 사건의 업종·계약방법과 안 맞는 조건부 서류는 뺌)
 function docItems(st,S){
  const cond={'공사':S.kind==='공사','물품':S.kind==='물품','용역':S.kind==='용역','협상계약':S.method==='협상','수의계약 시':/수의/.test(S.method)};
  return st.docs.split(/\s*,\s*|\s+\/\s+/).filter(d=>{const m=d.match(/\(([^)]+)\)$/);return !m||!(m[1] in cond)||cond[m[1]]}).map(d=>d.replace(/\((공사|물품|용역)\)$/,'').trim());
 }
-function docsQ(idx,S){
- const all=docItems(STEPS[idx],S), right=shuffle(all).slice(0,3), pool=[];
+function docsQ(step,S){
+ const idx=step-1, all=docItems(STEPS[idx],S), right=shuffle(all).slice(0,3), pool=[];
  STEPS.forEach((o,j)=>{if(Math.abs(j-idx)>=3)docItems(o,S).forEach(d=>{if(!all.includes(d)&&!pool.includes(d))pool.push(d)})});
  const c=shuffle(right.concat(shuffle(pool).slice(0,6-right.length)));
- return {t:'multi',q:'이 단계에서 챙길 서류를 모두 고르세요.',c:c,a:right.map(d=>c.indexOf(d)),exp:STEPS[idx].name+' 단계 서류 — '+right.join(', ')+'.'};
+ return {t:'multi',q:'이 일에 필요한 서류를 모두 고르세요.',c:c,a:right.map(d=>c.indexOf(d)),exp:STEPS[idx].name+' 단계 서류 — '+right.join(', ')+'.'};
 }
 
 /* ── 도트 장면 (200×80 캔버스를 CSS로 확대) ── */
@@ -777,23 +776,24 @@ const BUILD=[
   g.fillStyle='#fff';for(let c=0;c<4;c++)g.fillRect(150+c*11,28,5,26);g.fillStyle='#D9DEE3';g.fillRect(146,54,46,2);
   g.fillStyle='#FFC94D';g.fillRect(166,6,6,6);g.fillStyle='#D9730D';g.fillRect(168,8,2,2)}
 ];
-const postX=(z,k)=>14+Math.round(k*136/(ZONE_LEN[z]-1));
-function drawScene(cv,z,heroX,frame,cur){
+const zoneTasks=(tasks,z)=>tasks.map((t,i)=>i).filter(i=>zoneOfStep(tasks[i].s)===z);
+function postX(tasks,i){const zs=zoneTasks(tasks,zoneOfStep(tasks[i].s));return 14+Math.round(zs.indexOf(i)*136/Math.max(1,zs.length-1))}
+function drawScene(cv,tasks,z,heroX,frame,cur){
  const g=cv.getContext('2d');
  g.fillStyle=SKY[z];g.fillRect(0,0,200,80);
  g.fillStyle='#fff';[[16,12,14],[64,18,10],[108,9,12]].forEach(([x,y,w])=>{g.fillRect(x,y,w,3);g.fillRect(x+2,y-2,w-4,2)});
  BUILD[z](g);
  g.fillStyle='#BFE3B0';g.fillRect(0,56,200,24);g.fillStyle='#E8EBEE';g.fillRect(0,62,200,8);
- for(let k=0;k<ZONE_LEN[z];k++){const i=ZONE_START[z]+k,x=postX(z,k); // 단계 표지판: 지남=파랑, 지금=노랑
+ for(const i of zoneTasks(tasks,z)){const x=postX(tasks,i); // 업무 표지판: 끝냄=파랑, 지금=노랑
   g.fillStyle='#8B95A1';g.fillRect(x,52,1,10);g.fillStyle=i<cur?'#3268E8':i===cur?'#FFC94D':'#D9DEE3';g.fillRect(x-3,48,7,4)}
  sprite(g,HERO,heroX-10,40,2);sprite(g,LEGS[frame],heroX-10,62,2);
 }
 const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
 function walkTo(i,done){ // 다른 구역이면 오른쪽으로 나가서 새 장면 왼쪽에서 들어옴
- const z=zoneOf(i), tx=postX(z,i-ZONE_START[z])+10, cv=$('scene');
+ const z=zoneOfStep(J.tasks[i].s), tx=postX(J.tasks,i)+10, cv=$('scene');
  const seg=(zz,from,to,cb)=>{
-  if(RM){drawScene(cv,zz,to,0,J.idx);return cb()}
-  let x=from,f=0;const iv=setInterval(()=>{x=Math.min(to,x+3);f^=1;if(f)S_step();drawScene(cv,zz,x,f,J.idx);if(x>=to){clearInterval(iv);drawScene(cv,zz,to,0,J.idx);cb()}},70)};
+  if(RM){drawScene(cv,J.tasks,zz,to,0,J.idx);return cb()}
+  let x=from,f=0;const iv=setInterval(()=>{x=Math.min(to,x+3);f^=1;if(f)S_step();drawScene(cv,J.tasks,zz,x,f,J.idx);if(x>=to){clearInterval(iv);drawScene(cv,J.tasks,zz,to,0,J.idx);cb()}},70)};
  const fin=()=>{J.x=tx;J.z=z;hud();done()};
  if(J.z!==z) seg(J.z,J.x,210,()=>{$('sceneLbl').textContent=ZONE_NAME[z];seg(z,-10,tx,fin)}); else seg(z,J.x,tx,fin);
 }
@@ -801,53 +801,56 @@ function walkTo(i,done){ // 다른 구역이면 오른쪽으로 나가서 새 �
 /* ── 한 판 ── */
 let bST=Object.assign({best:0,clears:0},(load().board||{}));
 function bSave(){ST.board=bST;save(ST)}
-function bLobbyRender(){$('bBestV').textContent=bST.best;$('bClearV').textContent=bST.clears;drawScene($('lobbyScene'),0,44,0,-1)}
+function bLobbyRender(){$('bBestV').textContent=bST.best;$('bClearV').textContent=bST.clears;drawScene($('lobbyScene'),JOURNEY['물품'],0,44,0,-1)}
 let J=null, bCur=null;
 function hud(){
- $('bProg').textContent=J.idx;$('bScore').textContent=J.score;
+ const t=J.tasks[J.idx];
+ $('bProg').textContent=J.idx;$('bTotal').textContent=J.tasks.length;$('bScore').textContent=J.score;
  $('bHearts').textContent='♥'.repeat(Math.max(J.hearts,0))+'♡'.repeat(3-Math.max(J.hearts,0));
- $('sceneLbl').textContent=ZONE_NAME[J.z]+(J.idx<STEPS.length&&zoneOf(J.idx)===J.z?' · '+(J.idx+1)+'단계':'');
+ $('sceneLbl').textContent=ZONE_NAME[J.z]+(t&&zoneOfStep(t.s)===J.z?' · '+STEPS[t.s-1].name:'');
 }
 function bStart(){
  updStreak();
  const S=ri(SCN);
- J={S:S,idx:0,hearts:3,score:0,wrong:[],x:10,z:0,busy:false,answered:false,queue:[],ev:shuffle(scnEvents(S)).concat(shuffle(EV))};
+ J={S:S,tasks:tasksFor(S),idx:0,hearts:3,score:0,wrong:[],x:10,z:0,busy:false,answered:false,queue:[],ev:shuffle(scnEvents(S)).concat(shuffle(EV))};
  $('bLobby').style.display='none';$('bResult').style.display='none';$('bPlay').style.display='block';
- $('scnBrief').innerHTML='<b>'+S.org+' — '+S.name+'</b><div class="meta">'+(S.sub.includes(S.kind)?'':S.kind+' · ')+S.sub+' · '+S.note+'</div>';
- drawScene($('scene'),0,J.x,0,0);hud();pick();
+ $('scnBrief').innerHTML='<b>'+S.org+' — '+S.name+'</b><div class="meta">'+(S.sub.includes(S.kind)?'':S.kind+' · ')+S.sub+' · '+S.note.replace(S.sub+' · ','')+'</div>';
+ drawScene($('scene'),J.tasks,0,J.x,0,0);hud();pick();
 }
-function pick(){
- if(J.idx>=STEPS.length) return bEnd(true);
- $('qPanel').style.display='none';$('pickBox').style.display='block';$('pickMsg').textContent='';
- const opts=shuffle([STEPS[J.idx]].concat(shuffle(STEPS.slice(J.idx+1)).slice(0,3)));
+function pick(done){
+ if(J.idx>=J.tasks.length) return bEnd(true);
+ $('qPanel').style.display='none';$('pickBox').style.display='block';
+ $('pickMsg').className='pick-msg'+(done?' ok':'');$('pickMsg').textContent=done?'✓ '+done:'';
+ const cur=J.tasks[J.idx], later=J.tasks.filter(t=>t.s>cur.s);
  const box=$('pickCards');box.innerHTML='';
- opts.forEach(st=>{const b=document.createElement('button');b.className='pcard';b.textContent=st.name;b.onclick=()=>choose(st,b);box.appendChild(b)});
+ shuffle([cur].concat(shuffle(later).slice(0,3))).forEach(t=>{const b=document.createElement('button');b.className='pcard';b.textContent=t.n;b.onclick=()=>choose(t,b);box.appendChild(b)});
 }
-function choose(st,b){
+function choose(t,b){
  if(J.busy||J.hearts<=0)return;
- const want=STEPS[J.idx];
- if(st.id===want.id){S_ok();J.busy=true;b.classList.add('right');walkTo(J.idx,()=>{J.busy=false;startMissions()});return}
+ const cur=J.tasks[J.idx];
+ if(t===cur){S_ok();J.busy=true;b.classList.add('right');walkTo(J.idx,()=>{J.busy=false;startMissions()});return}
  S_bad();b.classList.add('wrong');b.disabled=true;J.hearts--;hud();
- J.wrong.push({q:(J.idx?'"'+STEPS[J.idx-1].name+'" 다음 단계는?':'첫 단계는?'),a:want.name,exp:'"'+st.name+'"은 '+st.id+'단계라 아직 일러요.'});
- $('pickMsg').textContent='아직 일러요 — "'+st.name+'"은 '+st.id+'단계예요.';
+ const later='"'+t.n+'"은 '+STEPS[t.s-1].name+' 단계 일이에요.';
+ J.wrong.push({q:(J.idx?'"'+J.tasks[J.idx-1].n+'" 다음에 할 일은?':'맨 처음 할 일은?'),a:cur.n,exp:later});
+ $('pickMsg').className='pick-msg';$('pickMsg').textContent='아직 일러요 — '+later;
  if(J.hearts<=0)setTimeout(()=>bEnd(false),900);
 }
 function startMissions(){
- const st=STEPS[J.idx];
- J.queue=MISSION[st.key].map(k=>k==='docs'?docsQ(J.idx,J.S):GEN[k](J.S));
- if(EVENT_AFTER.has(st.key)&&J.ev.length)J.queue.push(Object.assign({ev:true},J.ev.shift()));
+ const t=J.tasks[J.idx];
+ J.queue=(t.m||[]).map(k=>k==='docs'?docsQ(t.s,J.S):GEN[k](J.S));
+ if(t.ev&&J.ev.length)J.queue.push(Object.assign({ev:true},J.ev.shift()));
  $('pickBox').style.display='none';nextMission();
 }
 function nextMission(){
  if(J.hearts<=0)return bEnd(false);
- if(!J.queue.length){J.idx++;drawScene($('scene'),J.z,J.x,0,J.idx);hud();return pick()}
+ if(!J.queue.length){const done=J.tasks[J.idx].n;J.idx++;drawScene($('scene'),J.tasks,J.z,J.x,0,J.idx);hud();return pick(done)}
  askQ(J.queue.shift());
 }
 function askQ(item){
  bCur=item;J.answered=false;
  $('qPanel').style.display='block';
  $('bStampEl').className='stamp';$('bExp').className='exp';$('bExp').innerHTML='';
- $('bTag').textContent=item.ev?'돌발 상황':STEPS[J.idx].name;
+ $('bTag').textContent=item.ev?'돌발 상황':J.tasks[J.idx].n;
  $('bQ').innerHTML=(item.ev?'<span class="eventflag">돌발</span><br>':'')+item.q.replace(/^\[이벤트\]\s*/,'');
  const A=$('bA');A.innerHTML='';buildAns(item,A);
  $('qPanel').scrollIntoView({behavior:'smooth',block:'nearest'});
@@ -884,7 +887,7 @@ function bEnd(clear){
  if(clear){S_win();J.score+=30;bST.clears++}
  $('bPlay').style.display='none';$('bResult').style.display='block';
  $('bFinal').textContent=J.score;
- $('bSub').textContent=(clear?'20단계 완주! 보너스 +30점. ':'하트를 모두 잃었어요 — '+(J.idx+1)+'단계에서 멈춤. ')+'사건: '+J.S.name;
+ $('bSub').textContent=(clear?J.tasks.length+'개 업무 완주! 보너스 +30점. ':'하트를 모두 잃었어요 — '+(J.idx+1)+'번째 업무에서 멈춤. ')+'사건: '+J.S.name;
  if(J.score>bST.best)bST.best=J.score;
  $('bRecap').innerHTML=J.wrong.slice(0,8).map(w=>'<div class="wrongitem">'+w.q+'<br><b>정답: '+w.a+'</b> — '+w.exp+'</div>').join('');
  bSave();bLobbyRender();
