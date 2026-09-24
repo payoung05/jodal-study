@@ -215,12 +215,15 @@ function wnRender(){
     return;
   }
   const cards=ids.map(id=>{
-    const q=notes[id];
-    const date=q.wrongAt?new Date(q.wrongAt).toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}):'';
+    // 저장된 사본 대신 지금 문제 데이터를 보여 줌 → 문제·해설이 고쳐지면 오답노트도 따라감
+    const saved=notes[id], cur=QUESTIONS.find(x=>x.id===id), q=cur||saved;
+    const sameOpts=!cur||JSON.stringify(cur.options)===JSON.stringify(saved.options);
+    const updated=cur&&(!sameOpts||cur.answer!==saved.answer||cur.question!==saved.question||cur.explanation!==saved.explanation);
+    const date=saved.wrongAt?new Date(saved.wrongAt).toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}):'';
     return `<div class="qz-res-card ng">
-      <div class="qz-res-hd"><span class="rv-verdict ng">✗ 오답</span>
+      <div class="qz-res-hd"><span class="rv-verdict ng">✗ 오답${updated?' <span class="wn-upd">문제 수정됨 · 최신 내용</span>':''}</span>
         <span class="wn-date">${q.subject} · ${date}<button class="btn btn-xs" data-act="remove" data-id="${esc(id)}">삭제</button></span></div>
-      <div class="rv-q">${q.question}</div>${rvOpts(q,q.mySelection)}${explain(q)}</div>`;
+      <div class="rv-q">${q.question}</div>${rvOpts(q,sameOpts?saved.mySelection:undefined)}${explain(q)}</div>`;
   }).join('');
   root.innerHTML=`<div class="qz-hd">
       <div class="qz-title">오답노트 <span class="n">${ids.length}</span></div>

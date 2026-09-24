@@ -1,0 +1,54 @@
+# 자동 테스트 + 사이트 배포
+# PR: 데이터 검사 + 브라우저 동작 테스트(test.html). 실패하면 main 보호 규칙 때문에 Merge 불가.
+# main: 같은 테스트 통과 후에만 사이트 배포(빌드 시각·커밋 표시). 오프라인 파일(dist)은 실행 결과에 첨부.
+name: test
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - name: 데이터 검사 (번호 중복·정답 범위·여정·constraints 금지 문구)
+        run: node tools/check-data.mjs
+      - name: 브라우저 동작 테스트 (필기·실기·탭·카드·검색·조달 여정 완주, 업종별)
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/dev/null 2>&1 &
+          sleep 1
+          fail=0
+          for q in "" "?kind=물품" "?kind=공사" "?kind=용역"; do
+            out=$(google-chrome --headless=new --no-sandbox --disable-gpu --no-first-run --force-prefers-reduced-motion \
+                  --user-data-dir="$(mktemp -d)" --virtual-time-budget=150000 --dump-dom "http://127.0.0.1:8765/test.html$q" 2>/dev/null \
+                  | sed -n '/<pre id="out">/,/<\/pre>/p' | sed 's/<[^>]*>//g')
+            echo "── test.html$q"; echo "$out" | grep -v '^PASS' || true
+            echo "PASS $(echo "$out" | grep -c '^PASS')개"
+            echo "### test.html$q — PASS $(echo "$out" | grep -c '^PASS')개" >> "$GITHUB_STEP_SUMMARY"
+            echo "$out" | grep -E '^(FAIL|ERROR)' >> "$GITHUB_STEP_SUMMARY" || true
+            if echo "$out" | grep -qE '^(FAIL|ERROR)' || ! echo "$out" | grep -q '^PASS 여정: JS 오류 없음'; then fail=1; fi
+          done
+          exit $fail
+      - name: 오프라인 파일 만들기
+        run: python3 build.py
+      - uses: actions/upload-artifact@v4
+        with: { name: 학습앱-오프라인, path: dist/ }
+
+  deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: test
+    runs-on: ubuntu-latest
+    permissions: { pages: write, id-token: write, contents: read }
+    environment: { name: github-pages, url: '${{ steps.d.outputs.page_url }}' }
+    steps:
+      - uses: actions/checkout@v4
+      - name: 빌드 시각·커밋 표시
+        run: echo "const BUILD={time:'$(TZ=Asia/Seoul date '+%Y-%m-%d %H:%M')',commit:'${GITHUB_SHA::7}'};" > js/version.js
+      - uses: actions/upload-pages-artifact@v3
+        with: { path: . }
+      - id: d
+        uses: actions/deploy-pages@v4

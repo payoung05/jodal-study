@@ -29,6 +29,11 @@ f.onload=()=>{ const w=f.contentWindow,d=w.document,errs=[];w.onerror=(m)=>errs.
  click($('#qz_root [data-act=go][data-to=select]')); ok(!$('#qz_root .menu-card[data-k=wrong]').disabled,'오답모드 활성');
  click($(`#wn_root [data-act=remove][data-id="${Object.keys(JSON.parse(w.localStorage.wrong_notes))[0]}"]`));
  ok($$('#wn_root .qz-res-card').length===18,'오답노트 삭제 (P1-001 같은 id)');
+ const wn=JSON.parse(w.localStorage.wrong_notes), wk=Object.keys(wn)[0]; wn[wk].explanation='옛 해설'; w.localStorage.wrong_notes=JSON.stringify(wn); w.eval('wnRender()');
+ ok(!/옛 해설/.test($('#wn_root').textContent)&&$('#wn_root .wn-upd'),'오답노트는 저장본 대신 최신 해설 + "수정됨" 표시');
+ ok($('#weak_root [data-act=exportRec]')&&$('#weak_root [data-act=importRec]')&&$('#recFile'),'기록 저장·불러오기 버튼');
+ ok(w.eval('typeof exportRecords')==='function'&&w.eval('RECORD_KEY.test("wrong_notes")&&!RECORD_KEY.test("other_app")'),'기록 백업은 이 앱 키만');
+ ok($('#buildStamp').textContent.length>0,'빌드 표시: '+$('#buildStamp').textContent);
  // ── 실기
  ok($$('#prac_root .menu-card').length===10,'실기 메뉴 10개');
  click($('#prac_root .menu-card[data-k=dan]')); ok($$('#prac_root .pr-card').length===10,'단답 10문제');

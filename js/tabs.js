@@ -798,6 +798,12 @@ function renderWeak(){
     '<div class="box">'+
       '<div class="box-ttl">추천 복습</div>'+
       '<div class="wk-recs">'+recs.join('<br>')+'</div>'+
+    '</div>'+
+    '<div class="box"><div class="box-ttl">학습 기록 옮기기</div>'+
+      '<div class="rec-desc">오답노트·메모·포스트잇·게임 기록은 이 기기의 브라우저에만 저장돼요. 파일로 저장해 두면 브라우저를 정리해도 되살리고, PC↔패드로 옮길 수 있어요.</div>'+
+      '<div class="rec-btns"><button class="btn filled" data-act="exportRec">기록 저장</button><button class="btn" data-act="importRec">기록 불러오기</button></div>'+
+      '<input type="file" id="recFile" accept=".json,application/json" hidden>'+
+      '<div class="rec-desc mt-10">앱 버전: '+buildLabel()+'</div>'+
     '</div>';
 }
 
@@ -977,6 +983,10 @@ function runSearch(){
   }).join('')+(hits.length>80?'<div class="srch-empty">상위 80건만 표시 — 키워드를 더 구체적으로 입력하세요.</div>':'');
 }
 
+// ─── 빌드 표시: 사이트·오프라인 파일 중 어느 게 최신인지 (js/version.js) ───
+const buildLabel=()=>BUILD.commit?'빌드 '+BUILD.time+' · '+BUILD.commit:'개발 버전 (빌드 전 파일)';
+function renderBuildStamp(){ const el=document.getElementById('buildStamp'); if(el) el.textContent=buildLabel(); }
+
 // ─── 법령 반영 기록 (data/law-log.js, 매주 점검이 개정을 찾으면 맨 위에 추가) ───
 function renderLawLog(){
   const el=document.getElementById('lawLog'); if(!el||typeof LAW_LOG==='undefined'||!LAW_LOG.length) return;
@@ -1002,10 +1012,13 @@ bindActs(document.body,{
   goStep:d=>selectStep(+d.id),
   term:(d,b)=>toggleTerm(d.key,b),
   bold:()=>document.execCommand('bold'),
+  exportRec:exportRecords,
+  importRec:()=>document.getElementById('recFile').click(),
   fcCat:d=>fcSetCat(d.cat), fcFlip:fcFlip, fcKnow:fcKnow, fcUnknow:fcUnknow, fcNext:fcNext, fcReset:fcReset,
 });
 document.addEventListener('mousedown',ev=>{ if(ev.target.closest('[data-act=bold]')) ev.preventDefault(); }); // 메모 포커스 유지
 document.getElementById('srchInput').addEventListener('input',runSearch);
+document.addEventListener('change',ev=>{ if(ev.target.id==='recFile'&&ev.target.files[0]) importRecords(ev.target.files[0]); });
 // 단계 메모: 포커스 잃으면 저장, 누르기는 위로 안 올려보냄
 (function(){
   const r=document.getElementById('step_root'); if(!r) return;

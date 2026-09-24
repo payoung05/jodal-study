@@ -8,3 +8,4 @@ qz.render();
 wnRender();
 renderDday();
 renderLawLog();
+renderBuildStamp();
