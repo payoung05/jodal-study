@@ -875,3 +875,22 @@ tr:hover td{background:var(--surface)}
 .zb-bars i.cur{background:var(--zc)}
 .zb-seg span{color:color-mix(in srgb,var(--zc) 70%,var(--text-4))}
 .zb-seg.on span{color:color-mix(in srgb,var(--zc) 75%,#000)}
+/* 넓은 화면(가로 공부): 글자·여백 키우고, 남는 오른쪽엔 탭 메모 */
+.side-memo{display:none}
+@media(min-width:1500px){
+  .page-wrap,.fc-wrap,.qz-wrap,#step_root>*,.sp-index>*{zoom:1.12}
+  .qz-wrap,.fc-wrap{max-width:1000px}
+  .sp-wrap{grid-template-columns:320px minmax(0,1fr)}
+  body[data-memo] .tab-content{right:360px}
+  body[data-memo] .side-memo{display:block;position:fixed;top:0;right:0;bottom:0;width:360px;padding:28px 24px;border-left:1px solid var(--line);background:var(--bg);overflow-y:auto}
+  .side-memo .sd-note{min-height:calc(100% - 80px);display:flex;flex-direction:column}
+  .side-memo .sd-note-ed{flex:1;min-height:240px}
+  body[data-memo] #new-sticky-btn{right:384px}
+}
+@media(min-width:1800px){
+  .page-wrap,.fc-wrap,.qz-wrap,#step_root>*,.sp-index>*{zoom:1.2}
+  .sp-wrap{grid-template-columns:340px minmax(0,1fr)}
+  body[data-memo] .tab-content{right:400px}
+  body[data-memo] .side-memo{width:400px}
+  body[data-memo] #new-sticky-btn{right:424px}
+}

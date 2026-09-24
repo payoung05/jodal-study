@@ -7,6 +7,9 @@ function switchTab(id, btn) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   if (btn) btn.classList.add('active');
+  sideMemoFor(id);
+  var gf = document.getElementById('gameFrame');   // 게임에서 나가면 시간제 게임 멈춤
+  if (id !== 'game_tab' && gf && gf.contentWindow) gf.contentWindow.postMessage('jodal:leave', '*');
   if (id === 'game_tab') {
     var fr = document.getElementById('gameFrame');
     if (!fr.dataset.loaded) {
@@ -19,6 +22,15 @@ function switchTab(id, btn) {
     var si = document.getElementById('srchInput');
     if (si) setTimeout(function(){ si.focus(); }, 50);
   }
+}
+// 넓은 화면 오른쪽 메모: 탭마다 따로 저장 (개념 탭은 단계 메모, 게임은 제외)
+var MEMO_TABS={num_tab:'수치',law_tab:'법령',quiz_tab:'문제',fc_tab:'카드',weak_tab:'약점',search_tab:'검색'};
+function sideMemoFor(id){
+  var ed=document.getElementById('sideMemo'); if(!ed) return;
+  if(!MEMO_TABS[id]){ delete document.body.dataset.memo; return; }
+  document.body.dataset.memo=id;
+  document.getElementById('sideMemoLbl').textContent=MEMO_TABS[id]+' 메모';
+  try{ ed.innerHTML=localStorage.getItem('tab_note_'+id)||''; }catch(e){ ed.innerHTML=''; }
 }
 function switchSub(btn){
   var tab=btn.closest('.tab-content');
@@ -1021,6 +1033,7 @@ bindActs(document.body,{
 document.addEventListener('mousedown',ev=>{ if(ev.target.closest('[data-act=bold]')) ev.preventDefault(); }); // 메모 포커스 유지
 document.getElementById('srchInput').addEventListener('input',runSearch);
 document.addEventListener('change',ev=>{ if(ev.target.id==='recFile'&&ev.target.files[0]) importRecords(ev.target.files[0]); });
+document.getElementById('sideMemo').addEventListener('input',ev=>{ const id=document.body.dataset.memo; if(id) try{ localStorage.setItem('tab_note_'+id, ev.target.innerHTML); }catch(e){} });
 // 단계 메모: 포커스 잃으면 저장, 누르기는 위로 안 올려보냄
 (function(){
   const r=document.getElementById('step_root'); if(!r) return;
