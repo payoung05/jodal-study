@@ -48,16 +48,23 @@ if (scn < 10) err.push(`게임 사건이 ${scn}종뿐`);
 if (!Array.isArray(LAW_LOG) || !LAW_LOG.length) err.push('법령 반영 기록이 비어 있음');
 // constraints.md 의 '금지:' 문구가 앱에 남아 있으면 실패
 const files = ['index.html', 'game.html', ...fs.readdirSync(new URL('data/', R)).map(f => 'data/' + f), ...fs.readdirSync(new URL('js/', R)).map(f => 'js/' + f)].filter(f => /\.(js|html)$/.test(f) && f !== 'data/law-log.js');
-let rules = 0;
-for (const m of read('constraints.md').matchAll(/^## (.+)[\s\S]*?^- 금지: \/(.+)\/([a-z]*)$/gm)) {
-  rules++; const re = new RegExp(m[2], m[3]);
-  for (const f of files) read(f).split('\n').forEach((line, i) => { const hit = line.match(re); if (hit) err.push(`constraints "${m[1]}": ${f}:${i + 1} 에 "${hit[0]}"`); });
+let rules = 0, examples = 0;
+for (const sec of read('constraints.md').split(/^## /m).slice(1)) {
+  const title = sec.split('\n')[0], rule = sec.match(/^- 금지: \/(.+)\/([a-z]*)$/m);
+  if (!rule) continue;
+  rules++; const re = new RegExp(rule[1], rule[2]);
+  const ex = k => ((sec.match(new RegExp('^- ' + k + ' 예: (.+)$', 'm')) || [])[1] || '').split(' | ').filter(Boolean);
+  const bad = ex('금지'), good = ex('허용'); examples += bad.length + good.length;
+  if (!bad.length || !good.length) err.push(`constraints "${title}": 금지 예·허용 예가 없음 (규칙 자체를 시험할 수 없음)`);
+  bad.forEach(s => { if (!re.test(s)) err.push(`constraints "${title}": 규칙이 틀린 문장을 놓침(미탐) — "${s}"`); });
+  good.forEach(s => { if (re.test(s)) err.push(`constraints "${title}": 규칙이 옳은 문장을 막음(오탐) — "${s}"`); });
+  for (const f of files) read(f).split('\n').forEach((line, i) => { const hit = line.match(re); if (hit) err.push(`constraints "${title}": ${f}:${i + 1} 에 "${hit[0]}"`); });
 }
 
 const summary = [
   `필기 ${QUESTIONS.length} · 실기 ${PRAC_QUESTIONS.length} · 카드 ${CARDS.length} · 단계 ${STEPS.length} · 사건 ${scn}종`,
   `여정 할 일: ${counts.join(' / ')}`,
-  `constraints 금지 규칙 ${rules}개 검사`,
+  `constraints 금지 규칙 ${rules}개 · 규칙 시험 예시 ${examples}개 검사`,
 ];
 console.log(summary.join('\n'));
 warn.forEach(w => console.log('주의', w));
