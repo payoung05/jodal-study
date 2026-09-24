@@ -1,0 +1,74 @@
+<!doctype html><meta charset="utf-8"><body><pre id="out"></pre>
+<!-- 동작 확인: 이 폴더에서 python -m http.server 후 http://localhost:8000/test.html 열기 → 전부 PASS면 정상 (저장된 학습 기록은 지워짐) -->
+<script>
+const log=[];const ok=(c,m)=>log.push((c?'PASS ':'FAIL ')+m);
+localStorage.clear();
+const f=document.createElement('iframe');f.src='index.html';f.style.cssText='width:1200px;height:800px';document.body.appendChild(f);
+f.onload=()=>{ const w=f.contentWindow,d=w.document,errs=[];w.onerror=(m)=>errs.push(m);
+ try{
+ const $=s=>d.querySelector(s),$$=s=>d.querySelectorAll(s),click=el=>el.dispatchEvent(new w.MouseEvent('click',{bubbles:true,cancelable:true}));
+ // ── 필기
+ ok($$('#qz_root .menu-card').length===8,'필기 메뉴 8개');
+ ok($('#qz_root .menu-card[data-k=wrong]').disabled,'오답 없으면 오답모드 비활성');
+ click($('#qz_root .menu-card[data-k=mini20]'));
+ ok($$('#qz_root .qz-card').length===20,'미니 20문제');
+ const q0=w.eval('qz').qs[0];
+ click($(`#qz_root .qz-opt[data-id="${q0.id}"][data-i="${q0.answer}"]`));
+ ok($(`#qz_root .qz-opt[data-id="${q0.id}"][data-i="${q0.answer}"]`).classList.contains('sel'),'보기 선택 표시');
+ click($(`#qz_root .qz-flag[data-id="${q0.id}"]`)); ok($('#qz_root .qz-flag.on'),'체크 표시');
+ click($('#qz_root [data-act=confirm][data-on="1"]')); ok($('#qz_root .qz-confirm'),'미완성 채점 확인창');
+ click($('#qz_root .qz-confirm [data-act=submit]'));
+ ok(/1/.test($('#qz_root .qz-score-num').textContent)&&$('#qz_root .qz-subj-tbl'),'결과: 1점 + 과목표');
+ ok(Object.keys(JSON.parse(w.localStorage.wrong_notes)).length===19,'오답 19개 저장');
+ ok($$('#wn_root .qz-res-card').length===19,'오답노트 19개 표시');
+ ok(/회/.test($('#weak_root').textContent),'약점 탭 바로 반영');
+ click($('#qz_root [data-act=review][data-f=wrong]')); ok($('#qz_root .rv-card')&&/1\/19/.test($('#qz_root .rv-card-hd').textContent),'복습 1/19');
+ click($('#qz_root [data-act=step][data-n="1"]')); ok(/2\/19/.test($('#qz_root .rv-card-hd').textContent),'복습 다음');
+ click($('#qz_root [data-act=go][data-to=result]')); ok($('#qz_root .qz-score-card'),'결과로 복귀');
+ click($('#qz_root [data-act=start]')); ok(w.eval('qz').phase==='solve'&&w.eval('qz').mode==='mini20','같은 모드 새로 풀기');
+ click($('#qz_root [data-act=go][data-to=select]')); ok(!$('#qz_root .menu-card[data-k=wrong]').disabled,'오답모드 활성');
+ click($(`#wn_root [data-act=remove][data-id="${Object.keys(JSON.parse(w.localStorage.wrong_notes))[0]}"]`));
+ ok($$('#wn_root .qz-res-card').length===18,'오답노트 삭제 (P1-001 같은 id)');
+ // ── 실기
+ ok($$('#prac_root .menu-card').length===10,'실기 메뉴 10개');
+ click($('#prac_root .menu-card[data-k=dan]')); ok($$('#prac_root .pr-card').length===10,'단답 10문제');
+ const p0=w.eval('prac').qs[0], ta=$(`#prac_root textarea[data-ans="${p0.id}"]`);
+ ta.value=(p0.keywords||[]).join(' '); ta.dispatchEvent(new w.Event('input',{bubbles:true}));
+ click($('#prac_root [data-act=submit]'));
+ ok(w.eval('prac').results[p0.id].pct===100&&$('#prac_root .qz-score-card'),'실기 채점 (키워드 전부 → 100%)');
+ ok(Object.keys(JSON.parse(w.localStorage.prac_wrong)).length===9,'실기 오답 9개 저장');
+ // ── 탭·서브탭
+ click($$('.tab-btn')[3]); click($$('#quiz_tab .sub-btn')[1]); ok($('#sub_prac').classList.contains('active')&&$$('#quiz_tab .sub-btn')[1].classList.contains('active'),'문제 서브탭 전환');
+ click($$('.tab-btn')[0]); ok($('#concept_tab').classList.contains('active')&&$$('.tab-btn')[0].classList.contains('active'),'탭 전환');
+ click($$('#concept_tab .sub-btn')[1]); ok($('#sub_flow').classList.contains('active'),'개념 서브탭 전환');
+ // ── 전체 흐름
+ click($('#flow_root [data-act=flowFilter][data-f=gs]')); ok(w.FLOW_FILTER==='gs'&&$('#flow_root [data-f=gs]').classList.contains('active'),'흐름 필터');
+ const a=$('#fe_index a'), ev=new w.MouseEvent('click',{bubbles:true,cancelable:true}); a.dispatchEvent(ev); ok(ev.defaultPrevented,'흐름 목차 점프 (주소 이동 막음)');
+ // ── 단계 상세
+ click($$('#concept_tab .sub-btn')[0]);
+ click($('#step_index [data-act=goStep][data-id="3"]')); ok($('#sd_3'),'단계 타일 → 3단계');
+ click($('#step_root .sp-nav .next')); ok($('#sd_4'),'다음 단계 버튼');
+ click($('#step_root .sd-term')); ok($('#step_root .sd-term-detail.show')&&$('#step_root .sd-term.active'),'용어 펼치기');
+ click($('#step_root .sd-term')); ok(!$('#step_root .sd-term-detail.show'),'용어 접기');
+ const ed=$('#step_root .sd-note-ed'); ed.innerHTML='메모X'; ed.dispatchEvent(new w.FocusEvent('focusout',{bubbles:true}));
+ ok(w.localStorage.step_note_4==='메모X','단계 메모 저장');
+ const md=new w.MouseEvent('mousedown',{bubbles:true,cancelable:true}); $('#step_root [data-act=bold]').dispatchEvent(md); ok(md.defaultPrevented,'B 버튼이 메모 포커스 유지');
+ // ── 카드
+ click($$('.tab-btn')[4]);
+ click($('#fc_root [data-act=fcKnow]')); ok(/✓ 1/.test($('#fc_root .fc-stats').textContent),'카드 알았어');
+ click($('#fc_root [data-act=fcUnknow]')); click($('#fc_root [data-act=fcCat][data-cat="모른 것만"]')); ok($('#fc_root .fc-card.unk .fc-unk'),'모른 것만 + 표시');
+ click($('#fc_root .fc-card')); ok($('#fc_root .fc-card.flipped'),'카드 뒤집기');
+ click($('#fc_root [data-act=fcReset]')); ok(/✓ 0/.test($('#fc_root .fc-stats').textContent),'카드 초기화');
+ // ── 검색
+ click($$('.tab-btn')[6]); const si=$('#srchInput'); si.value='보증금'; si.dispatchEvent(new w.Event('input',{bubbles:true}));
+ ok($$('#srchRes .srch-card').length>0,'검색 입력');
+ click($('#srchFilters [data-f=p]')); ok(/실기/.test($('#srchHint').textContent)&&$('#srchFilters [data-f=p]').classList.contains('active'),'검색 필터');
+ // ── 포스트잇·게임
+ const n0=$$('.sticky-note').length; click($('#new-sticky-btn')); ok($$('.sticky-note').length===n0+1,'포스트잇 추가');
+ click($$('.tab-btn')[7]); ok(/game\.html$/.test($('#gameFrame').src),'게임 iframe = game.html');
+ ok(!d.querySelector('[onclick],[oninput],[onblur],[onmousedown]'),'화면에 onclick 문자열 없음');
+ ok(errs.length===0,'JS 오류 없음 '+errs.join('|'));
+ }catch(x){log.push('ERROR '+x.stack)}
+ out.textContent=log.join('\n');
+};
+</script>

@@ -1,0 +1,874 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>조달 마스터 — 공공조달관리사 1권</title>
+<style>
+@font-face{font-family:'SchoolSafetyPictureDiary';src:url("fonts/SchoolSafetyPictureDiary.woff2") format('woff2');font-weight:normal;font-display:swap}
+:root{
+  --bg:#F4F4F0; --panel:#EBEBE6; --panel2:#E0E0DA; --line:rgba(17,17,17,.35);
+  --ink:#111111; --dim:#555555; --red:#BB2040; --jade:#111111; --gold:#B85C0A; --blue:#2AA048;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:'SchoolSafetyPictureDiary',-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;overscroll-behavior:none}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input{font-family:inherit}
+
+/* ───── 상단 결재선 헤더 ───── */
+.hd{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 10px;border-bottom:1px solid var(--line)}
+.hd .title{font-size:17px;font-weight:800;letter-spacing:-.3px}
+.hd .title small{display:block;font-size:13px;font-weight:500;color:var(--dim);letter-spacing:1.5px;margin-top:2px}
+.hd .streak{font-size:14px;color:var(--gold);font-weight:700;text-align:right}
+.hd .streak b{font-size:18px}
+
+/* ───── 탭 ───── */
+.tabs{display:flex;border-bottom:1px solid var(--line)}
+.tab{flex:1;padding:11px 0;font-size:16px;font-weight:700;color:var(--dim);border-bottom:2px solid transparent;transition:.15s}
+.tab.on{color:var(--ink);border-bottom-color:var(--red)}
+.view{display:none;padding:18px 16px 40px;max-width:560px;margin:0 auto}
+.view.on{display:block}
+
+/* ───── 스피드전 대기 화면 ───── */
+.lobby .big-stamp{width:120px;height:120px;margin:26px auto 14px;border:3px solid var(--red);border-radius:0;display:flex;align-items:center;justify-content:center;flex-direction:column;color:var(--red);transform:rotate(-7deg);position:relative}
+.lobby .big-stamp::after{content:'';position:absolute;inset:6px;border:1px solid var(--red);border-radius:0;opacity:.5}
+.lobby .big-stamp .t1{font-size:24px;font-weight:900;letter-spacing:3px}
+.lobby .big-stamp .t2{font-size:12px;letter-spacing:2px;margin-top:2px;opacity:.8}
+.lobby p.desc{text-align:center;color:var(--dim);font-size:16px;line-height:1.7;margin-bottom:20px}
+.statrow{display:flex;gap:8px;margin-bottom:20px}
+.statbox{flex:1;background:var(--panel);border:1px solid var(--line);border-radius:0;padding:12px 8px;text-align:center}
+.statbox .v{font-size:21px;font-weight:800;font-variant-numeric:tabular-nums}
+.statbox .k{font-size:13px;color:var(--dim);margin-top:3px;letter-spacing:.5px}
+.go{display:block;width:100%;background:var(--red);color:#111111;font-size:18px;font-weight:800;padding:16px;border-radius:0;letter-spacing:1px;transition:.1s}
+.go:active{transform:scale(.97)}
+
+/* ───── 플레이 화면 ───── */
+.play{display:none}
+.timerwrap{height:6px;background:var(--panel2);border-radius:0;margin-bottom:6px;overflow:hidden}
+.timerbar{height:100%;background:var(--jade);width:100%;transition:width 1s linear}
+.timerbar.warn{background:var(--red)}
+.playmeta{display:flex;justify-content:space-between;font-size:15px;color:var(--dim);margin-bottom:14px;font-variant-numeric:tabular-nums}
+.playmeta b{color:var(--ink)}
+.qcard{background:var(--panel);border:1px solid var(--line);border-radius:0;padding:20px 16px;position:relative;min-height:150px}
+.qtag{display:inline-block;font-size:13px;font-weight:700;color:var(--blue);border:1px solid var(--blue);border-radius:0;padding:2px 7px;margin-bottom:10px;letter-spacing:.5px}
+.qtext{font-size:18px;line-height:1.6;font-weight:600;word-break:keep-all}
+.answers{margin-top:16px}
+.choice{display:block;width:100%;text-align:left;background:var(--panel2);border:1px solid var(--line);border-radius:0;padding:13px 14px;font-size:17px;font-weight:600;margin-bottom:8px;transition:.1s;word-break:keep-all}
+.choice:active{transform:scale(.98)}
+.choice.right{border-color:var(--jade);color:var(--jade)}
+.choice.wrong{border-color:var(--red);color:var(--red)}
+.oxrow{display:flex;gap:10px}
+.oxrow .choice{flex:1;text-align:center;font-size:26px;font-weight:900;padding:18px 0}
+.numrow{display:flex;gap:8px}
+.numrow input{flex:1;background:var(--panel2);border:1px solid var(--line);border-radius:0;padding:13px 14px;font-size:17px;color:var(--ink);font-weight:700;font-variant-numeric:tabular-nums;min-width:0}
+.numrow input:focus{outline:none;border-color:var(--gold)}
+.numrow .unit{display:flex;align-items:center;color:var(--dim);font-size:16px;font-weight:700;min-width:34px;justify-content:center}
+.numrow .submit{background:var(--gold);color:#F4F4F0;font-weight:800;font-size:16px;border-radius:0;padding:0 18px}
+.exp{margin-top:12px;font-size:16px;color:var(--dim);line-height:1.6;word-break:keep-all;display:none}
+.exp.on{display:block}
+.exp b{color:var(--gold)}
+
+/* ───── 도장 피드백 (시그니처) ───── */
+.stamp{position:absolute;top:8px;right:10px;pointer-events:none;opacity:0;transform:rotate(-14deg) scale(2.2);font-weight:900;letter-spacing:2px;padding:7px 12px;border:3px solid;border-radius:0;font-size:17px;z-index:5}
+.stamp.show{animation:slam .28s cubic-bezier(.2,1.6,.4,1) forwards}
+.stamp.ok{color:var(--jade);border-color:var(--jade);border-radius:0;padding:14px 10px}
+.stamp.bad{color:var(--red);border-color:var(--red)}
+@keyframes slam{0%{opacity:0;transform:rotate(-14deg) scale(2.2)}100%{opacity:.92;transform:rotate(-14deg) scale(1)}}
+@media (prefers-reduced-motion: reduce){.stamp.show{animation:none;opacity:.92;transform:rotate(-14deg) scale(1)}}
+
+/* ───── 결과 화면 ───── */
+.result{display:none;text-align:center}
+.result .score{font-size:54px;font-weight:900;font-variant-numeric:tabular-nums;margin:18px 0 2px}
+.result .sub{color:var(--dim);font-size:16px;margin-bottom:18px}
+.result .newbest{color:var(--gold);font-weight:800;font-size:15px;margin-bottom:10px}
+.wronglist{text-align:left;margin:14px 0}
+.wrongitem{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--red);border-radius:0;padding:11px 12px;font-size:16px;margin-bottom:7px;line-height:1.55;word-break:keep-all}
+.wrongitem b{color:var(--jade)}
+.btnrow{display:flex;gap:8px;margin-top:8px}
+.btnrow .go{flex:1}
+.go.ghost{background:var(--panel2);color:var(--ink);border:1px solid var(--line)}
+
+/* ───── 보드게임 자리 ───── */
+.soon{text-align:center;padding:60px 0;color:var(--dim);font-size:15px;line-height:1.8}
+.soon .seal{width:90px;height:90px;border:2px dashed var(--line);border-radius:0;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--dim)}
+
+/* ───── 오답노트 ───── */
+.notehead{font-size:15px;color:var(--dim);margin-bottom:12px;line-height:1.6}
+.noteitem{background:var(--panel);border:1px solid var(--line);border-radius:0;padding:13px;margin-bottom:9px;font-size:15px;line-height:1.6;word-break:keep-all}
+.noteitem .nq{font-weight:600}
+.noteitem .na{color:var(--jade);font-weight:700;margin-top:4px;font-size:16px}
+.noteitem .cnt{float:right;font-size:13px;color:var(--red);font-weight:800;border:1px solid var(--red);border-radius:0;padding:1px 6px}
+
+/* ───── 보드게임 ───── */
+.brief{background:linear-gradient(180deg,#ece5d3,#e2d9c2);color:#26221a;border-radius:0;padding:13px 14px;margin-bottom:12px;font-size:15px;line-height:1.65;word-break:keep-all;position:relative}
+.brief::before{content:'QUEST';position:absolute;top:10px;right:12px;font-size:12px;letter-spacing:2px;color:#B85C0A;border:1px solid #B85C0A;border-radius:0;padding:1px 5px}
+.brief b{font-weight:800}
+.brief .meta{font-size:15px;color:#6b5f48;margin-top:4px}
+.orderlist .ostep{display:block;width:100%;text-align:left;background:var(--panel2);border:1px solid var(--line);border-radius:0;padding:12px 14px;font-size:16px;font-weight:600;margin-bottom:8px;transition:.12s}
+.orderlist .ostep.picked{opacity:.35;pointer-events:none}
+.orderlist .ostep .seq{display:inline-block;min-width:20px;color:var(--gold);font-weight:800}
+.opicked{font-size:15px;color:var(--dim);margin-bottom:10px;min-height:18px;word-break:keep-all}
+.opicked b{color:var(--gold)}
+.eventflag{background:var(--red);color:#111111;font-size:13px;font-weight:800;letter-spacing:1.5px;border-radius:0;padding:2px 7px;display:inline-block;margin-bottom:10px}
+
+
+/* ───── 도트 보드판 (아기자기 ver.) ───── */
+.pxtitle{text-align:center;font-size:22px;font-weight:900;letter-spacing:4px;margin:30px 0 14px;color:var(--gold);text-shadow:2px 2px 0 #000}
+.pxtitle::before{content:'✦ '}.pxtitle::after{content:' ✦'}
+.boardwrap{position:relative;margin:0 auto 12px;max-width:520px;width:100%;padding:8px;border-radius:0;
+ background:repeating-conic-gradient(#151c26 0% 25%, #121821 0% 50%) 0 0/16px 16px;border:2px solid var(--line)}
+.board{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));grid-template-rows:repeat(7,minmax(0,1fr));aspect-ratio:1;gap:5px;image-rendering:pixelated}
+.cell{min-width:0;min-height:0;width:100%;height:100%;overflow:hidden;border:2px solid #F4F4F0;border-radius:0;
+ box-shadow:inset 0 -3px 0 rgba(0,0,0,.25), inset 0 2px 0 rgba(255,255,255,.18);
+ display:flex;flex-direction:column;align-items:center;justify-content:center;
+ font-size:13px;font-weight:800;text-align:center;line-height:1.15;position:relative;word-break:keep-all;padding:2px;color:#1d2430}
+.cell .ico{font-size:21px;line-height:1;margin-bottom:4px;filter:drop-shadow(1px 1px 0 rgba(0,0,0,.25))}
+.cell.empty{background:transparent;border:none;box-shadow:none}
+.cell.z0{background:#111111}.cell.z1{background:#8A6D00}.cell.z2{background:#c5b3ef}.cell.z3{background:#BB2040}
+.cell.z4{background:#f0cf9e}.cell.z5{background:#b9e3a3}.cell.z6{background:#a7d6e8}.cell.z7{background:#d8c2ea}
+.cell.ev{background:#BB2040;color:#52160c}
+.cell.pen{background:#ef8474;color:#4d0f06;animation:blink 1.4s steps(2) infinite}
+.cell.start{background:#7ecf9d}
+@keyframes blink{50%{filter:brightness(1.18)}}
+.cell.here{outline:3px solid #B85C0A;outline-offset:0;z-index:2;animation:hop .5s steps(2) infinite alternate}
+@keyframes hop{to{transform:translateY(-2px)}}
+/* 픽셀 병아리 말 */
+.pawn{position:absolute;width:20px;height:20px;top:-12px;left:50%;margin-left:-10px;z-index:4;
+ animation:pbounce .45s steps(2) infinite alternate;image-rendering:pixelated;
+ background:
+  linear-gradient(#B85C0A,#B85C0A) 8px 18px/4px 2px,  /* 발 */
+  linear-gradient(#000,#000) 5px 7px/2px 2px,         /* 눈 */
+  linear-gradient(#000,#000) 11px 7px/2px 2px,
+  linear-gradient(#B85C0A,#B85C0A) 8px 9px/3px 2px,   /* 부리 */
+  linear-gradient(#B85C0A,#B85C0A) 4px 12px/12px 4px, /* 배 */
+  linear-gradient(#B85C0A,#B85C0A) 3px 4px/14px 12px, /* 몸 */
+  linear-gradient(#B85C0A,#B85C0A) 6px 2px/8px 4px;   /* 머리 */
+ background-repeat:no-repeat;filter:drop-shadow(0 2px 0 rgba(0,0,0,.35))}
+@keyframes pbounce{to{transform:translateY(-3px)}}
+.bcenter{position:absolute;inset:23%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;pointer-events:none}
+.bcenter > *{pointer-events:auto}
+.phaselbl{font-size:14px;font-weight:800;color:#cfd6e4;letter-spacing:1px;background:rgba(0,0,0,.35);padding:3px 10px;border-radius:0}
+.dice{width:54px;height:54px;background:#fffaf0;color:#2a2118;border:3px solid #F4F4F0;border-radius:0;
+ box-shadow:inset 0 -5px 0 #e8d9bd, 0 4px 0 #F4F4F0;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:900}
+.dice.rolling{animation:shake .08s steps(1) infinite}
+@keyframes shake{0%{transform:translate(1px,-1px) rotate(3deg)}50%{transform:translate(-1px,1px) rotate(-3deg)}100%{transform:translate(1px,1px)}}
+.rollbtn{background:linear-gradient(#B85C0A,#f2b93b);color:#3a2c10;font-weight:900;font-size:15px;letter-spacing:2px;padding:10px 20px;
+ border:3px solid #F4F4F0;border-radius:0;box-shadow:0 4px 0 #F4F4F0;transition:.06s}
+.rollbtn:active{transform:translateY(3px);box-shadow:0 1px 0 #F4F4F0}
+.rollbtn:disabled{opacity:.4;pointer-events:none}
+.zonebanner{position:absolute;top:42%;left:50%;transform:translate(-50%,-50%);z-index:20;
+ background:#1a2230;color:#B85C0A;border:3px solid #F4F4F0;border-radius:0;box-shadow:0 4px 0 #F4F4F0;
+ font-size:18px;font-weight:900;letter-spacing:2px;padding:12px 22px;white-space:nowrap;
+ animation:zb 1.6s steps(6) forwards;pointer-events:none}
+@keyframes zb{0%{opacity:0;transform:translate(-50%,-30%)}15%{opacity:1;transform:translate(-50%,-50%)}80%{opacity:1}100%{opacity:0}}
+@media (prefers-reduced-motion: reduce){.zonebanner{animation:none;opacity:1}}
+.qpanel{margin:4px auto 0;max-width:520px}
+#scnBrief{max-width:520px;margin-left:auto;margin-right:auto}
+#v-board .playmeta{max-width:520px;margin-left:auto;margin-right:auto}
+#v-board .lobby,#v-board .result{max-width:520px;margin:0 auto}
+/* 픽셀 콘페티 */
+.confetti{position:absolute;width:6px;height:6px;z-index:9;pointer-events:none;animation:cfall .8s steps(8) forwards}
+@keyframes cfall{0%{opacity:1;transform:translate(0,0)}100%{opacity:0;transform:translate(var(--dx),46px) rotate(180deg)}}
+@media (prefers-reduced-motion: reduce){.cell.pen,.dice.rolling,.cell.here,.pawn,.confetti{animation:none}}
+
+.empty{text-align:center;color:var(--dim);font-size:15px;padding:50px 0}
+</style>
+
+
+
+<div class="hd">
+  <div class="title">조달 마스터<small>공공조달관리사 · 1권 전권</small></div>
+  <div class="streak"><b id="streakN">0</b>일 연속</div>
+</div>
+
+<div class="tabs">
+  <button class="tab on" data-v="speed">수치 스피드전</button>
+  <button class="tab" data-v="board">보드게임</button>
+  <button class="tab" data-v="note">오답노트</button>
+</div>
+
+<!-- 스피드전 -->
+<div class="view on" id="v-speed">
+  <div class="lobby" id="lobby">
+    <div class="big-stamp"><div class="t1">적 격</div><div class="t2">60 SEC</div></div>
+    <p class="desc">60초 안에 최대한 많이.<br>틀린 문제는 다음 판에 더 자주 나온다.</p>
+    <div class="statrow">
+      <div class="statbox"><div class="v" id="bestV">0</div><div class="k">최고 점수</div></div>
+      <div class="statbox"><div class="v" id="todayV">0</div><div class="k">오늘 최고</div></div>
+      <div class="statbox"><div class="v" id="wrongV">0</div><div class="k">오답노트</div></div>
+    </div>
+    <button class="go" id="startBtn">시작</button>
+  </div>
+
+  <div class="play" id="play">
+    <div class="timerwrap"><div class="timerbar" id="tbar"></div></div>
+    <div class="playmeta"><span>남은 시간 <b id="tnum">60</b>s</span><span>점수 <b id="score">0</b></span></div>
+    <div class="qcard" id="qcard">
+      <div class="stamp" id="stampEl"></div>
+      <span class="qtag" id="qtag"></span>
+      <div class="qtext" id="qtext"></div>
+      <div class="answers" id="answers"></div>
+      <div class="exp" id="exp"></div>
+    </div>
+  </div>
+
+  <div class="result" id="result">
+    <div class="score" id="finalScore">0</div>
+    <div class="sub" id="finalSub"></div>
+    <div class="newbest" id="newbest" style="display:none">★ 신기록</div>
+    <div class="wronglist" id="wrongRecap"></div>
+    <div class="btnrow">
+      <button class="go ghost" id="toLobby">대기실</button>
+      <button class="go" id="retry">한 판 더</button>
+    </div>
+  </div>
+</div>
+
+<!-- 보드게임 (도트 보드판) -->
+<div class="view" id="v-board">
+  <div class="lobby" id="bLobby">
+    <div class="pxtitle">계약 플로우 보드</div>
+    <div style="position:relative;width:20px;height:20px;margin:0 auto 6px"><div class="pawn" style="position:relative;top:0;left:0;margin:0"></div></div>
+    <p class="desc">판마다 발주 사건 1건을 받는다 — 금액·업종·방식이 다르니<br>같은 칸이라도 정답이 매번 달라진다.<br>계산 칸 다수 + 지체상금 칸은 지나칠 수 없는 검문소.<br>틀리면 3칸 후퇴 + 감사지적, 3회면 발주 중단.</p>
+    <div class="statrow">
+      <div class="statbox"><div class="v" id="bBestV">0</div><div class="k">최고 점수</div></div>
+      <div class="statbox"><div class="v" id="bClearV">0</div><div class="k">완주 횟수</div></div>
+      <div class="statbox"><div class="v"><button id="sndBtn" style="font-size:15px;font-weight:800;color:var(--gold)">ON</button></div><div class="k">8비트 사운드</div></div>
+    </div>
+    <button class="go" id="bStartBtn" style="background:var(--blue)">발주 개시</button>
+  </div>
+
+  <div class="play" id="bPlay">
+    <div class="brief" id="scnBrief" style="margin-bottom:8px"></div>
+    <div class="playmeta">
+      <span><b id="bScore">0</b>G</span>
+      <span><span id="bMarks" style="letter-spacing:2px"></span></span>
+    </div>
+    <div class="boardwrap"><div class="board" id="board"></div>
+      <div class="bcenter" id="bCenter">
+        <div class="phaselbl" id="phaseLbl">수요발생</div>
+        <div class="dice" id="dice">?</div>
+        <button class="rollbtn" id="rollBtn">주사위</button>
+      </div>
+    </div>
+    <div class="qpanel" id="qPanel" style="display:none">
+      <div class="brief" id="bBrief" style="display:none"></div>
+      <div class="qcard" id="bCard">
+        <div class="stamp" id="bStampEl"></div>
+        <span class="qtag" id="bTag"></span>
+        <div class="qtext" id="bQ"></div>
+        <div class="answers" id="bA"></div>
+        <div class="exp" id="bExp"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="result" id="bResult">
+    <div class="score" id="bFinal">0</div>
+    <div class="sub" id="bSub"></div>
+    <div class="wronglist" id="bRecap"></div>
+    <div class="btnrow">
+      <button class="go ghost" id="bToLobby">대기실</button>
+      <button class="go" id="bRetry" style="background:var(--blue)">다시 발주</button>
+    </div>
+  </div>
+</div>
+
+<!-- 오답노트 -->
+<div class="view" id="v-note">
+  <div class="notehead">많이 틀린 순. 스피드전에서 정답을 맞히면 횟수가 줄어들고, 0이 되면 목록에서 빠진다.</div>
+  <div id="noteList"></div>
+</div>
+
+<script>
+
+const Q = [
+/* ───── 5장 전략적 조달의 활용 (35) ───── */
+{id:'q501',tag:'5장·우선구매',t:'num',q:'중소기업제품 구매목표비율 — 공공기관 구매총액(물품·용역·공사)의 몇 % 이상?',a:50,u:'%',exp:'판로지원법. 구매총액의 50% 이상을 중소기업제품으로.'},
+{id:'q502',tag:'5장·우선구매',t:'num',q:'기술개발제품 우선구매 — 중소기업 물품 구매액의 몇 % 이상?',a:15,u:'%',exp:'총구매액이 아니라 중소기업 "물품" 구매액의 15% 이상.'},
+{id:'q503',tag:'5장·우선구매',t:'ox',q:'기술개발제품 구매목표 15%는 공공기관 총구매액 기준이다.',a:false,exp:'중소기업 물품구매액 기준. 총구매액 기준이 아니다.'},
+{id:'q504',tag:'5장·우선구매',t:'num',q:'여성기업제품 — 물품·용역 구매총액의 몇 % 이상 의무구매?',a:5,u:'%',exp:'물품·용역 5%, 공사는 3%.'},
+{id:'q505',tag:'5장·우선구매',t:'num',q:'여성기업제품 — 공사 구매총액의 몇 % 이상?',a:3,u:'%',exp:'공사 3%. 물품·용역 5%와 구분.'},
+{id:'q506',tag:'5장·우선구매',t:'num',q:'장애인기업제품 — 총구매액의 몇 % 이상?',a:1,u:'%',exp:'장애인기업활동촉진법. 총구매액의 1% 이상.'},
+{id:'q507',tag:'5장·우선구매',t:'num',q:'창업기업제품 — 총구매액의 몇 % 이상?',a:8,u:'%',exp:'중소기업창업 지원법 제38조. 8% 이상.'},
+{id:'q508',tag:'5장·우선구매',t:'num',q:'중증장애인생산품 — 2025년부터 법정 구매목표비율은 몇 %?',a:1.1,u:'%',exp:'1% → 1.1%로 상향. 공사는 제외 대상.'},
+{id:'q509',tag:'5장·우선구매',t:'ox',q:'중증장애인생산품 우선구매 대상에는 공사도 포함된다.',a:false,exp:'공사 제외. 생산품·용역(서비스)만 해당.'},
+{id:'q510',tag:'5장·우선구매',t:'mc',q:'장애인기업과 계약 시 소액수의계약이 가능한 금액 한도는?',c:['5천만 원 이하','1억 원 이하','2억 원 이하','2천만 원 이하'],a:1,exp:'1억 원 이하 가능. 단 5천만~1억은 2인 이상 견적 필요.'},
+{id:'q511',tag:'5장·우선구매',t:'ox',q:'장애인기업과 5,000만~1억 원 수의계약 시 견적서 1장으로 충분하다.',a:false,exp:'그 구간은 2인 이상 견적서 필요.'},
+{id:'q512',tag:'5장·우선구매',t:'ox',q:'장애인기업 요건 — 상시근로자 중 장애인 30% 이상 고용(소기업 제외).',a:true,exp:'소유·경영 + 장애인 30% 이상 고용 기준.'},
+{id:'q513',tag:'5장·경쟁제품',t:'num',q:'중소기업자 간 경쟁제품 지정요건 — 공공기관 연간 수요가 몇 억 원 이상?',a:20,u:'억',exp:'수요 20억↑ + 직접생산 중소기업 10개↑ + 구매실적 10억↑.'},
+{id:'q514',tag:'5장·경쟁제품',t:'num',q:'중기간 경쟁제품 지정요건 — 직접생산 가능 중소기업이 몇 개 이상?',a:10,u:'개',exp:'세부품명 기준 직접생산 중소기업 10개 이상.'},
+{id:'q515',tag:'5장·경쟁제품',t:'num',q:'중기간 경쟁제품 지정요건 — 구매실적이 몇 억 원 이상?',a:10,u:'억',exp:'구매실적 10억 원 이상.'},
+{id:'q516',tag:'5장·이행능력',t:'num',q:'중기간 경쟁입찰 계약이행능력심사의 낙찰하한율은? (소수점까지)',a:87.995,u:'%',exp:'모든 추정가격 구간 동일 87.995%.'},
+{id:'q517',tag:'5장·이행능력',t:'num',q:'일반 물품구매 적격심사 — 고시금액 미만 구간의 낙찰하한율은?',a:84.245,u:'%',exp:'고시금액(2.2억) 미만 84.245%. 이행능력심사보다 낮다.'},
+{id:'q518',tag:'5장·이행능력',t:'num',q:'계약이행능력심사가 일반 적격심사보다 최소대가를 몇 %p 이상 더 보장?',a:3.75,u:'%p',exp:'87.995 − 84.245 = 3.75%p.'},
+{id:'q519',tag:'5장·이행능력',t:'num',q:'현행 기획재정부 고시금액(물품·용역)은 몇 억 원?',a:2.2,u:'억',exp:'추정가격 2.2억 원. 국제입찰·적격심사 구간의 기준.'},
+{id:'q520',tag:'5장·이행능력',t:'ox',q:'고시금액 미만 중기간 경쟁입찰에서 소기업·소상공인·창업기업(7년 이내)은 신용평가등급과 무관하게 만점을 받는다.',a:true,exp:'재정 여건이 진입장벽이 되지 않도록 하는 장치.'},
+{id:'q521',tag:'5장·이행능력',t:'mc',q:'입찰금액 10억 원 이상 중기간 경쟁입찰의 입찰가격 배점은?',c:['50점','55점','60점','70점'],a:1,exp:'가격 55점 + 납품이행능력 등으로 구성.'},
+{id:'q522',tag:'5장·조합추천',t:'num',q:'조합추천 소액수의 — 추정가격 2,000만 원 이하이면 몇 개 이상 추천?',a:2,u:'개',exp:'2천만 이하 2개 이상, 2천만 초과~1억은 5개 이상.'},
+{id:'q523',tag:'5장·조합추천',t:'num',q:'조합추천 소액수의 — 2,000만 원 이상 1억 원 이하면 몇 개 이상 추천?',a:5,u:'개',exp:'5개 이상. 적격업체가 3~4개뿐이면 전부 추천.'},
+{id:'q524',tag:'5장·조합추천',t:'ox',q:'조합추천 시 비조합원사를 1개 이상 반드시 포함해야 한다.',a:true,exp:'조합원 편중 방지. 비조합원도 동일 기회.'},
+{id:'q525',tag:'5장·혁신조달',t:'mc',q:'기술개발제품 구매목표비율의 변천으로 맞는 것은?',c:['2006년 5% 권고 → 2020년 15% 의무','2006년 10% 의무 → 2020년 20% 의무','처음부터 15% 의무였다','2009년 5% 의무 → 2016년 15% 권고'],a:0,exp:'5% 권고(2006) → 10%(2016) → 15% 의무(2020).'},
+{id:'q526',tag:'5장·혁신조달',t:'num',q:'첫걸음기업 기준 — 공공조달 계약실적 몇 억 원 이하?',a:5,u:'억',exp:'창업기업(7년 이하) 또는 실적 5억 이하 첫걸음기업.'},
+{id:'q527',tag:'5장·혁신조달',t:'num',q:'우선구매 대상 창업기업 기준 — 설립 몇 년 이하?',a:7,u:'년',exp:'설립 7년 이하 창업기업.'},
+{id:'q528',tag:'5장·해외',t:'num',q:'미국 연방조달의 중소기업 구매목표는 조달금액의 몇 % 이상?',a:23,u:'%',exp:'연방 조달금액의 23% 이상.'},
+{id:'q529',tag:'5장·법령매칭',t:'mc',q:'여성기업제품 우선구매의 근거 법률은?',c:['여성기업지원에 관한 법률','판로지원법','중소기업창업 지원법','장애인기업활동촉진법'],a:0,exp:'여성기업법 제9조.'},
+{id:'q530',tag:'5장·법령매칭',t:'mc',q:'중소기업제품 50% 구매목표의 근거 법률은?',c:['판로지원법','조달사업법','중소기업기본법','국가계약법'],a:0,exp:'판로지원법(중소기업제품 구매촉진 및 판로지원에 관한 법률).'},
+{id:'q531',tag:'5장·법령매칭',t:'mc',q:'창업기업제품 8% 구매목표의 근거 법률은?',c:['중소기업창업 지원법','벤처기업법','판로지원법','조달사업법'],a:0,exp:'중소기업창업 지원법 제38조.'},
+{id:'q532',tag:'5장·우선구매',t:'ox',q:'중소기업 공공구매 목표 중 중기업이 아닌 소기업·소상공인 몫으로 중소기업 물품구매액의 15% 이상이 별도 제시된다.',a:true,exp:'중기 50% 안에서 소기업·소상공인 15% 목표가 따로 있다.'},
+{id:'q533',tag:'5장·녹색',t:'ox',q:'EU는 1990년대 후반부터 녹색 공공조달을 추진해 전체 입찰의 50% 이상에서 녹색 기준을 반영하는 수준에 이르렀다.',a:true,exp:'EU 녹색조달 정착 사례.'},
+{id:'q534',tag:'5장·우선구매',t:'ox',q:'구매목표비율 제도는 2009년 판로지원법 제정과 함께 시작됐다.',a:true,exp:'판로지원법 제정(2009)이 출발점.'},
+{id:'q535',tag:'5장·우선구매',t:'mc',q:'다음 중 구매목표비율이 가장 높은 것은?',c:['중소기업제품(총구매액 기준)','창업기업제품','여성기업 물품·용역','기술개발제품(물품액 기준)'],a:0,exp:'중기 50% > 기술개발 15% > 창업 8% > 여성 5%.'},
+/* ───── 6장 공공조달 법률 이해 (40) ───── */
+{id:'q601',tag:'6장·가격개념',t:'ox',q:'추정가격은 부가가치세를 제외한 금액이다.',a:true,exp:'추정가격 = 부가세 제외. 국제입찰·계약방법 판단 기준.'},
+{id:'q602',tag:'6장·가격개념',t:'mc',q:'추정금액 = ?',c:['추정가격 + 부가세 (공사는 관급자재비 포함)','추정가격 − 부가세','예정가격 + 부가세','낙찰금액 + 관급자재'],a:0,exp:'추정가격에 부가세를 더하고, 공사는 관급자재비까지 합산.'},
+{id:'q603',tag:'6장·가격개념',t:'ox',q:'예정가격은 입찰·수의계약에서 낙찰자 결정의 기준이 되며 사전에 공개해야 한다.',a:false,exp:'기준은 맞지만 절대 비공개.'},
+{id:'q604',tag:'6장·가격개념',t:'ox',q:'추정가격이 고시금액 이상이면 국제입찰 대상이 된다.',a:true,exp:'GPA에 따른 국제입찰 판단 기준 = 추정가격 vs 고시금액.'},
+{id:'q605',tag:'6장·가격개념',t:'mc',q:'예정가격이 결정되기 "전에" 산정되는 가격은?',c:['추정가격','예비가격기초금액','계약금액','낙찰하한가'],a:0,exp:'추정가격은 예정가격 결정 전 산정(시행령 제2조).'},
+{id:'q606',tag:'6장·가격개념',t:'ox',q:'공사의 추정가격 산정 시 관급자재 가격은 제외한다.',a:true,exp:'관급자재 제외 금액이 추정가격. 포함하면 추정금액.'},
+{id:'q607',tag:'6장·가격개념',t:'ox',q:'유사 계약 실적으로 추정가격을 산정할 때는 직전 회계연도 또는 직전 12개월의 계약 총액을 기준으로 한다.',a:true,exp:'직후 12개월 예측의 기초로 삼는다.'},
+{id:'q608',tag:'6장·이의신청',t:'num',q:'이의신청 — 원인 행위가 있었던 날부터 며칠 이내?',a:20,u:'일',exp:'행위일 기준 20일, 안 날 기준 15일.'},
+{id:'q609',tag:'6장·이의신청',t:'num',q:'이의신청 — 행위가 있음을 "안 날"부터 며칠 이내?',a:15,u:'일',exp:'안 날 15일 / 행위일 20일. 자주 바꿔 낸다.'},
+{id:'q610',tag:'6장·이의신청',t:'num',q:'중앙관서의 장은 이의신청을 받은 날부터 며칠 이내에 심사·통지해야 하나?',a:15,u:'일',exp:'15일 이내 심사 후 결과 통지.'},
+{id:'q611',tag:'6장·이의신청',t:'num',q:'심사 결과에 불복 시 며칠 이내에 분쟁조정위원회에 재심을 청구하나?',a:20,u:'일',exp:'통지받은 날부터 20일 이내 재심 청구.'},
+{id:'q612',tag:'6장·이의신청',t:'num',q:'국가계약분쟁조정위원회는 청구일부터 며칠 이내에 심사·조정해야 하나?',a:50,u:'일',exp:'특별한 사유 없으면 50일 이내.'},
+{id:'q613',tag:'6장·이의신청',t:'mc',q:'국가계약분쟁조정위원회는 어디에 두는가?',c:['기획재정부','조달청','행정안전부','법제처'],a:0,exp:'국가계약법 제29조 — 기재부 소속.'},
+{id:'q614',tag:'6장·이의신청',t:'ox',q:'국가계약 분쟁은 소송에 앞서 분쟁조정위 조정 또는 중재법에 따른 중재를 선택할 수 있다.',a:true,exp:'소송 전 대체 수단 두 가지.'},
+{id:'q615',tag:'6장·이의신청',t:'mc',q:'이의신청 흐름으로 맞는 것은?',c:['이의신청 → 중앙관서 심사 → 재심청구 → 위원회 조정','재심청구 → 이의신청 → 위원회 → 심사','위원회 조정 → 이의신청 → 심사','이의신청 → 위원회 → 중앙관서 심사'],a:0,exp:'신청(20/15일) → 심사(15일) → 재심(20일) → 위원회(50일).'},
+{id:'q616',tag:'6장·계약방법',t:'mc',q:'불특정 다수가 자유롭게 참가하는 입찰 방식은?',c:['일반경쟁','제한경쟁','지명경쟁','수의계약'],a:0,exp:'원칙은 일반경쟁. 공정성·투명성 최고.'},
+{id:'q617',tag:'6장·계약방법',t:'ox',q:'현행 공공계약법상 고시금액 미만의 물품제조·용역은 소재지 기준 지역제한 경쟁이 가능하다.',a:true,exp:'고시금액 미만 → 지역제한 허용.'},
+{id:'q618',tag:'6장·계약방법',t:'ox',q:'중소기업자 간 경쟁제품은 중소기업만 참가하는 제한경쟁으로 시행한다.',a:true,exp:'판로지원법에 따른 참가자격 제한.'},
+{id:'q619',tag:'6장·계약방법',t:'mc',q:'요건을 충족하는 잠재 참가자가 소수일 때 특정 업체들을 지정해 경쟁시키는 방식은?',c:['지명경쟁','제한경쟁','일반경쟁','협상계약'],a:0,exp:'제한경쟁과 유사하나 후보가 소수일 때 지명경쟁.'},
+{id:'q620',tag:'6장·계약방법',t:'ox',q:'경쟁입찰 결과 입찰자가 1인뿐이면 시행령 제27조에 따라 재공고 입찰 사유가 된다.',a:true,exp:'유효 경쟁 불성립 → 재공고.'},
+{id:'q621',tag:'6장·계약방법',t:'mc',q:'제한경쟁의 제한 기준이 아닌 것은?',c:['담당 공무원과의 친분','지역(소재지)','시공·납품 실적','재무상태'],a:0,exp:'지역·실적·기술·재무 등 객관 기준만 가능.'},
+{id:'q622',tag:'6장·수의기준',t:'num',q:'소액수의계약 — 종합공사는 추정가격 몇 억 원 이하?',a:4,u:'억',exp:'종합공사 4억 / 전문공사 2억 / 그 외 공사 1.6억.'},
+{id:'q623',tag:'6장·수의기준',t:'num',q:'소액수의계약 — 전문공사는 추정가격 몇 억 원 이하?',a:2,u:'억',exp:'전문공사 2억 이하.'},
+{id:'q624',tag:'6장·수의기준',t:'num',q:'소액수의계약 — 전기·통신 등 그 외 공사는 몇 억 원 이하?',a:1.6,u:'억',exp:'1억 6천만 원 이하.'},
+{id:'q625',tag:'6장·수의기준',t:'num',q:'물품·용역 1인 견적 소액수의계약은 추정가격 몇 천만 원 이하?',a:2,u:'천만',exp:'2천만 원 이하는 1인 견적 가능.'},
+{id:'q626',tag:'6장·계약원칙',t:'ox',q:'계약상대자의 계약상 이익을 부당하게 제한하는 특약·조건은 정할 수 없다.',a:false,exp:'함정 아님 — 맞는 문장. 부당특약 금지(법 제5조).',},
+{id:'q627',tag:'6장·계약원칙',t:'ox',q:'국제입찰에서는 호혜(互惠)의 원칙에 따라 상호 호혜적인 조건을 보장해야 한다.',a:true,exp:'GPA 국제입찰의 기본 원칙.'},
+{id:'q628',tag:'6장·법체계',t:'ox',q:'국가계약법은 중앙행정기관, 지방계약법은 지방자치단체에 적용된다.',a:true,exp:'적용 대상으로 양 법을 구분.'},
+{id:'q629',tag:'6장·법체계',t:'mc',q:'공공계약법과 민법의 관계로 맞는 것은?',c:['민법이 일반법, 공공계약법이 특별법','공공계약법이 일반법','서로 무관','민법이 우선 적용'],a:0,exp:'공공거래 특수성을 반영한 특별법적 성격.'},
+{id:'q630',tag:'6장·법체계',t:'ox',q:'국가계약법과 지방계약법의 주요 계약 규정은 대부분 동일하고, 일부 사항만 달리 정한다.',a:true,exp:'국가법 기준 + 지방법 차이점 비교가 학습 포인트.'},
+{id:'q631',tag:'6장·법체계',t:'mc',q:'다음 중 공공조달 관련 법령이 아닌 것은?',c:['공정거래법상 가맹사업 규정','조달사업법','전자조달법','공기업·준정부기관 계약사무규칙'],a:0,exp:'1권 6장 체계: 공공계약법·조달사업법·전자조달법·계약사무규칙.'},
+{id:'q632',tag:'6장·계약원칙',t:'ox',q:'지자체가 지방계약법에 따라 입찰·계약을 체결하는 행위는 기본적으로 사법(私法)상 계약이다.',a:true,exp:'공공계약의 법적 성격 = 사법상 계약(판례).'},
+{id:'q633',tag:'6장·가격개념',t:'mc',q:'국제입찰 대상 여부·계약방법·공고기간 결정의 기준이 되는 금액은?',c:['추정가격','예정가격','계약금액','예비가격기초금액'],a:0,exp:'추정가격이 각종 기준금액 역할.'},
+{id:'q634',tag:'6장·이의신청',t:'ox',q:'이의신청은 모든 금액의 계약에서 가능하다.',a:false,exp:'대통령령으로 정하는 금액 이상(국제입찰은 법 제4조 기준)에서 가능.'},
+{id:'q635',tag:'6장·계약방법',t:'mc',q:'경쟁입찰의 3가지 유형을 모두 맞게 나열한 것은?',c:['일반·제한·지명','일반·수의·협상','제한·지명·수의','일반·지명·MAS'],a:0,exp:'경쟁 = 일반/제한/지명. 수의는 비경쟁.'},
+{id:'q636',tag:'6장·계약원칙',t:'ox',q:'입찰참가 서약서 내용이 허위로 드러나면 계약 해제·해지와 부정당업자 제재가 가능하다.',a:true,exp:'서약서 위반 = 해제·해지 + 제재 사유.'},
+{id:'q637',tag:'6장·법체계',t:'mc',q:'독일이 운영하는 공공조달 관련 국내법은?',c:['경쟁제한금지법(GWB)','연방조달법(FAR)','공공계약법(PCR)','조달기본법(GPA)'],a:0,exp:'GWB + 공공업무위탁규정(VgV). FAR은 미국.'},
+{id:'q638',tag:'6장·수의기준',t:'mc',q:'소액수의 한도를 큰 순서로 나열하면?',c:['종합공사 > 전문공사 > 그 외 공사 > 물품·용역','전문공사 > 종합공사 > 물품·용역 > 그 외','물품·용역 > 공사 전부','모두 동일'],a:0,exp:'4억 > 2억 > 1.6억 > 2천만(1인 견적).'},
+{id:'q639',tag:'6장·가격개념',t:'ox',q:'추정가격과 추정금액은 같은 개념이다.',a:false,exp:'추정금액 = 추정가격 + 부가세(+공사 관급자재).'},
+{id:'q640',tag:'6장·계약방법',t:'ox',q:'입찰공고 게시 후 입찰참가자격 제한기준 적용에 중대한 하자가 발견되면 당초 입찰을 취소하고 새로 공고할 수 있다.',a:true,exp:'중대 하자 → 입찰 취소·재공고 가능(유권해석).'},
+/* ───── 7장 분쟁관리 (20) ───── */
+{id:'q701',tag:'7장·부정당',t:'ox',q:'전자조달시스템으로 견적서만 제출한 자도 부정당업자 제재를 받을 수 있다.',a:false,exp:'입찰참가자·계약상대자 지위가 아니므로 제재 불가(유권해석).'},
+{id:'q702',tag:'7장·부정당',t:'ox',q:'적격심사 중 제재 "사유"가 발생하면 처분 확정 전이라도 즉시 심사에서 제외해야 한다.',a:false,exp:'처분이 확정되지 않으면 사유 발생만으로 제외 불가.'},
+{id:'q703',tag:'7장·부정당',t:'ox',q:'낙찰자가 계약 체결 전에 부정당업자 제재 처분을 받으면 계약을 체결할 수 없다.',a:true,exp:'국가 시행령 76조·지방 시행령 92조.'},
+{id:'q704',tag:'7장·부정당',t:'ox',q:'제재 처분에 대해 법원이 집행정지를 인용하면 확정 판결 시까지 입찰참가·계약체결이 가능하다.',a:true,exp:'집행정지 인용 → 처분 효력 유보.'},
+{id:'q705',tag:'7장·부정당',t:'num',q:'수의계약 배제 — 견적서 제출 마감일 기준 최근 몇 개월 이내에 해당 기관과의 계약에서 부당행위를 한 자는 배제되나?',a:3,u:'개월',exp:'최근 3개월 이내 부당행위 → 수의계약 배제.'},
+{id:'q706',tag:'7장·분쟁',t:'num',q:'중재판정 취소 소송은 정본 수령일로부터 몇 개월 이내에 제기해야 하나?',a:3,u:'개월',exp:'중재법 — 3개월 이내.'},
+{id:'q707',tag:'7장·부정당',t:'ox',q:'계약 서류를 위·변조하거나 허위서류를 제출한 자는 부정당업자 제재 사유에 해당한다.',a:true,exp:'허위서류 제출 = 대표 제재 사유.'},
+{id:'q708',tag:'7장·부정당',t:'ox',q:'허위서류 제재의 적정성은 그 서류가 입찰·계약에 미친 영향 정도를 따져 판단한다.',a:true,exp:'영향 정도에 따라 처분 적정성이 달라진다.'},
+{id:'q709',tag:'7장·분쟁',t:'mc',q:'공공계약 관련 대표적 행정소송 대상이 아닌 것은?',c:['단순 대금 지연이자 청구','부정당업자 제재','입찰참가자격 제한처분','국가보조금 환수처분'],a:0,exp:'대금 청구는 민사. 제재·제한·환수가 행정소송 대상.'},
+{id:'q710',tag:'7장·부정당',t:'mc',q:'부정당업자 제재 처분의 기본 효과는?',c:['입찰참가자격 제한','벌금 부과','영업 등록 말소','대표자 형사처벌'],a:0,exp:'제재 = 일정 기간 입찰참가자격 제한(Debarment).'},
+{id:'q711',tag:'7장·분쟁',t:'ox',q:'입찰무효 사유에는 참가자격 없는 자의 입찰, 허위 적격심사서류 제출 등이 포함된다.',a:true,exp:'무효입찰 대표 사유들.'},
+{id:'q712',tag:'7장·부정당',t:'ox',q:'견적서를 냈다가 계약을 체결하지 않은 자는 부정당업자 제재 대상이다.',a:false,exp:'견적서 제출자는 입찰참가자가 아님 → 제재 불가.'},
+{id:'q713',tag:'7장·분쟁',t:'mc',q:'민법상 분쟁을 재판 없이 당사자 합의로 종결하는 계약은?',c:['화해','도급','위임','조정'],a:0,exp:'민법 제731조 화해. 6~7장 연계 개념.'},
+{id:'q714',tag:'7장·부정당',t:'ox',q:'제재 처분이 확정된 업체와는 이미 진행 중인 적격심사에서도 낙찰자 선정이 불가하다.',a:true,exp:'처분 확정 = 자격 상실. 미확정과 구분이 핵심.'},
+{id:'q715',tag:'7장·분쟁',t:'ox',q:'분쟁 해결 수단으로 조정·중재 같은 ADR을 소송보다 먼저 검토할 수 있다.',a:true,exp:'대안적 분쟁해결(ADR) 활용.'},
+{id:'q716',tag:'7장·부정당',t:'mc',q:'적격심사 중인 A사에 제재 사유가 발생했다. 올바른 처리는?',c:['처분 확정 전이므로 심사 계속','즉시 부적격 처리 후 차순위 심사','입찰 자체를 취소','계약 후 해지'],a:0,exp:'회제41301-845 유권해석 — 확정 전 제외 불가.'},
+{id:'q717',tag:'7장·분쟁',t:'ox',q:'유권해석(법령해석)은 계약담당자의 실무 판단 근거로 활용된다.',a:true,exp:'7장 전체가 유권해석·판례 기반 사례 학습.'},
+{id:'q718',tag:'7장·부정당',t:'ox',q:'담합은 부정당업자 제재 사유에 해당한다.',a:true,exp:'경쟁의 공정성 침해 — 대표 제재 사유.'},
+{id:'q719',tag:'7장·분쟁',t:'mc',q:'계약 해제와 해지의 차이는?',c:['해제는 소급 소멸, 해지는 장래 소멸','해제는 장래, 해지는 소급','둘 다 소급','둘 다 장래'],a:0,exp:'해제 = 처음부터 무효(소급), 해지 = 장래를 향해 종료.'},
+{id:'q720',tag:'7장·부정당',t:'ox',q:'부정당업자 제재 처분은 처분청의 재량 없이 기간이 일률 고정된다.',a:false,exp:'위반 유형·정도에 따라 기간 차등. 과징금 대체도 있다.'},
+/* ───── 1~3장 (20) ───── */
+{id:'q101',tag:'1장·개요',t:'mc',q:'세계 각국 공공조달 규모는 국가 GDP의 약 몇 %?',c:['12~15%','5~8%','20~25%','30~35%'],a:0,exp:'GDP의 12~15%. 우리나라는 약 12.9%.'},
+{id:'q102',tag:'1장·개요',t:'ox',q:'조달(procurement)은 구매·획득·공급을 의미한다.',a:true,exp:'공공(public) + 조달(procurement)의 단어적 정의.'},
+{id:'q103',tag:'1장·개요',t:'ox',q:'공공조달과 민간 구매는 기능이 유사하므로 실질적으로 동일한 개념이다.',a:false,exp:'법적 규율·공공성·투명성 요구 등 실질적 차이가 크다.'},
+{id:'q104',tag:'1장·개요',t:'ox',q:'공공조달 프로세스는 일회성·단선적 과정이다.',a:false,exp:'순환적·연속적 프로세스 — 1장 학습목표 핵심.'},
+{id:'q105',tag:'2장·방법',t:'mc',q:'비경쟁적 공공조달 방법에 해당하는 것은?',c:['단독공급원조달(수의계약)','공개입찰','제한입찰','2단계 입찰'],a:0,exp:'비경쟁 = 견적요청(소액) + 단독공급원조달.'},
+{id:'q106',tag:'2장·방법',t:'num',q:'UN의 소액구매 한도는 몇 달러?',a:5000,u:'$',exp:'5,000달러. 사전 승인 시 최대 1만 달러.'},
+{id:'q107',tag:'2장·방법',t:'num',q:'UN 소액구매 — 사전 승인을 받으면 최대 몇 달러까지?',a:10000,u:'$',exp:'승인 시 1만 달러.'},
+{id:'q108',tag:'2장·방법',t:'num',q:'우리나라 정부구매카드로 처리하는 소액 소모품 구매는 통상 몇 만 원 내외?',a:500,u:'만원',exp:'기관별 상이하나 500만 원 내외.'},
+{id:'q109',tag:'2장·방법',t:'ox',q:'소액구매의 공급기회 편중을 막기 위해 자격 갖춘 다수 업체에 기회를 배분한다.',a:true,exp:'특정 업체 쏠림 방지가 소액구매 운영 원칙.'},
+{id:'q110',tag:'2장·방법',t:'mc',q:'미국 소액구매임곗값(MPT) 적용 방식으로 맞는 것은?',c:['국내·국외 체결에 따라 한도가 다르다','전 세계 동일 한도','한도 제도가 없다','UN과 동일 금액'],a:0,exp:'국외 체결 시 3만 5,000달러 등 구분 운영.'},
+{id:'q111',tag:'3장·나라장터',t:'num',q:'나라장터(국가종합전자조달시스템)는 몇 년에 구축·개통됐나?',a:2002,u:'년',exp:'2002년, 전자정부 11대 과제 중 하나.'},
+{id:'q112',tag:'3장·나라장터',t:'ox',q:'나라장터는 전자정부 11대 과제의 하나로 추진됐다.',a:true,exp:'2002년 전자정부 과제.'},
+{id:'q113',tag:'3장·나라장터',t:'ox',q:'공급업체는 나라장터에 한 번 등록하면 전국 모든 공공기관 입찰에 참가할 수 있다.',a:true,exp:'1회 등록 → 전 기관 공고검색·투찰·계약.'},
+{id:'q114',tag:'3장·나라장터',t:'mc',q:'나라장터의 공식 명칭은?',c:['국가종합전자조달시스템','국가전자입찰시스템','공공조달통합포털','정부조달정보망'],a:0,exp:'국가종합전자조달시스템(G2B).'},
+{id:'q115',tag:'3장·나라장터',t:'ox',q:'나라장터 개통 이전 공공조달은 문서 기반 수작업으로 처리됐다.',a:true,exp:'아날로그 → 디지털 패러다임 전환.'},
+{id:'q116',tag:'2장·방법',t:'mc',q:'수의계약의 형식적 절차로 맞는 것은?',c:['특정 기업 지정 → 견적 → 직접 계약','공고 → 투찰 → 개찰 → 낙찰','다수 추천 → 추첨','등록 → 자동 배정'],a:0,exp:'경쟁 없이 특정 상대와 직접 계약.'},
+{id:'q117',tag:'1장·개요',t:'mc',q:'공공조달이 공공서비스 공급에서 하는 역할은?',c:['핵심 전달 수단','보조적 사후 수단','민간 영역과 무관','규제 수단일 뿐'],a:0,exp:'행정서비스·공익사업 공급의 핵심 전달 수단.'},
+{id:'q118',tag:'1장·개요',t:'ox',q:'공공조달의 참여자에는 수요기관·조달기업 외에 국민 등 이해관계자도 포함된다.',a:true,exp:'참여자 + 이해관계자 구도(1장 2절).'},
+{id:'q119',tag:'3장·나라장터',t:'ox',q:'목록정보시스템은 조달 대상 물품의 분류·식별 정보를 관리한다.',a:true,exp:'3장 4절 — 물품목록정보 표준화.'},
+{id:'q120',tag:'2장·방법',t:'ox',q:'경쟁적 조달 방법과 비경쟁적 조달 방법은 대상물 특성·금액에 따라 선택된다.',a:true,exp:'2장 2~3절의 큰 구도.'},
+/* ───── 4장 전략적 공공조달 (5) ───── */
+{id:'q401',tag:'4장·전략조달',t:'mc',q:'우리나라 공공조달 중 우선구매 등 전략적 활용 비중(최근 5년 평균)은 약?',c:['62%','35%','80%','15%'],a:0,exp:'약 62.2%. 그중 중기지원이 약 47%로 최대.'},
+{id:'q402',tag:'4장·전략조달',t:'ox',q:'전략적 활용 중 비중이 가장 큰 것은 녹색조달이다.',a:false,exp:'중기지원 약 47% > 사회적책임 약 10% > 녹색 약 5.9% > 혁신 약 3.3%.'},
+{id:'q403',tag:'4장·전략조달',t:'ox',q:'단체수의계약제도(1965~)는 2008년부터 중소기업자 간 경쟁 기반 우선구매로 전환됐다.',a:true,exp:'공공구매지원(1963) → 단체수의(1965) → 중기간 경쟁(2008).'},
+{id:'q404',tag:'4장·전략조달',t:'num',q:'여성기업법은 몇 년에 제정됐나?',a:1999,u:'년',exp:'1999 제정, 2014년부터 구매목표 의무화.'},
+{id:'q405',tag:'4장·전략조달',t:'num',q:'녹색제품 우선구매는 몇 년에 시작됐나?',a:2004,u:'년',exp:'2004년 환경적 지속가능성 목적으로 도입.'}
+];
+
+
+/* ───── 저장소 ───── */
+const LS = 'jodal_game_v1';
+function load(){ try{ return JSON.parse(localStorage.getItem(LS))||{} }catch(e){ return {} } }
+function save(s){ localStorage.setItem(LS, JSON.stringify(s)) }
+let ST = Object.assign({best:0, wrong:{}, days:{}, lastDay:'', streak:0}, load());
+
+function todayKey(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0') }
+function updStreak(){
+  const t = todayKey();
+  if(ST.lastDay === t) return;
+  const y = new Date(Date.now()-864e5); 
+  const yk = y.getFullYear()+'-'+String(y.getMonth()+1).padStart(2,'0')+'-'+String(y.getDate()).padStart(2,'0');
+  ST.streak = (ST.lastDay === yk) ? ST.streak+1 : 1;
+  ST.lastDay = t; save(ST);
+}
+
+/* ───── 탭 ───── */
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
+  document.querySelectorAll('.view').forEach(x=>x.classList.remove('on'));
+  t.classList.add('on');
+  document.getElementById('v-'+t.dataset.v).classList.add('on');
+  if(t.dataset.v==='note') renderNote();
+}));
+
+/* ───── 로비 ───── */
+function renderLobby(){
+  document.getElementById('bestV').textContent = ST.best;
+  document.getElementById('todayV').textContent = ST.days[todayKey()]||0;
+  document.getElementById('wrongV').textContent = Object.values(ST.wrong).filter(v=>v>0).length;
+  document.getElementById('streakN').textContent = ST.streak;
+}
+
+/* ───── 가중 추첨: 오답 횟수만큼 등장 확률 증가 ───── */
+let bag = [], bagIdx = 0;
+function buildBag(){
+  bag = [];
+  Q.forEach((q,i)=>{
+    const w = 1 + Math.min(ST.wrong[q.id]||0, 4)*2; // 오답 1회당 +2 가중, 최대 9배
+    for(let k=0;k<w;k++) bag.push(i);
+  });
+  for(let i=bag.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [bag[i],bag[j]]=[bag[j],bag[i]] }
+  bagIdx = 0;
+}
+let recentIds = [];
+function nextQ(){
+  for(let tries=0;tries<bag.length;tries++){
+    const q = Q[bag[bagIdx % bag.length]]; bagIdx++;
+    if(!recentIds.includes(q.id)){ recentIds.push(q.id); if(recentIds.length>15) recentIds.shift(); return q }
+  }
+  return Q[Math.floor(Math.random()*Q.length)];
+}
+
+/* ───── 게임 진행 ───── */
+let timer=null, tLeft=60, score=0, cur=null, locked=false, sessionWrong=[];
+const $ = id=>document.getElementById(id);
+
+function startGame(){
+  updStreak();
+  buildBag(); recentIds=[]; sessionWrong=[];
+  score=0; tLeft=60; locked=false;
+  $('lobby').style.display='none'; $('result').style.display='none'; $('play').style.display='block';
+  $('score').textContent='0';
+  tick(true);
+  timer = setInterval(()=>tick(false), 1000);
+  showQ();
+}
+function tick(first){
+  if(!first) tLeft--;
+  $('tnum').textContent = tLeft;
+  const b = $('tbar'); b.style.width = (tLeft/60*100)+'%';
+  b.classList.toggle('warn', tLeft<=10);
+  if(tLeft<=0) endGame();
+}
+function endGame(){
+  clearInterval(timer); timer=null;
+  $('play').style.display='none'; $('result').style.display='block';
+  $('finalScore').textContent = score;
+  const tk = todayKey();
+  if(score > (ST.days[tk]||0)) ST.days[tk]=score;
+  let nb=false;
+  if(score > ST.best){ ST.best=score; nb=true }
+  $('newbest').style.display = nb?'block':'none';
+  $('finalSub').textContent = sessionWrong.length ? '이번 판에서 틀린 문제 '+sessionWrong.length+'개' : '전부 정답. 깔끔하다.';
+  $('wrongRecap').innerHTML = sessionWrong.slice(0,8).map(q=>
+    '<div class="wrongitem">'+q.q+'<br><b>정답: '+ansText(q)+'</b> — '+q.exp+'</div>').join('');
+  save(ST); renderLobby();
+}
+function ansText(q){
+  if(q.t==='ox') return q.a ? 'O' : 'X';
+  if(q.t==='mc') return q.c[q.a];
+  return q.disp || (q.a + (q.u||''));
+}
+
+function showQ(){
+  cur = nextQ(); locked=false;
+  $('stampEl').className='stamp';
+  $('exp').className='exp'; $('exp').innerHTML='';
+  $('qtag').textContent = cur.tag;
+  $('qtext').textContent = cur.q;
+  const A = $('answers'); A.innerHTML='';
+  if(cur.t==='ox'){
+    const r=document.createElement('div'); r.className='oxrow';
+    [['O',true],['X',false]].forEach(([lbl,val])=>{
+      const b=document.createElement('button'); b.className='choice'; b.textContent=lbl;
+      b.onclick=()=>judge(val===cur.a, b); r.appendChild(b);
+    });
+    A.appendChild(r);
+  } else if(cur.t==='mc'){
+    const idx=[...cur.c.keys()];
+    for(let i=idx.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[idx[i],idx[j]]=[idx[j],idx[i]]}
+    idx.forEach(i=>{
+      const b=document.createElement('button'); b.className='choice'; b.textContent=cur.c[i];
+      b.onclick=()=>judge(i===cur.a, b); A.appendChild(b);
+    });
+  } else { // num
+    const r=document.createElement('div'); r.className='numrow';
+    const inp=document.createElement('input'); inp.type='text'; inp.inputMode='decimal'; inp.placeholder='숫자 입력'; inp.autocomplete='off';
+    const u=document.createElement('span'); u.className='unit'; u.textContent=cur.u||'';
+    const sb=document.createElement('button'); sb.className='submit'; sb.textContent='확인';
+    const go=()=>{ const v=inp.value.replace(/,/g,'').trim(); if(v==='')return;
+      judge(checkNum(v, cur), null); inp.blur(); };
+    sb.onclick=go; inp.onkeydown=e=>{ if(e.key==='Enter') go() };
+    r.appendChild(inp); r.appendChild(u); r.appendChild(sb); A.appendChild(r);
+    setTimeout(()=>inp.focus(),50);
+  }
+}
+function checkNum(v, q){
+  const n = parseFloat(v);
+  if(isNaN(n)) return false;
+  const ok = Array.isArray(q.a) ? q.a : [q.a];
+  return ok.some(a => Math.abs(n - a) < 1e-9);
+}
+function judge(correct, btn){
+  if(locked) return; locked=true;
+  const st = $('stampEl');
+  if(correct){
+    score++; $('score').textContent=score; confetti($('qcard'));
+    if(ST.wrong[cur.id]>0){ ST.wrong[cur.id]--; }
+    st.textContent='적 격'; st.className='stamp ok show';
+    if(btn) btn.classList.add('right');
+    setTimeout(showQ, 600);
+  } else {
+    ST.wrong[cur.id] = (ST.wrong[cur.id]||0)+1;
+    if(!sessionWrong.find(x=>x.id===cur.id)) sessionWrong.push(cur);
+    st.textContent='감사지적'; st.className='stamp bad show';
+    if(btn) btn.classList.add('wrong');
+    $('exp').innerHTML = '<b>정답: '+ansText(cur)+'</b> · '+cur.exp;
+    $('exp').className='exp on';
+    setTimeout(showQ, 2200); // 오답은 해설 볼 시간
+  }
+  save(ST);
+}
+
+$('startBtn').onclick = startGame;
+$('retry').onclick = startGame;
+$('toLobby').onclick = ()=>{ $('result').style.display='none'; $('lobby').style.display='block'; renderLobby(); };
+
+/* ───── 오답노트 ───── */
+function renderNote(){
+  const list = Q.filter(q=>(ST.wrong[q.id]||0)>0).sort((a,b)=>ST.wrong[b.id]-ST.wrong[a.id]);
+  $('noteList').innerHTML = list.length ? list.map(q=>
+    '<div class="noteitem"><span class="cnt">'+ST.wrong[q.id]+'회</span><div class="nq">'+q.q+'</div><div class="na">'+ansText(q)+' — '+q.exp+'</div></div>'
+  ).join('') : '<div class="empty">아직 오답 없음. 한 판 돌리고 오자.</div>';
+}
+
+
+/* ════════ 보드게임 데이터 ════════ */
+/* ════════ 시나리오 11종 (법령 원문 검증 완료) ════════
+ 검증 출처: 국가계약법 시행령 26·24·30·35·37·50·58조, 시행규칙 75조,
+ 계약예규 정부입찰·계약집행기준 34조, 공사계약일반조건 25조,
+ MAS 2단계경쟁 업무처리기준, 조달사업법 27조 */
+const SCN = [
+{id:'A',name:'어린이공원 펜스 보수공사',org:'울산 ○○구청',kind:'공사',sub:'전문공사',price:18000,method:'수의2',
+ note:'전문공사 · 추정가격 1억 8천만 원',rate:0.05,
+ d3:{t:'ox',q:'전문공사 수의 한도(2억)를 넘지 않지만, 2천만 원 초과이므로 견적서는 2인 이상 받아야 한다.',a:true,exp:'시행령 30조 — 1인 견적은 2천만 이하(특정기업 5천만)만. 그 위는 2인 견적.'}},
+{id:'B',name:'청사 사무용 의자 300개',org:'△△시청',kind:'물품',sub:'중기간 경쟁제품 · 종합쇼핑몰(MAS) 등록',price:9000,method:'MAS',
+ note:'추정가격 9천만 원 · MAS 등록 품목',rate:0.075,
+ d3:{t:'mc',q:'이 건은 MAS 2단계경쟁 대상인가?',c:['아니오 — 중기간 경쟁제품은 1억 이상부터','예 — 5천만 이상이므로','예 — 모든 MAS는 2단계 필수','아니오 — 2단계 제도는 폐지됨'],a:0,exp:'2단계경쟁 기준: 중기간 경쟁제품 1억↑ / 그 외 5천만↑ (MAS 2단계경쟁 업무처리기준). 9천만 의자는 미달.'}},
+{id:'C',name:'관광안내 사인물 디자인 용역',org:'◇◇군청',kind:'용역',sub:'RFP 발주 · 협상에 의한 계약',price:12000,method:'협상',
+ note:'추정가격 1억 2천만 원 · 제안서 평가',rate:0.125,
+ d3:{t:'num',q:'협상에 의한 계약 — 제안서 제출마감일 전날부터 기산해 며칠 전 공고가 원칙?',a:40,u:'일',exp:'시행령 35조⑤ 40일. 재공고·긴급 등 사유 시 10일까지 단축(단서).'}},
+{id:'D',name:'수목 표찰 200개 제작',org:'울산 ◎◎구청',kind:'물품',sub:'소액 수의계약',price:1500,method:'수의1',
+ note:'추정가격 1,500만 원',rate:0.075,
+ d3:{t:'mc',q:'견적서는 몇 인에게 받아야 하나?',c:['1인 견적 가능 — 2천만 이하','2인 이상 — 모든 수의계약 공통','3인 이상','조합추천 5개사'],a:0,exp:'시행령 30조 — 추정가격 2천만 이하는 1인 견적 가능.'}},
+{id:'E',name:'마을회관 신축공사',org:'□□시청',kind:'공사',sub:'종합공사',price:38000,method:'수의2',
+ note:'종합공사 · 추정가격 3억 8천만 원',rate:0.05,
+ d3:{t:'num',q:'종합공사(건설공사) 소액수의 한도는 추정가격 몇 억 원 이하?',a:4,u:'억',exp:'시행령 26조 — 종합 4억 / 전문 2억 / 그 밖의 공사 1.6억.'}},
+{id:'F',name:'가로등 LED 등기구 일괄 교체',org:'◈◈공단',kind:'물품',sub:'중소기업자 간 경쟁제품',price:100000,method:'제한',
+ note:'추정가격 10억 원 · 직접생산확인 필요',rate:0.075,
+ d3:{t:'num',q:'계약이행능력심사 낙찰하한율은? (소수점까지)',a:87.995,u:'%',exp:'중기간 경쟁입찰 — 모든 구간 87.995%.'}},
+{id:'G',name:'실험분석장비 구매',org:'◐◐청',kind:'물품',sub:'국제입찰 검토 대상',price:25000,method:'일반',
+ note:'추정가격 2억 5천만 원 (고시금액 2.2억)',rate:0.075,
+ d3:{t:'ox',q:'추정가격이 고시금액(2.2억) 이상이므로 이 건은 국제입찰 대상이다.',a:true,exp:'추정가격 ≥ 고시금액 → GPA 국제입찰 대상.'}},
+{id:'H',name:'사무용품 연간 구매',org:'◑◑구청',kind:'물품',sub:'장애인기업 생산품',price:7000,method:'수의2',
+ note:'장애인기업 · 추정가격 7천만 원',rate:0.075,
+ d3:{t:'mc',q:'수의계약 처리는?',c:['가능 — 1억 이하, 단 5천만 초과라 2인 견적','가능 — 1인 견적','불가 — 5천만 초과','불가 — 경쟁 의무'],a:0,exp:'여성·장애인기업 1억 이하 수의 가능(시행령 26조), 1인 견적은 5천만 이하까지(30조) → 7천만은 2인 견적.'}},
+{id:'I',name:'미세먼지 측정기 5대',org:'◒◒군청',kind:'물품',sub:'혁신제품 (지정 2년차)',price:5000,method:'수의2',
+ note:'조달청 지정 혁신제품 · 추정가격 5천만 원',rate:0.075,
+ d3:{t:'ox',q:'혁신제품은 금액과 무관하게 수의계약 근거가 있다.',a:true,exp:'조달사업법 27조 혁신제품 → 시행령 26조1항5호 수의 가능. 지정기간 3년이라 2년차는 유효.'}},
+{id:'J',name:'사무용 가구 (여성기업)',org:'◓◓시청',kind:'물품',sub:'여성기업 생산품',price:4000,method:'수의1',
+ note:'여성기업 · 추정가격 4천만 원',rate:0.075,
+ d3:{t:'mc',q:'견적서는?',c:['1인 견적 가능 — 여성기업 5천만 이하 특례','2인 이상 — 2천만 초과','3인 이상','불가 — 경쟁 의무'],a:0,exp:'시행령 30조 단서 — 여성·장애인·사회적기업 등은 5천만 이하까지 1인 견적.'}},
+{id:'K',name:'LED 보안등 (우수조달물품)',org:'◔◔군청',kind:'물품',sub:'우수조달물품 지정 제품',price:15000,method:'수의2',
+ note:'우수제품 지정 · 추정가격 1억 5천만 원',rate:0.075,
+ d3:{t:'mc',q:'구매 경로로 맞는 것은?',c:['수의계약 가능 — 제3자단가(쇼핑몰) 또는 총액계약','일반경쟁만 가능','지명경쟁 의무','2억 미만이라 불가'],a:0,exp:'우수조달물품은 시행령 26조 수의 근거 — 쇼핑몰 제3자단가 또는 총액계약. 지정 3년(연장 3년).'}},
+/* ── 추가 시나리오 L·M·N (법령 검증 완료) ── */
+{id:'L',name:'특수 방수공법 교량 유지보수공사',org:'◖◖도청',kind:'공사',sub:'전문공사 · 지명경쟁입찰',price:17500,method:'지명',
+ note:'시공 가능 업체 전국 6곳 · 특수 공법 · 추정가격 1억 7,500만 원',rate:0.05,
+ d3:{t:'num',q:'지명경쟁입찰 — 원칙적으로 몇 인 이상을 지명해야 하나?',a:5,u:'인',exp:'시행령 24조① — 5인 이상 지명, 2인 이상 참가신청. 대상자 5인 미만이면 전원 지명.'}},
+{id:'M',name:'태풍 피해 항만시설 긴급 복구공사',org:'◗◗항만청',kind:'공사',sub:'긴급수의계약 · 비상재해',price:28000,method:'수의2',
+ note:'태풍 직후 72시간 이내 착공 필요 · 추정가격 2억 8천만 원',rate:0.05,
+ d3:{t:'mc',q:'긴급수의계약의 근거 요건으로 맞는 것은?',c:['천재지변·비상재해로 입찰에 부칠 여유가 없는 경우','추정가격 4억 이하 공사는 항상 긴급 가능','담당자 재량으로 결정','예산이 있으면 자동 적용'],a:0,exp:'시행령 26조①1호가 — 천재지변·비상재해 등으로 입찰 여유가 없는 경우. 사유 서면 기록 필수.'}},
+{id:'N',name:'사회적기업 청소 용역',org:'◘◘시청',kind:'용역',sub:'사회적기업 생산품 · 소액 수의',price:4800,method:'수의1',
+ note:'사회적기업법상 인증기업 · 추정가격 4,800만 원',rate:0.125,
+ d3:{t:'mc',q:'견적서 수는?',c:['1인 견적 가능 — 사회적기업 5천만 이하 특례','2인 이상 — 2천만 초과','불가 — 경쟁 의무','3인 이상'],a:0,exp:'시행령 30조 단서 — 여성·장애인기업과 동일하게 사회적기업도 5천만 이하 1인 견적 가능(법제처 해석).'}},
+];
+/* ════════ 이벤트 카드 15 ════════ */
+const EV = [
+{id:'e01',q:'[이벤트] 입찰 마감 결과 투찰자가 1개사뿐이다. 조치는?',t:'mc',c:['재공고 입찰','그대로 낙찰 처리','수의 전환 즉시 확정','입찰 무기한 연기'],a:0,exp:'유효경쟁 불성립 → 재공고(시행령 27조). 재공고 후에도 1인이면 수의 검토.'},
+{id:'e02',q:'[이벤트] 낙찰 예정사가 "예정가격을 미리 알려준 공무원이 있다"고 제보됐다. 예정가격 사전 공개는 허용되는가?',t:'ox',a:false,exp:'예정가격은 비공개. 누설 시 중대 비위.'},
+{id:'e03',q:'[이벤트] 견적서만 낸 업체가 계약을 거부했다. 부정당 제재 상신이 올라왔다. 결재해도 되나?',t:'ox',a:false,exp:'견적서 제출자는 제재 대상 아님 — 반려.'},
+{id:'e04',q:'[이벤트] 적격심사 중 1순위사에 제재 사유 발생(처분 미확정). 즉시 차순위로 넘긴다?',t:'ox',a:false,exp:'처분 확정 전 제외 불가 — 심사 계속.'},
+{id:'e05',q:'[이벤트] 낙찰사가 계약 체결 직전 부정당 제재 처분 확정. 계약을 체결한다?',t:'ox',a:false,exp:'체결 전 처분 확정 → 계약 불가.'},
+{id:'e06',q:'[이벤트] 제재받은 업체가 집행정지 인용 결정문을 들고 입찰에 왔다. 참가시킨다?',t:'ox',a:true,exp:'집행정지 인용 → 확정판결까지 참가 가능.'},
+{id:'e07',q:'[이벤트] 계약서 초안에 "일체의 손해는 을이 부담" 조항 발견. 처리는?',t:'mc',c:['부당특약 — 삭제','관행상 유지','금액 절반만 부담으로 수정','을 동의 받고 유지'],a:0,exp:'계약상 이익 부당 제한 특약 금지.'},
+{id:'e08',q:'[이벤트] 공고 중인 입찰에서 자격제한 기준의 중대한 하자가 발견됐다. 입찰을 취소하고 재공고할 수 있다?',t:'ox',a:true,exp:'중대 하자 → 취소·재공고 가능.'},
+{id:'e09',q:'[이벤트] 이의신청 결과 통지 후 25일 지나서 재심 청구가 접수됐다. 적법한가?',t:'ox',a:false,exp:'재심 청구는 통지일부터 20일 이내 — 기간 도과.'},
+{id:'e10',q:'[이벤트] 두 업체 투찰서의 산출내역이 오탈자까지 동일하다. 의심 사안은?',t:'mc',c:['담합','단순 우연','동일 프로그램 사용 문제없음','전자시스템 오류'],a:0,exp:'담합 정황 — 확인되면 부정당 제재.'},
+{id:'e11',q:'[이벤트] 납품 실적증명서가 위조로 판명됐다. 부정당 제재 사유인가?',t:'ox',a:true,exp:'허위서류 제출 = 제재 사유.'},
+{id:'e12',q:'[이벤트] 장애인기업과 8,000만 원 수의계약 — 견적서 1장으로 진행하자는 보고. 결재?',t:'ox',a:false,exp:'5천만~1억 구간은 2인 이상 견적 필요.'},
+{id:'e13',q:'[이벤트] 중기간 경쟁제품 입찰에 대기업 계열사가 투찰했다. 유효한가?',t:'ox',a:false,exp:'중소기업만 참가 가능한 제한경쟁 — 무효.'},
+{id:'e14',q:'[이벤트] 상대방이 분쟁조정위 조정 대신 곧장 소송을 가자고 한다. 소송 전 조정·중재 선택지가 있다는 말은 사실인가?',t:'ox',a:true,exp:'소송 전 조정 또는 중재 선택 가능.'},
+{id:'e15',q:'[이벤트] 추정가격 2.3억 물품 건을 "국제입찰 귀찮으니" 2.1억+0.2억으로 분할 발주하자는 제안. 적절한가?',t:'ox',a:false,exp:'국제입찰(고시금액 2.2억) 회피 목적 분할은 부당.'}
+];
+
+/* ════════ 시나리오 구동 도트 보드 엔진 ════════ */
+let bST=Object.assign({best:0,clears:0},(load().board||{}));
+function bSave(){ST.board=bST;save(ST)}
+function bLobbyRender(){$('bBestV').textContent=bST.best;$('bClearV').textContent=bST.clears}
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function ri(arr){return arr[Math.floor(Math.random()*arr.length)]}
+function fmt(n){return n.toLocaleString('ko-KR')}
+
+/* ── 8비트 사운드 ── */
+let sndOn=true,AC=null;
+function beep(seq){if(!sndOn)return;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();let t=AC.currentTime;
+ seq.forEach(([f,d])=>{const o=AC.createOscillator(),g=AC.createGain();o.type='square';o.frequency.value=f;
+ g.gain.setValueAtTime(.08,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g);g.connect(AC.destination);o.start(t);o.stop(t+d);t+=d})}catch(e){}}
+const S_roll=()=>beep([[220,.05],[330,.05],[220,.05]]),S_step=()=>beep([[440,.04]]),
+S_ok=()=>beep([[523,.08],[659,.08],[784,.12]]),S_bad=()=>beep([[196,.15],[147,.22]]),
+S_pen=()=>beep([[155,.1],[131,.1],[110,.25]]),S_win=()=>beep([[523,.1],[659,.1],[784,.1],[1047,.3]]);
+$('sndBtn').onclick=()=>{sndOn=!sndOn;$('sndBtn').textContent=sndOn?'ON':'OFF'};
+function confetti(host){
+ const colors=['#B85C0A','#111111','#BB2040','#8A6D00','#BB2040'];
+ for(let i=0;i<10;i++){const p=document.createElement('div');p.className='confetti';
+  p.style.background=colors[i%colors.length];
+  p.style.left=(20+Math.random()*60)+'%';p.style.top='8px';
+  p.style.setProperty('--dx',(Math.random()*60-30)+'px');
+  host.appendChild(p);setTimeout(()=>p.remove(),850)}
+}
+
+/* ── 보드 24칸: 입찰 전 단계 0~9 (40%+) ── */
+const CELLS=[
+{n:'수요발생',i:'',z:0,start:true},{n:'추정금액',i:'',z:0,g:'calc_amt'},{n:'계약방법',i:'',z:1,g:'method'},
+{n:'세부판단',i:'',z:1,g:'detail'},{n:'공고·견적',i:'',z:1,g:'notice'},{n:'이벤트',i:'',ev:true},
+{n:'참가·개찰',i:'',z:2,g:'open'},{n:'낙찰·심사',i:'',z:2,g:'award'},{n:'입찰보증금',i:'',z:2,g:'calc_bid'},
+{n:'계약체결',i:'',z:3,g:'calc_perf'},{n:'선금',i:'',z:3,g:'calc_adv'},{n:'이벤트',i:'',ev:true},
+{n:'지체상금',i:'',pen:true,stop:true,g:'calc_delay'},{n:'계약이행',i:'',z:4,g:'perform'},{n:'검사 14일',i:'',z:4,g:'inspect'},
+{n:'이벤트',i:'',ev:true},{n:'대금 5일',i:'',z:5,g:'pay'},{n:'하자보수',i:'',z:6,g:'defect'},
+{n:'분쟁·제재',i:'',z:6,g:'dispute'},{n:'이의신청',i:'',z:7,g:'appeal'},{n:'이벤트',i:'',ev:true},
+{n:'사후관리',i:'',z:7,g:'post'},{n:'정산',i:'',z:0,g:'calc_settle'},{n:'준공',i:'',z:0}
+];
+const PERIM=(()=>{const x=[];for(let i=0;i<7;i++)x.push(i);for(let r=1;r<7;r++)x.push(r*7+6);for(let i=5;i>=0;i--)x.push(42+i);for(let r=5;r>=1;r--)x.push(r*7);return x})();
+
+/* ── 칸별 문제 생성기: 시나리오 S 조건으로 정답이 결정됨 ── */
+const methodName={'수의1':'수의계약(1인 견적)','수의2':'수의계약(2인 이상 견적)','MAS':'MAS(다수공급자계약) 납품요구','협상':'협상에 의한 계약','제한':'제한경쟁(중소기업자 간)','일반':'일반경쟁(국제입찰)','지명':'지명경쟁'};
+const GEN={
+calc_amt:S=>{return {t:'num',q:'이 건의 추정금액(부가세 10% 포함)은? (만 원)',a:Math.round(S.price*1.1),u:'만원',exp:'추정금액 = 추정가격 '+fmt(S.price)+'만 × 1.1 = '+fmt(Math.round(S.price*1.1))+'만 원.'}},
+method:S=>{const c=['수의계약(1인 견적)','수의계약(2인 이상 견적)','MAS(다수공급자계약) 납품요구','협상에 의한 계약','제한경쟁(중소기업자 간)','일반경쟁(국제입찰)','지명경쟁'];
+ const key=['수의1','수의2','MAS','협상','제한','일반','지명'];
+ return {t:'mc',q:'이 발주 건에 맞는 계약방법은?',c:c,a:key.indexOf(S.method),exp:S.id+'형: '+methodName[S.method]+'. '+S.d3.exp}},
+detail:S=>S.d3,
+notice:S=>{
+ if(S.method==='협상')return {t:'num',q:'제안서 제출마감일 전날 기산, 공고는 며칠 전? (원칙)',a:40,u:'일',exp:'협상·경쟁적대화 40일(시행령 35조⑤). 긴급 등 사유 시 10일 단축.'};
+ if(S.method==='수의1'||S.method==='수의2')return {t:'ox',q:'이 건은 입찰공고 대신 나라장터 견적요청으로 진행한다.',a:true,exp:'수의계약 — 공고 불요, 견적서 징구('+(S.method==='수의1'?'1인':'2인 이상')+').'};
+ if(S.method==='MAS')return {t:'ox',q:'MAS 납품요구는 별도 입찰공고 없이 종합쇼핑몰에서 진행한다.',a:true,exp:'이미 단가계약 체결된 품목 — 쇼핑몰 납품요구.'};
+ return {t:'num',q:'입찰공고는 입찰서 제출마감일 전날부터 기산해 며칠 전? (일반 원칙)',a:7,u:'일',exp:'시행령 35조① 7일. 긴급·재공고는 5일.'}},
+open:S=>{
+ if(S.method==='지명')return {t:'num',q:'지명경쟁 — 입찰이 성립하려면 몇 인 이상의 참가신청이 필요?',a:2,u:'인',exp:'5인 이상 지명 + 2인 이상 참가신청(시행령 24조).'};
+ if(S.method==='수의1')return {t:'num',q:'이 건은 원칙상 몇 인 견적으로 계약 가능한가?',a:1,u:'인',exp:'1인 견적 요건 충족(시행령 30조 단서 — 2천만 이하 또는 특정기업 5천만 이하).'};
+ if(S.method==='수의2')return {t:'mc',q:'나라장터 전자견적 제출 결과, 견적이 딱 1건 들어왔다. 처리는?',c:['원칙은 2인 이상 — 재요청. 단, 다시 받아도 1인뿐일 게 명백하면 1인 견적 가능','1인이어도 무조건 즉시 계약','무조건 입찰 전환','수의 자체가 무효'],a:0,exp:'시행령 30조① — 원칙 2인 이상 견적. 예외: 전자견적 1인 + 재요청해도 1인 명백 시 1인 견적 인정(30조①3호).'};
+ if(S.method==='MAS')return {t:'ox',q:'이 건이 2단계경쟁 대상 금액이라면 원칙상 5개사 이상에 제안요청해야 한다.',a:true,exp:'2단계경쟁 제안요청 5개사 이상(적격업체 2~4개면 전부).'};
+ return {t:'ox',q:'개찰 결과 유효 입찰자가 1인뿐이면 재공고 사유다.',a:true,exp:'유효경쟁 불성립 — 재공고(시행령 27조), 재공고는 5일 공고 가능.'}},
+award:S=>{
+ if(S.method==='제한')return {t:'num',q:'계약이행능력심사 낙찰하한율은?',a:87.995,u:'%',exp:'중기간 경쟁 87.995% — 일반 적격심사(고시금액 미만 84.245%)보다 3.75%p 높음.'};
+ if(S.method==='협상')return {t:'ox',q:'협상에 의한 계약은 가격뿐 아니라 기술·제안 내용을 종합평가해 협상적격자를 정한다.',a:true,exp:'제안서 평가 → 협상 순위 → 협상 → 계약.'};
+ if(S.method==='일반')return {t:'num',q:'일반 물품 적격심사 — 고시금액 미만 구간 낙찰하한율은?',a:84.245,u:'%',exp:'84.245%. (이 건은 고시금액 이상 국제입찰이지만 하한율 체계 암기용.)'};
+ return {t:'ox',q:'수의계약·MAS도 계약상대자 자격(부정당 제재 여부 등) 확인은 필요하다.',a:true,exp:'제재 기간 중인 자와는 수의계약도 불가.'}},
+calc_bid:S=>{const v=Math.round(S.price*0.05);return {t:'num',q:'경쟁입찰이라면 입찰보증금은? (추정가격 기준 가정, 만 원)',a:v,u:'만원',exp:'입찰보증금 = 입찰금액의 5/100(시행령 37조) → '+fmt(S.price)+'만 × 5% = '+fmt(v)+'만 원.'}},
+calc_perf:S=>{const v=Math.round(S.price*0.1);return {t:'num',q:'계약금액을 '+fmt(S.price)+'만 원이라 할 때 계약보증금은? (만 원)',a:v,u:'만원',exp:'계약보증금 = 계약금액의 10/100(시행령 50조) = '+fmt(v)+'만 원.'}},
+calc_adv:S=>{const v=Math.round(S.price*0.7);return {t:'num',q:'선금 지급 한도는? (계약금액 '+fmt(S.price)+'만 원, 만 원)',a:v,u:'만원',exp:'선금 한도 = 계약금액의 70%(계약예규 집행기준 34조) = '+fmt(v)+'만 원. 청구 후 14일 내 지급.'}},
+calc_delay:S=>{const days=ri([4,8,10,12,16,20]);const v=Math.round(S.price*10000*(S.rate/100)*days)/10000;
+ return {t:'num',q:'납품(준공) '+days+'일 지체! 계약금액 '+fmt(S.price)+'만 원 · '+S.kind+' 지체상금률 '+S.rate+'%. 지체상금은? (만 원)',a:v,u:'만원',
+ exp:fmt(S.price)+'만 × '+S.rate+'% × '+days+'일 = '+fmt(v)+'만 원. 요율(시행규칙 75조): 공사 0.05 / 물품 0.075 / 용역 0.125%.'}},
+perform:S=>{
+ if(S.kind==='공사')return {t:'ox',q:'장마(불가항력)로 공정이 늦어진 기간도 지체일수에 산입된다.',a:false,exp:'계약상대자 책임 없는 사유(천재지변 등)는 지체일수 미산입(공사계약일반조건 25조).'};
+ if(S.kind==='용역')return {t:'ox',q:'과업 내용이 변경되면 과업지시서 수정과 변경계약 없이 구두 지시로 진행해도 된다.',a:false,exp:'과업 변경 = 변경계약 사항. 구두 지시는 대가 분쟁의 씨앗.'};
+ return {t:'ox',q:'납품 중 일부 수량을 임의로 다른 규격 제품으로 대체해도 검사에서 걸리지 않으면 문제없다.',a:false,exp:'규격 위반 — 검사 불합격·시정 대상이고 허위 납품은 제재 사유.'}},
+inspect:S=>({t:'num',q:'검사는 검사요청(납품)을 받은 날부터 며칠 이내에 해야 하나?',a:14,u:'일',exp:'검사 14일 이내(시행령 55조). 기한 내 납품했다면 검사 소요기간은 지체일수 미산입.'}),
+pay:S=>({t:'num',q:'대가는 적법한 청구를 받은 날부터 며칠 이내 지급?',a:5,u:'일',exp:'대가 지급 5일 이내(시행령 58조). 검수 끝났으면 청구 서류 빨리 내는 게 이득.'}),
+defect:S=>{
+ if(S.kind==='공사')return {t:'ox',q:'하자담보책임기간 중 하자가 발생하면 계약상대자가 보수 책임을 진다.',a:true,exp:'하자보수보증금(공종별 차등)으로 담보 — 기간 경과 후가 바로 유지관리 용역의 영역.'};
+ return {t:'ox',q:'납품 물품의 하자가 검수 후 발견되면 무조건 발주기관 부담이다.',a:false,exp:'하자담보책임 — 보증기간 내 계약상대자 책임.'}},
+dispute:S=>ri([
+ {t:'ox',q:'견적서만 제출한 업체는 부정당업자 제재 대상이 아니다.',a:true,exp:'입찰참가자·계약상대자 지위가 아님(유권해석).'},
+ {t:'ox',q:'계약 체결 전 부정당 제재 처분이 확정되면 계약을 체결할 수 없다.',a:true,exp:'시행령 76조.'},
+ {t:'ox',q:'허위 실적증명서 제출은 부정당 제재 사유다.',a:true,exp:'위·변조, 허위서류 = 대표 제재 사유.'},
+ {t:'mc',q:'제재 처분에 불복해 법원이 집행정지를 인용하면?',c:['확정판결까지 입찰참가 가능','즉시 자격 영구 상실','과징금 자동 전환','재입찰 금지 유지'],a:0,exp:'처분 효력 유보 — 참가 가능.'}]),
+appeal:S=>ri([
+ {t:'num',q:'이의신청 — 행위가 있었던 날부터 며칠 이내?',a:20,u:'일',exp:'행위일 20일 / 안 날 15일(국가계약법 28조).'},
+ {t:'num',q:'이의신청 — 행위를 안 날부터 며칠 이내?',a:15,u:'일',exp:'안 날 15일 / 행위일 20일.'},
+ {t:'num',q:'분쟁조정위원회의 심사·조정 기한은?',a:50,u:'일',exp:'청구일부터 50일 이내(법 31조).'}]),
+post:S=>{
+ if(S.kind==='공사')return {t:'ox',q:'준공기한 내 준공신고서를 냈다면 준공검사에 걸린 기간은 지체일수에 산입하지 않는다.',a:true,exp:'공사계약일반조건 25조⑥.'};
+ return {t:'ox',q:'이행 완료 후에도 계약서·검사조서 등 계약 기록은 사후 감사 대비로 관리해야 한다.',a:true,exp:'대금·하자·제재 분쟁의 1차 증거가 전부 문서다.'}},
+calc_settle:S=>{const adv=Math.round(S.price*0.7);const done=ri([40,50,60]);const v=Math.round(adv*done/100);
+ return {t:'num',q:'선금 '+fmt(adv)+'만 원 수령 후 기성 '+done+'% 대가 지급 — 선금 정산액은? (만 원)',a:v,u:'만원',exp:'정산액 = 선금 × 기성대가/계약금액 = '+fmt(adv)+'만 × '+done+'% = '+fmt(v)+'만 원(집행기준 37조).'}}
+};
+/* 시나리오 조건부 이벤트 */
+function scnEvents(S){
+ const ex=[];
+ if(S.kind==='공사')ex.push({q:'[이벤트] 장마로 15일 공정 지연 — 계약상대자 귀책이 아니다. 이 15일을 지체일수에 산입하나?',t:'ox',a:false,exp:'불가항력 — 미산입 + 계약기간 연장 사유.'});
+ if(S.kind==='물품')ex.push({q:'[이벤트] 납품분 중 30개 검사 불합격! 올바른 처리는?',t:'mc',c:['시정(반품·재납품) 요구 후 재검사','불합격분만 대금 깎고 인수','전량 인수 후 하자처리','계약 즉시 해제'],a:0,exp:'검사 불합격 → 시정 요구·재검사. 기한 도과분은 지체상금 검토.'});
+ if(S.kind==='용역')ex.push({q:'[이벤트] 발주처가 과업 범위 추가를 요구한다. 올바른 처리는?',t:'mc',c:['과업지시서 수정 + 변경계약(대가 조정)','구두 합의로 진행','거부만 가능','일단 수행 후 정산 요구'],a:0,exp:'과업 변경 = 변경계약으로 대가·기간 조정.'});
+ if(S.method==='MAS')ex.push({q:'[이벤트] 같은 품목을 30일 내 쪼개서 추가 납품요구하면 2단계경쟁을 피할 수 있다는 제안. 적절한가?',t:'ox',a:false,exp:'30일 내 동일 세부품명 합산 — 분할(쪼개기)은 2단계경쟁 회피로 차단·감사 지적 대상.'});
+ if(S.method==='일반')ex.push({q:'[이벤트] "국제입찰 귀찮으니 2건으로 분할 발주하자"는 제안. 적절한가?',t:'ox',a:false,exp:'고시금액 회피 목적 분할 발주는 부당.'});
+ if(S.method==='지명')ex.push({q:'[이벤트] 지명 대상자 6곳 중 2곳이 참가를 거부했다. 유효한 경쟁이 성립되려면?',t:'mc',c:['4곳이 신청해도 2인 이상이면 성립','2인 이상 신청이면 성립 — 문제없음','반드시 재공고 필요','전원 신청해야만 성립'],a:1,exp:'시행령 24조① — 2인 이상 참가신청이 있으면 성립. 6인 지명 중 4인 신청이면 충분.'});
+ if(S.id==='M')ex.push({q:'[이벤트] 긴급수의 계약서에 "지체상금 없음" 특약을 삽입하려 한다. 적절한가?',t:'ox',a:false,exp:'긴급이라도 계약상대자 이익을 부당히 제한하는 특약 불가(법 5조 부당특약 금지).'});
+ if(S.method==='수의1'&&S.id==='N')ex.push({q:'[이벤트] 이 사회적기업이 인증을 취소당했다. 계속 진행해도 되나?',t:'ox',a:false,exp:'특례 요건(인증)을 잃으면 1인 견적 근거도 소멸 — 중단 후 재검토.'});
+ return ex;
+}
+
+/* ── 상태 ── */
+
+/* ── 모험 구역 ── */
+const ZONES=[[0,'발주의 마을'],[2,'공고의 평원'],[6,'입찰의 관문'],[9,'계약의 성문'],[12,'지체의 늪'],[16,'대금의 강'],[18,'감사의 던전'],[21,'준공의 성']];
+function zoneOf(p){let z=ZONES[0][1];for(const[i,n] of ZONES){if(p>=i)z=n}return z}
+let lastZone='';
+function zoneBanner(){
+ const z=zoneOf(bPos);
+ if(z===lastZone)return; lastZone=z;
+ const b=document.createElement('div');b.className='zonebanner';b.textContent=z;
+ $('board').parentElement.appendChild(b);
+ beep([[392,.07],[523,.07],[659,.12]]);
+ setTimeout(()=>b.remove(),1600);
+}
+
+let bPos=0,bScoreV=0,bMarksN=0,bLock=false,bWrong=[],bEvDeck=[],bOrderPick=[],bCur=null,bCurKind='',bScn=null;
+function bMarksTxt(){let s='';for(let i=0;i<3;i++)s+=i<bMarksN?'●':'○';return s}
+function drawBoard(){
+ const B=$('board');B.innerHTML='';
+ const cells=new Array(49).fill(null);PERIM.forEach((g,i)=>cells[g]=i);
+ for(let g=0;g<49;g++){const d=document.createElement('div');
+  if(cells[g]===null){d.className='cell empty'}
+  else{const i=cells[g],cd=CELLS[i];
+   d.className='cell '+(cd.start?'start':cd.ev?'ev':cd.pen?'pen':('z'+cd.z));
+   if(i===bPos)d.classList.add('here');
+   d.innerHTML='<div class="ico">'+cd.i+'</div>'+cd.n;
+   if(i===bPos){const p=document.createElement('div');p.className='pawn';d.appendChild(p)}}
+  B.appendChild(d)}
+ $('phaseLbl').textContent=zoneOf(bPos)+' · '+CELLS[bPos].n;
+}
+function bStart(){
+ updStreak();
+ bScn=ri(SCN);
+ bPos=0;bScoreV=0;bMarksN=0;bWrong=[];bLock=false;lastZone='';
+ bEvDeck=shuffle(EV.concat(scnEvents(bScn)));
+ $('bLobby').style.display='none';$('bResult').style.display='none';$('bPlay').style.display='block';
+ $('qPanel').style.display='none';$('rollBtn').disabled=false;
+ $('bScore').textContent='0';$('bMarks').innerHTML='<span style="color:var(--red)">'+bMarksTxt()+'</span>';
+ $('scnBrief').innerHTML='<b>'+bScn.org+' — '+bScn.name+'</b><div class="meta">'+bScn.sub+' · '+bScn.note+'</div>';
+ drawBoard();
+}
+function roll(){
+ if(bLock)return;bLock=true;$('rollBtn').disabled=true;
+ S_roll();const D=$('dice');D.classList.add('rolling');
+ const iv=setInterval(()=>{D.textContent=1+Math.floor(Math.random()*6)},70);
+ setTimeout(()=>{clearInterval(iv);D.classList.remove('rolling');
+  const n=1+Math.floor(Math.random()*6);D.textContent=n;move(n)},650);
+}
+function move(n){
+ let steps=0;
+ const iv=setInterval(()=>{
+  bPos++;steps++;S_step();
+  if(bPos>=CELLS.length-1){clearInterval(iv);bPos=CELLS.length-1;drawBoard();return bEnd(true)}
+  drawBoard();
+  if(CELLS[bPos].stop&&steps<n){clearInterval(iv);S_pen();setTimeout(land,350);return} // 검문소: 지나칠 수 없음
+  if(steps>=n){clearInterval(iv);setTimeout(land,350)}
+ },220);
+}
+function land(){
+ zoneBanner();
+ const cd=CELLS[bPos];
+ if(cd.ev){const e=bEvDeck.length?bEvDeck.pop():ri(EV);askQ(e,'ev');return}
+ if(cd.pen){bScoreV=Math.max(0,bScoreV-10);$('bScore').textContent=bScoreV;
+  askQ(GEN[cd.g](bScn),'q','지체 발생! −10점. 계산을 맞히면 통과.');return}
+ if(cd.g){askQ(GEN[cd.g](bScn),'q');return}
+ bLock=false;$('rollBtn').disabled=false;
+}
+function askQ(item,kind,note){
+ bCur=item;bCurKind=kind;bLock=true;
+ $('qPanel').style.display='block';
+ $('bStampEl').className='stamp';$('bExp').className='exp';$('bExp').innerHTML='';
+ $('bTag').textContent=(kind==='ev'?'감사관이 나타났다!':CELLS[bPos].n+' · 시나리오 '+bScn.id);
+ $('bQ').innerHTML=(note?'<span class="eventflag">'+note+'</span><br>':'')+(kind==='ev'?'<span class="eventflag">BATTLE</span><br>':'')+item.q;
+ const A=$('bA');A.innerHTML='';buildAns(item,A);
+ $('qPanel').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function buildAns(stg,A){
+ if(stg.t==='ox'){const r=document.createElement('div');r.className='oxrow';
+  [['O',true],['X',false]].forEach(([l,v])=>{const b=document.createElement('button');b.className='choice';b.textContent=l;b.onclick=()=>bJudge(v===stg.a,b,stg);r.appendChild(b)});A.appendChild(r)}
+ else if(stg.t==='mc'){shuffle([...stg.c.keys()]).forEach(i=>{const b=document.createElement('button');b.className='choice';b.textContent=stg.c[i];b.onclick=()=>bJudge(i===stg.a,b,stg);A.appendChild(b)})}
+ else if(stg.t==='num'){const r=document.createElement('div');r.className='numrow';
+  const inp=document.createElement('input');inp.type='text';inp.inputMode='decimal';inp.placeholder='숫자 입력';inp.autocomplete='off';
+  const u=document.createElement('span');u.className='unit';u.textContent=stg.u||'';
+  const sb=document.createElement('button');sb.className='submit';sb.textContent='확인';
+  const go=()=>{const v=inp.value.replace(/,/g,'').trim();if(v==='')return;bJudge(checkNum(v,stg),null,stg);inp.blur()};
+  sb.onclick=go;inp.onkeydown=e=>{if(e.key==='Enter')go()};
+  r.appendChild(inp);r.appendChild(u);r.appendChild(sb);A.appendChild(r)}
+}
+function ansTxtB(stg){if(stg.t==='ox')return stg.a?'O':'X';if(stg.t==='mc')return stg.c[stg.a];return fmt(stg.a)+(stg.u||'')}
+function bJudge(ok,btn,stg){
+ if(!bLock)return;
+ const st=$('bStampEl');
+ if(ok){S_ok();confetti($('bCard'));bScoreV+=(bCurKind==='ev'?10:7);$('bScore').textContent=bScoreV;
+  st.textContent=bCurKind==='ev'?'격 퇴':'적 격';st.className='stamp ok show';
+  if(btn)btn.classList.add('right');setTimeout(closeQ,800)}
+ else{S_bad();bMarksN++;
+  bWrong.push({q:bCur.q,a:ansTxtB(stg),exp:stg.exp});
+  st.textContent='감사지적';st.className='stamp bad show';
+  if(btn)btn.classList.add('wrong');
+  $('bExp').innerHTML='<b>정답: '+ansTxtB(stg)+'</b> · '+stg.exp;$('bExp').className='exp on';
+  $('bMarks').innerHTML='<span style="color:var(--red)">'+bMarksTxt()+'</span>';
+  setTimeout(()=>{if(bMarksN>=3)return bEnd(false);
+   bPos=Math.max(0,bPos-3);drawBoard();closeQ()},3000)}
+}
+function closeQ(){$('qPanel').style.display='none';bLock=false;$('rollBtn').disabled=false}
+function bEnd(clear){
+ if(clear){S_win();bScoreV+=30;bST.clears++}
+ $('bPlay').style.display='none';$('bResult').style.display='block';
+ $('bFinal').textContent=bScoreV;
+ $('bSub').textContent=(clear?'퀘스트 완료! 준공 보너스 +30G. ':'감사지적 3회 — 퀘스트 실패. ')+'시나리오 '+bScn.id+'형: '+bScn.name;
+ if(bScoreV>bST.best)bST.best=bScoreV;
+ $('bRecap').innerHTML=bWrong.slice(0,8).map(w=>'<div class="wrongitem">'+w.q+'<br><b>정답: '+w.a+'</b> — '+w.exp+'</div>').join('');
+ bSave();bLobbyRender();
+}
+$('rollBtn').onclick=roll;$('bStartBtn').onclick=bStart;$('bRetry').onclick=bStart;
+$('bToLobby').onclick=()=>{$('bResult').style.display='none';$('bLobby').style.display='block';bLobbyRender()};
+bLobbyRender();
+
+updStreak(); renderLobby();
+</script>

@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>공공조달관리사 학습앱 — Modernist</title>
+
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+
+<!-- 탭 바 -->
+<div id="tabbar">
+  <div class="sb-brand"><span class="sb-mark"></span>공공조달관리사</div>
+  <nav class="sb-nav">
+    <button class="tab-btn active" data-act="tab" data-tab="concept_tab"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3zM9 3v15M15 6v15"></path></svg><span>개념</span><em>01</em></button>
+    <button class="tab-btn" data-act="tab" data-tab="num_tab"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h16M4 15h16M10 3l-2 18M16 3l-2 18"></path></svg><span>수치</span><em>02</em></button>
+    <button class="tab-btn" data-act="tab" data-tab="law_tab"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg><span>법령</span><em>03</em></button>
+    <button class="tab-btn" data-act="tab" data-tab="quiz_tab"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"></path></svg><span>문제</span><em>04</em></button>
+    <button class="tab-btn" data-act="tab" data-tab="fc_tab"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg><span>카드</span><em>05</em></button>
+    <button class="tab-btn" data-act="tab" data-tab="weak_tab"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10M12 20V4M6 20v-6"></path></svg><span>약점</span><em>06</em></button>
+    <button class="tab-btn" data-act="tab" data-tab="search_tab"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 21l-4.35-4.35M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16z"></path></svg><span>검색</span><em>07</em></button>
+    <button class="tab-btn" data-act="tab" data-tab="game_tab"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2h16a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zM8 8h.01M16 8h.01M8 16h.01M16 16h.01M12 12h.01"></path></svg><span>게임</span><em>08</em></button>
+  </nav>
+  <button class="sb-dday" data-act="examDate" title="시험일 설정"><small>Exam</small><b id="ddayN">설정</b></button>
+</div>
+
+<!-- ①③③ 마인드맵 탭 -->
+<!-- 전체 플로우 -->
+<div class="tab-content active" id="concept_tab">
+  <div class="subbar">
+    <button class="sub-btn active" data-sub="sub_step" data-act="sub">단계별 상세</button>
+    <button class="sub-btn" data-sub="sub_flow" data-act="sub">전체 흐름 · 이벤트</button>
+    <button class="sub-btn" data-sub="sub_cmp" data-act="sub">물품·용역·공사 비교</button>
+    <button class="sub-btn" data-sub="sub_pref" data-act="sub">우대제도</button>
+  </div>
+  <div class="sub-content active" id="sub_step"><div class="sp-wrap"><div class="sp-index" id="step_index"></div><div class="sp-detail" id="step_root"></div></div></div>
+  <div class="sub-content" id="sub_flow"><div class="page-wrap" id="flow_root"></div></div>
+  <div class="sub-content" id="sub_cmp"><div class="page-wrap" id="cmp_root"></div></div>
+
+  <div class="sub-content" id="sub_pref">
+<div class="page-wrap pref">
+<div class="page-title">우대제도 기업 유형별 비교</div>
+<p class="page-sub mb-6">1권 4~5장. 기본 소액수의(물품·용역 2천만원 이하)에서 <b>무엇이 달라지는지</b>를 기준으로 정리</p>
+<p class="page-sub page-note">※ 수치는 국가계약법 시행령(시행 2026.6.3.) 기준 요지. 실제 적용 전 국가법령정보센터 원문 확인</p>
+
+<!-- ── 2026 법령 체크 ── -->
+<div class="law-alert">
+  <div class="law-alert-hd">2026.9 현행 법령 대조 결과 — 교재 수치와 다른 항목</div>
+  <p class="law-alert-sub">2021.7. 국가계약법 시행령 개정으로 우대기업 수의 한도가 5천만원 → 1억원으로 올라갔고, 5천만원은 <b>1인 견적 가능 한도</b>로만 남았다. 교재(1권)가 이 개정 전 수치를 쓰고 있을 가능성이 크므로 시험에서는 <b>출제 기준 연도</b>를 먼저 확인할 것.</p>
+  <div class="tbl-wrap mb-0">
+  <table class="chg">
+    <thead><tr><th>항목</th><th>기존 앱 내용</th><th>현행(2026.9)</th><th>근거</th></tr></thead>
+    <tbody>
+    <tr><td>여성기업·장애인기업 수의 한도</td><td><s>5천만원 이하</s></td><td><b class="new">2천만원 초과 ~ 1억원 이하</b><br><span class="dim">5천만원 이하는 1인 견적 가능, 초과분은 나라장터 2인 이상 견적</span></td><td>국가계약법 시행령 §26①5호가목5) / §30</td></tr>
+    <tr><td>사회적기업 수의 한도</td><td><s>5천만원 이하</s><br><s>근거: 사회적기업육성법 §12</s></td><td><b class="new">2천만원 초과 ~ 1억원 이하</b><br><span class="dim">사회적협동조합·자활기업·마을기업 포함(재정경제부장관 요건 충족 시). 육성법 §12는 우선구매 조항이고, 한도 근거는 국가계약법 시행령</span></td><td>국가계약법 시행령 §26①5호가목5)다)</td></tr>
+    <tr><td>소기업·소상공인</td><td>없음</td><td><b class="new">2천만원 초과 ~ 1억원 이하 수의 가능</b><br><span class="dim">판로지원법 §4: 1억원 미만 물품·용역은 소기업·소상공인 우선조달(제한경쟁)</span></td><td>국가계약법 시행령 §26①5호가목3) / 판로지원법 시행령 §2조의2</td></tr>
+    <tr><td>청년창업기업</td><td>없음</td><td><b class="new">5천만원 이하</b> 수의 가능</td><td>국가계약법 시행령 §26①5호가목7)</td></tr>
+    <tr><td>공사 소액수의</td><td><s>1억원 미만</s></td><td><b class="new">종합 4억 · 전문 2억 · 기타 1.6억원 이하</b></td><td>국가계약법 시행령 §26①5호가목1)</td></tr>
+    <tr><td>혁신제품 지정기간</td><td><s>2년</s><br><s>근거: 정부혁신법</s></td><td><b class="new">기본 3년</b> + 연장 최대 3년(1차 1년, 2차 2년)<br><span class="dim">'정부혁신법'이라는 법률은 없음</span></td><td>조달사업법 §27 · 시행령 §33 / 국가계약법 시행령 §26①5호사목</td></tr>
+    <tr><td>우수조달물품 지정기간</td><td>3년, 연장 최대 3년(총 6년)</td><td>지정 3년, 연장은 종합평가에 따라 <b class="new">1~3년 차등</b>(2019년부터 10년 상한 폐지)<br><span class="dim">'총 6년'은 수의계약 가능 기간의 상한(§26②)으로는 맞음</span></td><td>우수조달물품 지정관리규정 / 국가계약법 시행령 §26②</td></tr>
+    <tr><td>중증장애인생산품 · 기본 소액수의 2천만원</td><td colspan="2"><span class="ok">✔ 변동 없음</span> — 금액 제한 없이 수의, 의무구매 1% 이상 / 물품·용역 2천만원 이하</td><td>§26①4호다목 / §26①5호가목2)</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="law-alert-foot">지방계약법 시행령 §25·§30도 같은 구조(우대기업 1억원, 1인 견적 5천만원). 단, 지방은 사회적기업 등에 <b>취약계층 고용비율(행안부 고시)</b> 충족을 추가로 요구. 부처 명칭은 2025년 조직개편으로 기획재정부 → <b>재정경제부</b>.</p>
+</div>
+
+<!-- ── 한눈에 비교 ── -->
+<div class="section-hd" style="--sc:#AED141"><div class="s-icon"></div>한눈에 비교 — 물품·용역 수의계약 한도 (현행)</div>
+<div class="tbl-wrap">
+  <table class="cmp">
+    <thead><tr><th>대상</th><th class="c">수의 한도</th><th class="c">1인 견적</th><th>비고</th></tr></thead>
+    <tbody>
+    <tr><td>일반(모든 기업)</td><td class="c v-base">2천만원 이하</td><td class="c">가능</td><td>기본 기준</td></tr>
+    <tr><td>소기업·소상공인</td><td class="c v-up">1억원 이하</td><td class="c">2천만원까지</td><td>2천만 초과분은 2인 이상 견적</td></tr>
+    <tr><td>여성기업</td><td class="c v-up">1억원 이하</td><td class="c">5천만원까지</td><td>여성기업지원법 §2 확인기업</td></tr>
+    <tr><td>장애인기업</td><td class="c v-up">1억원 이하</td><td class="c">5천만원까지</td><td>장애인기업활동촉진법 §2</td></tr>
+    <tr><td>사회적기업 등</td><td class="c v-up">1억원 이하</td><td class="c">5천만원까지</td><td>사회적협동조합·자활기업·마을기업 포함</td></tr>
+    <tr><td>청년창업기업</td><td class="c v-up">5천만원 이하</td><td class="c">—</td><td>중소기업창업지원법 §2</td></tr>
+    <tr><td>중증장애인생산품</td><td class="c v-free">제한 없음</td><td class="c">—</td><td>생산시설과 직접 계약 · 의무구매 1%</td></tr>
+    <tr><td>우수조달물품</td><td class="c v-free">제한 없음</td><td class="c">—</td><td>인증 유효기간 내, 최대 6년</td></tr>
+    <tr><td>혁신제품</td><td class="c v-free">제한 없음</td><td class="c">—</td><td>혁신장터 · 지정기간 내</td></tr>
+    <tr><td>녹색제품</td><td class="c v-none">한도 변화 없음</td><td class="c">—</td><td>의무구매 방식</td></tr>
+    </tbody>
+  </table>
+</div>
+<p class="pref-note">공사 소액수의는 별도: 종합공사 4억 · 전문공사 2억 · 그 밖의 공사 1.6억원 이하.</p>
+
+<!-- ── 유형별 상세 ── -->
+<div class="section-hd" style="--sc:#2AA048"><div class="s-icon"></div>유형별 상세</div>
+
+<div class="pref-card" style="--pc:#AED141">
+  <div class="pref-card-hd">중소기업 지원 조달</div>
+  <table class="kv">
+    <tbody><tr><th>근거</th><td>중소기업제품 구매촉진 및 판로지원에 관한 법률(판로지원법)</td></tr>
+    <tr><th>핵심 제도</th><td>① <b>중소기업자간 경쟁제품</b> — 지정 품목은 중소기업만 참가하는 별도 경쟁입찰<br>② <b>공사용자재 직접구매</b> — 대형공사 발주 시 중소기업 생산 자재 분리 구매<br>③ <b>소기업·소상공인 우선조달</b> — 1억원 미만 물품·용역은 소기업·소상공인 제한경쟁, 2천만 초과~1억 수의 가능</td></tr>
+    <tr class="pt"><th>시험 포인트</th><td>수의 한도 변화보다 <b>경쟁 방식 자체</b>가 달라짐(중기간 경쟁입찰)</td></tr>
+  </tbody></table>
+</div>
+
+<div class="pref-card" style="--pc:#F7C914">
+  <div class="pref-card-hd">여성기업 · 장애인기업 — 수의 한도 상향</div>
+  <table class="kv kv3">
+    <tbody><tr><th></th><td class="hd">여성기업</td><td class="hd">장애인기업</td></tr>
+    <tr><th>근거</th><td>여성기업지원에 관한 법률</td><td>장애인기업활동 촉진법</td></tr>
+    <tr><th>수의 한도</th><td class="v-up">1억원 이하</td><td class="v-up">1억원 이하</td></tr>
+    <tr><th>1인 견적</th><td>5천만원 이하</td><td>5천만원 이하</td></tr>
+    <tr><th>구매목표</th><td>물품·용역 5% · 공사 3% 이상</td><td>총 구매액 1% 이상</td></tr>
+    <tr><th>공통</th><td colspan="2">기본 2천만원의 <b>5배</b> / 나라장터에서 해당 기업 확인 후 적용</td></tr>
+  </tbody></table>
+</div>
+
+<div class="pref-card" style="--pc:#F5933C">
+  <div class="pref-card-hd">중증장애인생산품 — 금액 제한 없음</div>
+  <table class="kv">
+    <tbody><tr><th>근거</th><td>중증장애인생산품 우선구매 특별법 / 국가계약법 시행령 §26①4호다목</td></tr>
+    <tr><th>핵심</th><td class="v-free">금액 제한 없이 수의계약 가능 (의무구매 대상)</td></tr>
+    <tr><th>구매목표</th><td>총 구매액의 <b>1% 이상</b> 의무구매</td></tr>
+    <tr class="pt"><th>시험 포인트</th><td>장애인<b>기업</b>(1억 이하) vs 중증장애인<b>생산품</b>(금액 무제한) 혼동 주의</td></tr>
+  </tbody></table>
+</div>
+
+<div class="pref-card" style="--pc:#2AA048">
+  <div class="pref-card-hd">사회적기업 등 — 수의 한도 상향</div>
+  <table class="kv">
+    <tbody><tr><th>근거</th><td>국가계약법 시행령 §26①5호가목5)다) — 사회적기업·사회적협동조합·자활기업·마을기업(재정경제부장관 요건 충족)</td></tr>
+    <tr><th>수의 한도</th><td class="v-up">1억원 이하</td><td></td></tr>
+    <tr><th>우선구매</th><td>사회적기업 육성법 §12 — 공공기관 우선구매 (구매계획·실적 공표, 목표 비율 규정은 없음)</td></tr>
+    <tr class="pt"><th>시험 포인트</th><td>ESG·공공조달 연계 사례로 출제 (1권 5장). 지방계약은 취약계층 고용비율 추가 요건</td></tr>
+  </tbody></table>
+</div>
+
+<div class="pref-card" style="--pc:#E5EA98">
+  <div class="pref-card-hd">녹색제품 — 의무구매 방식</div>
+  <table class="kv">
+    <tbody><tr><th>근거</th><td>녹색제품 구매촉진에 관한 법률</td></tr>
+    <tr><th>구조</th><td>수의 한도 변화가 아니라 <b>의무구매 대상 지정</b> — 환경표지제품·우수재활용(GR)제품·저탄소제품</td></tr>
+    <tr><th>생애주기비용</th><td>LCC(Life Cycle Cost) 고려 — 최저가가 아닌 운영비용 포함 평가</td></tr>
+    <tr class="pt"><th>시험 포인트</th><td>다른 우대제도(수의 한도↑)와 달리 <b>입찰 방식은 동일</b>, <b>구매 의무</b>만 부과</td></tr>
+  </tbody></table>
+</div>
+
+<div class="pref-card" style="--pc:#F7C914">
+  <div class="pref-card-hd">⭐ 우수조달물품 · 혁신제품 — 제품 인증에 따른 수의</div>
+  <table class="kv kv3">
+    <tbody><tr><th></th><td class="hd">우수조달물품</td><td class="hd">혁신제품</td></tr>
+    <tr><th>근거</th><td>조달사업법 시행령 §30 / 국가계약법 시행령 §26①3호바목</td><td>조달사업법 §27 / 국가계약법 시행령 §26①5호사목</td></tr>
+    <tr><th>수의계약</th><td>가능 — 쇼핑몰 제3자단가 또는 총액계약</td><td>가능 — 혁신장터</td></tr>
+    <tr><th>지정기간</th><td>3년, 연장 1~3년 차등 (수의는 최대 6년)</td><td>3년, 연장 최대 3년</td></tr>
+    <tr><th>공통</th><td colspan="2">기업 유형 우대(여성·장애인 등)가 아닌 <b>제품 자체의 품질·혁신 인증</b>에 따른 우대</td></tr>
+  </tbody></table>
+</div>
+
+</div>
+  </div>
+
+</div>
+
+<!-- 핵심 수치 -->
+<div class="tab-content" id="num_tab">
+<div class="page-wrap">
+<div class="page-title">핵심 <span>수치</span></div>
+<p class="page-sub mb-18">시험 빈출 비율·기한·한도 + 계산 예시</p>
+<div class="rev-panel">
+<h3>최근 법령 개정 반영 사항 (이 앱에서 수정된 수치)</h3>
+<table>
+<tbody><tr><td class="nm">① PQ 대상</td><td class="old">100억 의무</td><td class="new">추정가격 200억원 이상 교량·터널·항만 등 주요 공종</td></tr>
+<tr><td class="nm">② 종합심사낙찰제</td><td class="old">300억 이상</td><td class="new">추정가격 100억원 이상 (시행령 42조④ / 100억 미만은 적격심사)</td></tr>
+<tr><td class="nm">③ 적격심사 낙찰하한율</td><td class="old">87.745% 단일</td><td class="new">공사 규모별 89.745 / 88.745 / 87.495% · 물품 84.245% (2025~26 상향)</td></tr>
+<tr><td class="nm">④ 대금 지연이자</td><td class="old">연 1.5% 고정</td><td class="new">금융기관 대출평균금리 적용 (계산문제는 제시 조건 사용)</td></tr>
+<tr><td class="nm">⑤ 수의계약 한도 표현</td><td class="old">~ 미만</td><td class="new">법령 표현 "이하"로 통일</td></tr>
+<tr><td class="nm">⑥ 협상계약 체결 기한</td><td class="old">5일 이내</td><td class="new">협상 성립(낙찰통지) 후 10일 이내</td></tr>
+<tr><td class="nm">⑦ 사전규격공개 의무</td><td class="old">1억원 이상</td><td class="new">추정가격 5천만원 이상 (긴급·비밀 등 면제)</td></tr>
+</tbody></table>
+<div class="rev-note">※ 적격심사 하한율은 국가계약 기준 2026.1.30부터 순차 적용 중 — 실제 시험은 공고문의 출제 기준 시점을 반드시 확인. 협상계약 10일은 공사입찰유의서 §19(낙찰통지 후 10일) 기준.</div>
+</div>
+
+
+<div class="section-hd" style="--sc:#F5933C"><div class="s-icon">%</div>보증금 · 이행보증</div>
+<div class="grid">
+  <div class="card" style="--c:#F5933C"><div class="num">5<span class="unit">%</span></div><div class="card-label">입찰보증금</div><div class="card-desc">입찰금액의 5% 이상. 낙찰 후 미계약 시 국고 귀속. 현금·보증서·보험증권 가능</div></div>
+  <div class="card" style="--c:#F5933C"><div class="num">10<span class="unit">%</span></div><div class="card-label">계약보증금 (일반)</div><div class="card-desc">물품·용역 계약. 계약금액의 10% 이상</div></div>
+  <div class="card" style="--c:#F7C914"><div class="num">15<span class="unit">%</span></div><div class="card-label">계약보증금 (공사)</div><div class="card-desc">공사 계약은 일반보다 높은 15% 이상</div></div>
+  <div class="card" style="--c:#F7C914"><div class="num">40<span class="unit">%</span></div><div class="card-label">공사이행보증서</div><div class="card-desc">공사 계약보증금 대체 시 계약금액의 40%</div></div>
+  <div class="card" style="--c:#F7C914"><div class="num">50<span class="unit">%</span></div><div class="card-label">저가낙찰 이행보증</div><div class="card-desc">예정가격 70% 미만 저가낙찰 공사 → 이행보증 50%로 상향</div></div>
+  <div class="card" style="--c:#F5933C"><div class="num">3<span class="unit">%</span></div><div class="card-label">하자보수보증금 (물품)</div><div class="card-desc">필요 시 계약금액의 3%</div></div>
+  <div class="card" style="--c:#F5933C"><div class="num">2<span class="unit">%</span></div><div class="card-label">하자보수보증금 (용역)</div><div class="card-desc">필요 시 계약금액의 2%</div></div>
+  <div class="card" style="--c:#F5933C"><div class="num">공종별</div><div class="card-label">하자보수보증금 (공사)</div><div class="card-desc">공종별 하자보수보증률·담보기간 별도 적용</div></div>
+</div>
+
+<div class="section-hd" style="--sc:#AED141"><div class="s-icon"></div>선금 — 총 한도</div>
+<div class="grid">
+  <div class="card" style="--c:#AED141"><div class="num">70<span class="unit">%</span></div><div class="card-label">선금 총 한도</div><div class="card-desc">계약금액의 70% 초과 불가. 선급금보증서 제출 필수</div></div>
+</div>
+
+<div class="section-hd" style="--sc:#AED141"><div class="s-icon"></div>공사 선금 의무지급률</div>
+<div class="grid">
+  <div class="card" style="--c:#AED141"><div class="num">30<span class="unit">%</span></div><div class="card-label">100억 이상 공사</div><div class="card-desc">계약금액의 30% 이상 의무지급</div></div>
+  <div class="card" style="--c:#AED141"><div class="num">40<span class="unit">%</span></div><div class="card-label">20억 ~ 100억 미만</div><div class="card-desc">계약금액의 40% 이상 의무지급</div></div>
+  <div class="card" style="--c:#AED141"><div class="num">50<span class="unit">%</span></div><div class="card-label">20억 미만 공사</div><div class="card-desc">계약금액의 50% 이상 의무지급</div></div>
+</div>
+
+<div class="section-hd" style="--sc:#AED141"><div class="s-icon"></div>물품 제조·용역 선금 의무지급률</div>
+<div class="grid">
+  <div class="card" style="--c:#AED141"><div class="num">30<span class="unit">%</span></div><div class="card-label">10억 이상</div><div class="card-desc">계약금액의 30% 이상 의무지급</div></div>
+  <div class="card" style="--c:#AED141"><div class="num">40<span class="unit">%</span></div><div class="card-label">3억 ~ 10억 미만</div><div class="card-desc">계약금액의 40% 이상 의무지급</div></div>
+  <div class="card" style="--c:#AED141"><div class="num">50<span class="unit">%</span></div><div class="card-label">3억 미만</div><div class="card-desc">계약금액의 50% 이상 의무지급</div></div>
+</div>
+
+<div class="section-hd" style="--sc:#E5EA98"><div class="s-icon"></div>지체상금률 (1일당)</div>
+<div class="grid">
+  <div class="card" style="--c:#F7C914"><div class="num">0.05<span class="unit">%</span></div><div class="card-label">공사</div><div class="card-desc">1일 지체당 계약금액의 0.05% (= 1/2000)</div></div>
+  <div class="card" style="--c:#AED141"><div class="num">0.075<span class="unit">%</span></div><div class="card-label">물품 제조·구매</div><div class="card-desc">1일 지체당 계약금액의 0.075%</div></div>
+  <div class="card" style="--c:#E5EA98"><div class="num">0.125<span class="unit">%</span></div><div class="card-label">용역·수리·가공·대여·기타</div><div class="card-desc">1일 지체당 계약금액의 0.125%</div></div>
+  <div class="card" style="--c:#F5933C"><div class="num">0.15<span class="unit">%</span></div><div class="card-label">군용 음식료품</div><div class="card-desc">1일 지체당 계약금액의 0.15%</div></div>
+  <div class="card" style="--c:#F5933C"><div class="num">0.25<span class="unit">%</span></div><div class="card-label">운송·보관·양곡가공</div><div class="card-desc">1일 지체당 계약금액의 0.25% (가장 높음)</div></div>
+  <div class="card" style="--c:#F5933C"><div class="num">30<span class="unit">%</span></div><div class="card-label">지체상금 한도</div><div class="card-desc">누적 한도는 계약금액의 30%</div></div>
+</div>
+
+<div class="calc-box">
+  <div class="box-ttl c-green">지체상금 계산식 + 예시</div>
+  <div class="calc-formula">
+    지체상금 = 계약금액 × 지체상금률 × 지체일수
+  </div>
+  <div class="calc-ex">
+    <strong>예 1.</strong> 계약금액 1억원 물품 제조·구매 계약이 8일 지체된 경우<br>
+    → 100,000,000 × 0.00075 × 8 = <strong>600,000원</strong><br><br>
+    <strong class="c-orange">예 2.</strong> 계약금액 5억원 공사가 10일 지체된 경우<br>
+    → 500,000,000 × 0.0005 × 10 = <strong>2,500,000원</strong><br><br>
+    <strong class="c-green">예 3.</strong> 계약금액 2억원 용역이 20일 지체된 경우<br>
+    → 200,000,000 × 0.00125 × 20 = <strong>5,000,000원</strong><br><br>
+    <strong class="c-red">한도:</strong> 위 금액이 계약금액의 30%를 초과하면 30%까지만 부과
+  </div>
+</div>
+
+<div class="section-hd" style="--sc:#2AA048"><div class="s-icon"></div>기한</div>
+<div class="grid">
+  <div class="card" style="--c:#2AA048"><div class="num">14<span class="unit">일</span></div><div class="card-label">검사 처리</div><div class="card-desc">이행완료 통지일부터 14일 이내 검사</div></div>
+  <div class="card" style="--c:#2AA048"><div class="num">5<span class="unit">일</span></div><div class="card-label">대금 지급 (원칙)</div><div class="card-desc">검사완료일부터 5일 이내 지급</div></div>
+  <div class="card" style="--c:#2AA048"><div class="num">5<span class="unit">일</span></div><div class="card-label">대금 지급 (검사 후 청구)</div><div class="card-desc">청구일부터 5일 이내 지급</div></div>
+  <div class="card" style="--c:#2AA048"><div class="num">3<span class="unit">일</span></div><div class="card-label">불가항력 지급</div><div class="card-desc">불가항력 사유 소멸일부터 3일 이내</div></div>
+  <div class="card" style="--c:#2AA048"><div class="num">30<span class="unit">일</span></div><div class="card-label">기성대가 지급 주기</div><div class="card-desc">장기계약은 적어도 30일마다 기성대가 지급 원칙</div></div>
+  <div class="card" style="--c:#2AA048"><div class="num">7<span class="unit">일</span></div><div class="card-label">입찰공고 최소 기간</div><div class="card-desc">공고일로부터 최소 7일 이후 입찰</div></div>
+  <div class="card" style="--c:#2AA048"><div class="num">5<span class="unit">일</span></div><div class="card-label">사전규격공개<span class="rev-badge">개정</span></div><div class="card-desc">최소 5일 이상 의견 접수 · 의무 대상: 추정가격 5천만원 이상(긴급·비밀 등 면제)</div></div>
+  <div class="card" style="--c:#2AA048"><div class="num">10<span class="unit">일</span></div><div class="card-label">계약 체결 기한<span class="rev-badge">개정</span></div><div class="card-desc">낙찰통지(협상 성립) 후 10일 이내 계약 체결</div></div>
+</div>
+
+<div class="section-hd" style="--sc:#AED141"><div class="s-icon"></div>물가변동 조정</div>
+<div class="grid">
+  <div class="card" style="--c:#AED141"><div class="num">90<span class="unit">일</span></div><div class="card-label">조정 가능 시점</div><div class="card-desc">계약 체결일로부터 90일 경과 후 청구 가능</div></div>
+  <div class="card" style="--c:#AED141"><div class="num">3<span class="unit">%</span></div><div class="card-label">변동 기준</div><div class="card-desc">물가 3% 이상 변동 시 조정 청구 가능</div></div>
+</div>
+
+<div class="section-hd" style="--sc:#E5EA98"><div class="s-icon"></div>공사 하자담보책임기간 (대표)</div>
+<div class="grid">
+  <div class="card" style="--c:#E5EA98"><div class="num">10<span class="unit">년</span></div><div class="card-label">철근콘크리트·철골</div><div class="card-desc">구조물 핵심 부위</div></div>
+  <div class="card" style="--c:#E5EA98"><div class="num">3<span class="unit">년</span></div><div class="card-label">방수공사</div><div class="card-desc">방수·단열 등 일반 보호 공사</div></div>
+  <div class="card" style="--c:#E5EA98"><div class="num">1<span class="unit">년</span></div><div class="card-label">일반 마감</div><div class="card-desc">도장·타일 등 마감 공사</div></div>
+</div>
+
+<div class="section-hd" style="--sc:#E5EA98"><div class="s-icon"></div>낙찰·금액 기준</div>
+<div class="grid">
+  <div class="card" style="--c:#E5EA98"><div class="num">89.745<span class="unit">%</span></div><div class="card-label">적격심사 낙찰하한율 (공사)<span class="rev-badge">개정</span></div><div class="card-desc">10억 미만 89.745% / 10~50억 88.745% / 50~100억 87.495% (2025~26 상향 개정)</div></div>
+  <div class="card" style="--c:#E5EA98"><div class="num">70<span class="unit">%</span></div><div class="card-label">저가낙찰 기준</div><div class="card-desc">예정가격 70% 미만 → 공사이행보증 50% 적용</div></div>
+  <div class="card" style="--c:#E5EA98"><div class="num">100<span class="unit">억↑</span></div><div class="card-label">종합심사낙찰제<span class="rev-badge">개정</span></div><div class="card-desc">추정가격 100억원 이상 공사에 적용 (시행령 42조④)</div></div>
+  <div class="card" style="--c:#E5EA98"><div class="num">200<span class="unit">억↑</span></div><div class="card-label">PQ 대상<span class="rev-badge">개정</span></div><div class="card-desc">추정가격 200억원 이상 교량·터널·항만 등 주요 공종 사전심사</div></div>
+</div>
+
+</div>
+</div>
+
+<!-- ⑤ 단어카드 -->
+<div class="tab-content" id="fc_tab">
+  <div class="fc-wrap" id="fc_root"></div>
+</div>
+
+<!-- 문제 (필기/실기/오답) -->
+<div class="tab-content" id="quiz_tab">
+  <div class="subbar">
+    <button class="sub-btn active" data-act="sub" data-sub="sub_qz">필기 문제</button>
+    <button class="sub-btn" data-act="sub" data-sub="sub_prac">실기 문제</button>
+    <button class="sub-btn" data-act="sub" data-sub="sub_wn">오답노트</button>
+  </div>
+  <div class="sub-content active" id="sub_qz"><div class="qz-wrap" id="qz_root"></div></div>
+  <div class="sub-content" id="sub_prac"><div class="qz-wrap" id="prac_root"></div></div>
+  <div class="sub-content" id="sub_wn"><div class="qz-wrap" id="wn_root"></div></div>
+</div>
+
+<!-- 약점분석 -->
+<div class="tab-content" id="weak_tab">
+  <div class="page-wrap" id="weak_root"></div>
+</div>
+
+<!-- 조달게임 (iframe 격리 실행) -->
+
+<!-- 법령 탭 -->
+<div class="tab-content" id="law_tab">
+<div class="page-wrap">
+<div class="page-title">법령 <span>정리</span></div>
+<p class="page-sub mb-6">①법령 지도(어떤 법이 적용되나) → ②계약 흐름별 조문 발췌 → ③제재(사건 순)</p>
+<p class="page-sub page-note mb-24">※ 모든 조문은 <b>발췌·요지</b>임. 답안 작성 시 반드시 국가법령정보센터 원문 확인. 개정 = 2025~26 개정 반영 항목</p>
+
+<div class="section-hd" style="--sc:#F7C914"><div class="s-icon"></div>① 법령 지도 — 법체계 순</div>
+<div class="law-map">
+<div class="lm"><h4>민법</h4><p>모든 계약의 기초. 성립(청약+승낙)·효력·해제/해지·도급·위임·화해. 공공계약도 사법상 계약 → 민법 보충 적용</p></div>
+<div class="lm"><h4>국가계약법 (국가를 당사자로 하는 계약에 관한 법률)</h4><p>국가기관 계약의 기본법. 추정가격·예정가격, 계약방법, 입찰·낙찰, 계약체결·이행, 이의신청</p></div>
+<div class="lm"><h4>지방계약법</h4><p>지자체·교육청 계약. 구조는 국가계약법과 유사하나 수의계약 한도 등 일부 상이</p></div>
+<div class="lm"><h4>조달사업법</h4><p>조달청 중심. 계약체결 요청(중앙조달), 대금지급, 구매규격 사전공개, 수요기관 지원, 조달 공정성</p></div>
+<div class="lm"><h4>전자조달법</h4><p>나라장터 운영 근거. 전자공고, 전자입찰서, 전자공개수의계약, 하도급 전자처리, 이용제한</p></div>
+<div class="lm"><h4>공기업·준정부기관 계약사무규칙</h4><p>공공기관 적용. 국제입찰 범위, 중기간 경쟁제품 위탁 예외, 수의계약·이의신청 특칙</p></div>
+</div>
+
+<table class="law-vs">
+<tbody><tr><th></th><th>국가계약법</th><th>지방계약법</th></tr>
+<tr><td class="td-key">적용 대상</td><td>국가기관(중앙부처 등)</td><td>지자체·지방교육행정기관</td></tr>
+<tr><td class="td-key">소액 수의 (물품·용역)</td><td>추정가격 2천만원 이하 1인 견적<br>(여성·장애인·사회적기업 등 1억원 이하, 1인 견적은 5천만원까지)</td><td>유사 구조이나 한도·특례 일부 상이 — 공고문 근거 법 확인 필수</td></tr>
+<tr><td class="td-key">분쟁</td><td>국가계약분쟁조정위원회</td><td>지방계약분쟁조정위원회</td></tr>
+</tbody></table>
+
+<div class="section-hd" style="--sc:#AED141"><div class="s-icon"></div>② 계약 흐름 순 — 단계별 조문 발췌</div>
+
+<div class="law-flow-step">1. 입찰참가자격 등록</div>
+<div class="law-cite"><div class="src">국가계약법 시행령 §12 (발췌·요지)</div>
+<div class="txt">경쟁입찰에 참가하려는 자는 <b>입찰참가자격을 등록</b>하여야 하며, 허가·인가·면허 등 요건과 보안측정 등 필요 자격을 갖추어야 한다.</div>
+<div class="pt">→ 시험 포인트: 등록은 나라장터에서, 변동사항 발생 시 갱신 의무</div></div>
+
+<div class="law-flow-step">2. 사전규격공개 개정</div>
+<div class="law-cite"><div class="src">조달사업법령 — 구매규격 사전공개 (발췌·요지)</div>
+<div class="txt">추정가격 <b>5천만원 이상</b> 물품·용역의 구매규격은 입찰공고 전에 <b>미리 공개(최소 5일)</b>하여 의견을 받아야 한다. 다만 <b>긴급·비밀</b> 등의 경우 제외.</div>
+<div class="pt">→ 시험 포인트: 기준 5천만(개정) / 기간 5일 / 면제 사유 / 사전규격공개 ≠ 입찰공고</div></div>
+
+<div class="law-flow-step">3. 입찰공고</div>
+<div class="law-cite"><div class="src">국가계약법 시행령 §33·§35 (발췌·요지)</div>
+<div class="txt">입찰공고는 <b>전자조달시스템(나라장터)</b>을 이용하여 하며, 입찰서 제출 마감일의 <b>7일 전</b>까지 공고하여야 한다(긴급 시 단축 가능).</div>
+<div class="pt">→ 시험 포인트: 원칙 7일 / 전자공고 원칙(전자조달법 연계)</div></div>
+
+<div class="law-flow-step">4. 입찰·개찰</div>
+<div class="law-cite"><div class="src">국가계약법 시행령 §37·§39 (발췌·요지)</div>
+<div class="txt">입찰보증금은 입찰금액의 <b>100분의 5 이상</b>. 낙찰자가 계약을 체결하지 아니하면 <b>국고 귀속</b>. 입찰서는 전자적으로 제출하며 무효입찰 사유에 해당하면 효력이 없다.</div>
+<div class="pt">→ 시험 포인트: 5% / 귀속 요건 / 무효입찰 사유(자격 미달, 동일인 2통 등)</div></div>
+
+<div class="law-flow-step">5. 낙찰자 결정 개정</div>
+<div class="law-cite"><div class="src">국가계약법 시행령 §42 + 계약예규 적격심사기준 (발췌·요지)</div>
+<div class="txt">추정가격 <b>100억원 이상</b> 공사는 <b>종합심사낙찰제</b>, 미만은 <b>적격심사</b>. 적격심사 낙찰하한율은 공사 규모별 <b>89.745 / 88.745 / 87.495%</b>, 물품 <b>84.245%</b>(고시금액 미만) <b>(2025~26 상향 개정)</b>.</div>
+<div class="pt">→ 시험 포인트: 100억 경계(개정) / 규모별 하한율(개정) / PQ는 200억↑ 주요 공종(개정)</div></div>
+
+<div class="law-flow-step">6. 계약 체결 개정</div>
+<div class="law-cite"><div class="src">국가계약법 §11 + 공사입찰유의서 §19 (발췌·요지)</div>
+<div class="txt">계약서에는 목적·금액·이행기간·계약보증금·지체상금 등을 기재하고 <b>당사자가 기명·날인 또는 서명</b>함으로써 확정된다. 낙찰자는 낙찰통지(협상 성립) 후 <b>10일 이내</b> 계약을 체결하여야 한다. 계약보증금은 계약금액의 <b>10% 이상</b>(공사 이행보증 등 별도).</div>
+<div class="pt">→ 시험 포인트: 계약서 필수 기재사항 / 체결 기한 10일(개정) / 보증금 10%</div></div>
+
+<div class="law-flow-step">7. 선금</div>
+<div class="law-cite"><div class="src">계약예규 정부 입찰·계약 집행기준 (발췌·요지)</div>
+<div class="txt">계약상대자가 청구하면 선금을 지급할 수 있으며, 공사는 규모별 <b>의무지급률(3억 미만 50% / 3~10억 40% / 10억 이상 30%)</b>이 적용된다. 선금은 <b>보증서 제출</b>을 조건으로 한다.</div>
+<div class="pt">→ 시험 포인트: 의무지급률 구간 / 선금보증 / 기지급 선금은 기성대가에서 공제</div></div>
+
+<div class="law-flow-step">8. 이행 · 계약변경</div>
+<div class="law-cite"><div class="src">국가계약법 §19 + 시행령 §64~66 (발췌·요지)</div>
+<div class="txt">물가변동·설계변경·그 밖의 계약내용 변경으로 계약금액 조정이 필요한 경우 이를 조정한다. 물가변동 조정은 계약 체결 후 <b>90일 경과</b> + 품목·지수 <b>3% 이상</b> 변동 시 가능.</div>
+<div class="pt">→ 시험 포인트: 조정 3요건(물가변동·설계변경·기타) / 90일+3% 동시 충족</div></div>
+
+<div class="law-flow-step">9. 검사 · 검수</div>
+<div class="law-cite"><div class="src">국가계약법 §14 + 시행령 §55 (발췌·요지)</div>
+<div class="txt">계약상대자가 이행을 완료한 때에는 통지를 받은 날부터 <b>14일 이내</b> 검사를 하여야 한다.</div>
+<div class="pt">→ 시험 포인트: 14일 / 검사조서 작성 / 검사 ≠ 검수 구분(물품 납품검사)</div></div>
+
+<div class="law-flow-step">10. 대금 지급 개정</div>
+<div class="law-cite"><div class="src">국가계약법 §15 + 시행령 §58 (발췌·요지)</div>
+<div class="txt">검사 완료 후 대가 청구를 받은 날부터 <b>5일 이내</b> 지급하여야 하며, 기한 초과 시 <b>지연이자</b>를 지급한다. 지연이자율은 <b>금융기관 대출평균금리</b>를 적용한다 <b>(연 1.5% 고정 아님)</b>. 장기계속계약 등 기성대가는 적어도 <b>30일마다</b> 지급.</div>
+<div class="pt">→ 시험 포인트: 5일 / 지연이자 산식(미지급액×초과일수×금리÷365) / 불가항력 소멸 후 3일</div></div>
+
+<div class="law-flow-step">11. 지체상금 · 하자 · 종결</div>
+<div class="law-cite"><div class="src">시행령 §74 + 계약예규 (발췌·요지)</div>
+<div class="txt">정당한 이유 없이 이행을 지체하면 <b>지체상금(공사 0.05 / 물품 0.075 / 용역 0.125% 일할)</b>을 계약금액에서 공제하며 한도는 <b>30%</b>. 공사는 하자담보책임기간(철근콘크리트 <b>10년</b> 등) 동안 <b>하자보수보증금</b>을 납부한다.</div>
+<div class="pt">→ 시험 포인트: 율 암기 / 한도 30% / 하자기간은 공종별</div></div>
+
+<div class="section-hd" style="--sc:#F5933C"><div class="s-icon"></div>③ 6장 공정조달 관리 — 위반 발생 시 사건 순</div>
+
+<div class="law-flow-step">위반 발생 → ① 보증금 귀속</div>
+<div class="law-cite"><div class="src">국가계약법 §12 (발췌·요지)</div>
+<div class="txt">계약상대자가 계약상 의무를 이행하지 아니한 때에는 <b>계약보증금을 국고에 귀속</b>시킨다.</div>
+<div class="pt">→ 쟁점: 귀속의 법적 성격(손해배상액 예정) / 일부 이행 시 비율 귀속 다툼</div></div>
+
+<div class="law-flow-step">② 계약 해제·해지</div>
+<div class="law-cite"><div class="src">계약일반조건 + 민법 §543 이하 (발췌·요지)</div>
+<div class="txt">이행 지체·불능, 부정당 행위 등의 경우 계약을 <b>해제(소급 소멸) 또는 해지(장래 소멸)</b>할 수 있다.</div>
+<div class="pt">→ 시험 포인트: 해제 vs 해지 효과 구분 / 사유별 사후조치(기성 정산 등)</div></div>
+
+<div class="law-flow-step">③ 부정당업자 제재</div>
+<div class="law-cite"><div class="src">국가계약법 §27 (발췌·요지)</div>
+<div class="txt">담합, 허위서류 제출, 뇌물, 계약 불이행 등을 한 자에게는 <b>2년 이내</b> 범위에서 <b>입찰참가자격을 제한</b>하며, 이를 즉시 다른 기관에 통보·공개한다.</div>
+<div class="pt">→ 쟁점: 제재는 처분(행정쟁송 대상) / 제재기간 중 전 기관 효력 / 과징금 갈음 가능</div></div>
+
+<div class="law-flow-step">④ 부당이득 환수 · 불공정행위 제재</div>
+<div class="law-cite"><div class="src">조달사업법 — 불공정 조달행위 (발췌·요지)</div>
+<div class="txt">허위서류·원산지 위반 등 불공정 조달행위로 얻은 <b>부당이득은 환수</b>하고, 가산금을 부과할 수 있다.</div>
+<div class="pt">→ 시험 포인트: 부정당 제재(자격 제한)와 부당이득 환수(금전)는 병과 가능</div></div>
+
+<div class="law-flow-step">⑤ 이의신청 · 분쟁조정</div>
+<div class="law-cite"><div class="src">국가계약법 §28~29 (발췌·요지)</div>
+<div class="txt">국제입찰 등 일정 규모 이상 계약에서 불이익을 받은 자는 발주기관에 <b>이의신청</b>할 수 있고, 결과에 불복하면 <b>국가계약분쟁조정위원회</b>에 조정을 청구할 수 있다.</div>
+<div class="pt">→ 시험 포인트: 이의신청 → 조정 2단계 / 지방계약은 지방계약분쟁조정위</div></div>
+
+</div>
+</div>
+
+<!-- 검색 탭 -->
+<div class="tab-content" id="search_tab">
+  <div class="srch-box">
+    <input id="srchInput" type="text" placeholder="문제·카드·해설 검색 (예: 지체상금, 적격심사, 89.745)" autocomplete="off">
+    <div class="srch-filters" id="srchFilters">
+      <button class="active" data-act="srchFilter" data-f="all">전체</button>
+      <button data-act="srchFilter" data-f="q">필기</button>
+      <button data-act="srchFilter" data-f="p">실기</button>
+      <button data-act="srchFilter" data-f="c">카드</button>
+    </div>
+    <div class="srch-hint" id="srchHint">키워드를 입력하면 필기·실기 문제와 단어카드를 한 번에 찾습니다.</div>
+  </div>
+  <div class="srch-res" id="srchRes"></div>
+</div>
+
+<div class="tab-content" id="game_tab">
+  <iframe id="gameFrame" title="조달게임"></iframe>
+</div>
+<button id="new-sticky-btn" data-act="stickyNew" title="새 포스트잇 추가">+</button>
+
+<script src="js/store.js"></script>
+<script src="data/steps.js"></script>
+<script src="data/cards.js"></script>
+<script src="data/questions.js"></script>
+<script src="data/prac.js"></script>
+<script src="js/tabs.js"></script>
+<script src="js/quiz-engine.js"></script>
+<script src="js/law-api.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
