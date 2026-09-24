@@ -953,3 +953,6 @@ tr:hover td,.kv-tbl tr:hover td{background:transparent}
 @media(max-width:860px){.wk-kpis{grid-template-columns:1fr 1fr}.wk-kpi:last-child{grid-column:1/-1}.wk-grid{grid-template-columns:1fr}.wk-bar{grid-template-columns:7em minmax(0,1fr) 3em}}
 .wk-grid .box,.wk-start{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:18px 20px}
 .wk-grid{margin-bottom:12px}
+/* 휴대폰: 하단 탭 8개가 한 줄에 다 보이게 시험일 상자는 빼고, 약점 탭 버튼으로 */
+.wk-dday{display:none}
+@media(max-width:560px){#tabbar .sb-dday{display:none}.wk-dday{display:inline-flex;gap:6px;margin:0 0 12px}.wk-dday b{color:var(--accent)}}

@@ -326,7 +326,8 @@ function renderStepIndex(){
   root.innerHTML = x;
 }
 function setExamDate(){ var cur=localStorage.getItem('exam_date')||''; var v=prompt('시험일을 입력하세요 (YYYY-MM-DD)', cur); if(v===null) return; if(v.trim()==='') localStorage.removeItem('exam_date'); else localStorage.setItem('exam_date', v.trim()); renderDday(); }
-function renderDday(){ var el=document.getElementById('ddayN'); if(!el) return; var d=localStorage.getItem('exam_date'); if(!d){ el.textContent='설정'; return; } var t=new Date(d); if(isNaN(t)){ el.textContent='설정'; return; } var diff=Math.ceil((t - new Date().setHours(0,0,0,0))/86400000); el.textContent = diff>=0 ? 'D-'+diff : 'D+'+(-diff); }
+function ddayText(){ var d=localStorage.getItem('exam_date'); if(!d) return '설정'; var t=new Date(d); if(isNaN(t)) return '설정'; var diff=Math.ceil((t - new Date().setHours(0,0,0,0))/86400000); return diff>=0 ? 'D-'+diff : 'D+'+(-diff); }
+function renderDday(){ var v=ddayText(); document.querySelectorAll('#ddayN,.dday-n').forEach(function(e){ e.textContent=v; }); } // 사이드바 + 약점 탭 시험일 버튼
 
 
 // 단계별 보강 데이터: 실무 체크리스트 + 시험 함정
@@ -818,6 +819,7 @@ function renderWeak(){
       '<div class="box-ttl">추천 복습</div>'+
       '<div class="wk-recs">'+recs.map(function(t,i){return (i+1)+'. '+t;}).join('<br>')+'</div>'+
     '</div>')+
+    '<button class="btn wk-dday" data-act="examDate">시험일 <b class="dday-n">'+ddayText()+'</b></button>'+
     '<div class="box"><div class="box-ttl">학습 기록 옮기기</div>'+
       '<div class="rec-desc">오답노트·메모·포스트잇·게임 기록은 이 기기의 브라우저에만 저장돼요. 파일로 저장해 두면 브라우저를 정리해도 되살리고, PC↔패드로 옮길 수 있어요.</div>'+
       '<div class="rec-btns"><button class="btn filled" data-act="exportRec">기록 저장</button><button class="btn" data-act="importRec">기록 불러오기</button></div>'+
