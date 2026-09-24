@@ -866,9 +866,11 @@ tr:hover td{background:var(--surface)}
 .sp-zone{grid-column:1/-1;display:flex;align-items:center;gap:6px;padding:8px 2px 0;font-size:13px;font-weight:700;color:color-mix(in srgb,var(--zc) 75%,#000)}
 .sp-zone::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--zc)}
 .sp-zone span{font-weight:500;color:var(--text-4);font-variant-numeric:tabular-nums}
-.sp-tile{background:color-mix(in srgb,var(--zc) 9%,var(--bg));box-shadow:inset 4px 0 0 var(--zc)}
-.sp-tile:hover{background:color-mix(in srgb,var(--zc) 17%,var(--bg))}
-.sp-tile.sel{background:var(--accent);box-shadow:inset 4px 0 0 var(--zc)}
+.sp-tile{background:color-mix(in srgb,var(--zc) 8%,var(--bg))}
+.sp-tile:hover{background:color-mix(in srgb,var(--zc) 16%,var(--bg))}
+.sp-tile .tz{width:12px;height:12px;border-radius:50%;background:var(--zc)}
+.sp-tile.sel{background:var(--accent)}
+.sp-tile.sel .tz{box-shadow:0 0 0 2px #fff}
 @media(max-width:860px){.sp-zone{display:none}}
 .zb-bars i{background:color-mix(in srgb,var(--zc) 16%,var(--bg))}
 .zb-bars i.done{background:color-mix(in srgb,var(--zc) 55%,var(--bg))}
