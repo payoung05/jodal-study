@@ -63,7 +63,7 @@ function rvOpts(q,ua){
     return `<div class="rv-opt${isA?' ok':wr?' ng':''}"><span class="rv-opt-t">${NUM[oi]} ${o}</span>${isA?'<span class="rv-opt-tag">정답</span>':''}${wr?'<span class="rv-opt-tag">내 선택</span>':''}</div>`;
   }).join('')+'</div>';
 }
-const explain=q=>`<div class="qz-explain"><div class="qz-explain-lbl">해설</div>${q.explanation}</div>`;
+const explain=q=>`<div class="qz-explain"><div class="qz-explain-lbl">해설</div>${q.explanation}${q.basis?`<div class="qz-basis">근거: <a href="${q.basisUrl}" target="_blank" rel="noopener">${q.basis} ↗</a></div>`:''}</div>`;
 
 // ════════════════════════════════════════
 // 필기

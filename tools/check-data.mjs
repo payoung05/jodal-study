@@ -19,6 +19,10 @@ QUESTIONS.forEach(q => {
   else if (!Number.isInteger(q.answer) || q.answer < 0 || q.answer >= q.options.length) err.push(`필기 ${q.id}: 정답 번호 ${q.answer}가 보기 범위 밖`);
   else if (new Set(q.options).size !== q.options.length) err.push(`필기 ${q.id}: 같은 보기가 두 번`);
 });
+// 근거 조문 링크는 법제처 주소만
+[...QUESTIONS, ...PRAC_QUESTIONS].forEach(q => {
+  if (q.basis && !/^https:\/\/www\.law\.go\.kr\//.test(q.basisUrl || '')) err.push(`${q.id}: 근거(basis)는 있는데 법제처 원문 링크(basisUrl)가 없음`);
+});
 // 실기
 uniq(PRAC_QUESTIONS, '실기');
 PRAC_QUESTIONS.forEach(q => {
@@ -61,8 +65,9 @@ for (const sec of read('constraints.md').split(/^## /m).slice(1)) {
   for (const f of files) read(f).split('\n').forEach((line, i) => { const hit = line.match(re); if (hit) err.push(`constraints "${title}": ${f}:${i + 1} 에 "${hit[0]}"`); });
 }
 
+const withBasis = [...QUESTIONS, ...PRAC_QUESTIONS].filter(q => q.basis).length;
 const summary = [
-  `필기 ${QUESTIONS.length} · 실기 ${PRAC_QUESTIONS.length} · 카드 ${CARDS.length} · 단계 ${STEPS.length} · 사건 ${scn}종`,
+  `필기 ${QUESTIONS.length} · 실기 ${PRAC_QUESTIONS.length} (근거 조문 ${withBasis}개) · 카드 ${CARDS.length} · 단계 ${STEPS.length} · 사건 ${scn}종`,
   `여정 할 일: ${counts.join(' / ')}`,
   `constraints 금지 규칙 ${rules}개 · 규칙 시험 예시 ${examples}개 검사`,
 ];
