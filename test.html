@@ -70,5 +70,39 @@ f.onload=()=>{ const w=f.contentWindow,d=w.document,errs=[];w.onerror=(m)=>errs.
  ok(errs.length===0,'JS 오류 없음 '+errs.join('|'));
  }catch(x){log.push('ERROR '+x.stack)}
  out.textContent=log.join('\n');
+ gameTest();
 };
+// ── 조달 여정: 정답만 골라 20단계 완주 → 다음 판은 단계 카드를 계속 틀려 하트 3개 소진
+function gameTest(){
+ const g=document.createElement('iframe');g.src='game.html';g.style.cssText='width:820px;height:900px';document.body.appendChild(g);
+ g.onload=()=>{ const w=g.contentWindow,d=w.document,$=s=>d.querySelector(s),errs=[];w.onerror=m=>errs.push(m);
+  const J=()=>w.eval('J'), STEPS=w.eval('STEPS'), vis=id=>d.getElementById(id).style.display!=='none';
+  const click=el=>el.dispatchEvent(new w.MouseEvent('click',{bubbles:true}));
+  let asked=0, kinds={}, round=1;
+  $('.tab[data-v=board]').click(); click($('#bStartBtn'));
+  ok(/— /.test($('#scnBrief').textContent),'여정: 사건 한 건 배정');
+  const tick=setInterval(()=>{ try{
+   const j=J();
+   if(vis('bResult')){ clearInterval(tick);
+    if(round===1){ ok(j.idx===20&&j.hearts===3&&/완주/.test($('#bSub').textContent),'여정: 정답만 골라 20단계 완주 (문제 '+asked+'개: '+Object.keys(kinds).join('·')+')');
+     ok(kinds.multi&&kinds.num&&(kinds.ox||kinds.mc),'여정: 서류 고르기·계산·판단 모두 출제');
+     round=2; click($('#bRetry')); return setTimeout(()=>{ // 틀린 카드만 3번 → 게임 끝
+      for(let k=0;k<3;k++){const b=[...d.querySelectorAll('.pcard:not([disabled])')].find(b=>b.textContent!==STEPS[J().idx].name); if(b) click(b);}
+      setTimeout(()=>{ ok(vis('bResult')&&J().hearts===0,'여정: 단계 순서 3번 틀리면 끝');
+       ok(errs.length===0,'여정: JS 오류 없음 '+errs.join('|')); out.textContent=log.join('\n'); },1500);
+     },300);
+    }
+   }
+   if(j.busy) return;
+   if(vis('pickBox')){ const b=[...d.querySelectorAll('.pcard')].find(b=>b.textContent===STEPS[j.idx].name); if(b&&!b.classList.contains('right')) click(b); return; }
+   if(!vis('qPanel')||j.answered) return;
+   const q=w.eval('bCur'); asked++; kinds[q.t]=1;
+   const btns=[...d.querySelectorAll('#bA .choice')];
+   if(q.t==='ox') click(btns.find(b=>b.textContent===(q.a?'O':'X')));
+   else if(q.t==='mc') click(btns.find(b=>b.textContent===q.c[q.a]));
+   else if(q.t==='multi'){ q.a.forEach(i=>click(btns.find(b=>b.textContent===q.c[i]))); click($('#bA .go')); }
+   else { $('#bA input').value=String(Array.isArray(q.a)?q.a[0]:q.a); click($('#bA .submit')); }
+  }catch(x){clearInterval(tick);log.push('ERROR 여정 '+x.stack);out.textContent=log.join('\n');} },120);
+ };
+}
 </script>

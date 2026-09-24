@@ -13,10 +13,12 @@ def fonts(s):
     return re.sub(r'url\("(?:\.\./)?fonts/([^"]+)"\)', sub, s)
 
 
+inline_js = lambda s: re.sub(r'<script src="([^"]+)"></script>', lambda m: '<script>\n' + read(m[1]) + '</script>', s)
+
 html = read('index.html')
 html = re.sub(r'<link rel="stylesheet" href="([^"]+)">', lambda m: '<style>\n' + fonts(read(m[1])) + '</style>', html)
-html = re.sub(r'<script src="([^"]+)"></script>', lambda m: '<script>\n' + read(m[1]) + '</script>', html)
-html = html.replace('</body>', '<template id="gameTpl">\n' + fonts(read('game.html')) + '</template>\n</body>')
+html = inline_js(html)
+html = html.replace('</body>', '<template id="gameTpl">\n' + fonts(inline_js(read('game.html'))) + '</template>\n</body>')
 
 out = R / 'dist' / '학습앱.html'
 out.parent.mkdir(exist_ok=True)
