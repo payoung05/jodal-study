@@ -272,10 +272,7 @@ function renderFlow(){
         (e.docs?'<div class="fe-ev-docs">'+e.docs.join(' · ')+'</div>':'')+'</div>';
     }).join('')+'</div>';
   }
-  function cmpHtml(c){
-    var cols=[['gs','공사',c.gs],['mp','물품',c.mp],['yy','용역',c.yy]];
-    return '<div class="fe-cmp">'+cols.map(function(k){ var dim=(FLOW_FILTER!=='all'&&FLOW_FILTER!==k[0]); return '<div class="fe-cmp-cell c-'+k[0]+(dim?' dim':'')+'"><div class="cmp-type">'+k[1]+'</div><div class="cmp-text">'+hl(k[2])+'</div></div>'; }).join('')+'</div>';
-  }
+  function cmpHtml(c){ return cmpTable(c,hl,FLOW_FILTER!=='all'?FLOW_FILTER:null); }
   var h='<div class="page-title">계약 흐름 <span>20단계</span></div><div class="page-sub">수요 발생부터 사후관리까지. 모든 단계에 공사·물품·용역을 나란히 놓았다</div>';
   h+='<div class="fl-filters">';
   [['all','전체'],['gs','공사'],['mp','물품'],['yy','용역']].forEach(function(f){ h+='<button class="'+(FLOW_FILTER===f[0]?'active':'')+'" data-act="flowFilter" data-f="'+f[0]+'">'+f[1]+'</button>'; });
@@ -394,6 +391,14 @@ function splitTop(s,seps){
   return out;
 }
 // 핵심 수치: 여러 개거나 "구분: 값"이면 표, 하나뿐이면 글 상자
+// 공사·물품·용역 비교 표: 업종을 열로, " / "로 나뉜 부분은 같은 순서끼리 한 줄에 (dim: 흐리게 할 업종 빼고)
+function cmpTable(c,fmt,dim){
+  fmt=fmt||(x=>x);
+  const K=[['gs','공사'],['mp','물품'],['yy','용역']], parts=K.map(k=>splitTop(String(c[k[0]]||''),[' / ']));
+  const n=Math.max(...parts.map(p=>p.length)), off=j=>dim&&dim!==K[j][0]?' dim':'';
+  return '<div class="tbl-wrap cmp-tbl"><table><thead><tr>'+K.map((k,j)=>'<th class="c-'+k[0]+off(j)+'">'+k[1]+'</th>').join('')+'</tr></thead><tbody>'+
+    Array.from({length:n},(_,i)=>'<tr>'+parts.map((p,j)=>'<td class="'+off(j).trim()+'">'+(p[i]?fmt(p[i]):'')+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>';
+}
 function numTable(s){
   const items=splitTop(s,[' / ']);
   if(items.length<2&&s.indexOf(': ')<0) return '<div class="sd-num-box">'+hlNum(s)+'</div>';
@@ -498,11 +503,7 @@ function renderStepDetail() {
             ${pointList(s.examPoint)}
             ${extraHtml}
             <div class="sd-sec-title">공사 · 물품 · 용역 차이</div>
-            <div class="cmp-grid">
-              <div class="cmp-cell c-gs"><div class="cmp-type">공사</div><div class="cmp-text">${s.compare.gs}</div></div>
-              <div class="cmp-cell c-mp"><div class="cmp-type">물품</div><div class="cmp-text">${s.compare.mp}</div></div>
-              <div class="cmp-cell c-yy"><div class="cmp-type">용역</div><div class="cmp-text">${s.compare.yy}</div></div>
-            </div>
+            ${cmpTable(s.compare)}
           </div>
         </div>
 

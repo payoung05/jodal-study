@@ -956,3 +956,20 @@ tr:hover td,.kv-tbl tr:hover td{background:transparent}
 /* 휴대폰: 하단 탭 8개가 한 줄에 다 보이게 시험일 상자는 빼고, 약점 탭 버튼으로 */
 .wk-dday{display:none}
 @media(max-width:560px){#tabbar .sb-dday{display:none}.wk-dday{display:inline-flex;gap:6px;margin:0 0 12px}.wk-dday b{color:var(--accent)}}
+/* 공사·물품·용역 비교 표 */
+.cmp-tbl{margin:0 0 8px}
+.cmp-tbl table{table-layout:fixed}
+.cmp-tbl th::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--cc);margin-right:6px;vertical-align:1px}
+.cmp-tbl td{font-size:15px;color:var(--text);word-break:keep-all;vertical-align:top}
+.cmp-tbl td+td,.cmp-tbl th+th{border-left:1px solid var(--line)}
+.cmp-tbl .dim{opacity:.35}
+@media(max-width:560px){.cmp-tbl td,.cmp-tbl th{padding:10px 10px;font-size:14px}}
+/* 약점 차트를 앱 카드 스타일에 맞춤: 테두리 없는 회색 둥근 카드 + 둥근 막대 */
+.wk-grid .box,.wk-start{background:var(--surface);border:0;border-radius:var(--r-lg);padding:20px 22px}
+.wk-grid .box-ttl{font-size:16px;margin-bottom:14px}
+.wk-chart{gap:12px}
+.wk-lbl{font-size:15px;color:var(--text)}
+.wk-track{height:14px;background:var(--bg);border-radius:999px}
+.wk-track i{border-radius:999px;background:#B9CCF6}
+.wk-track i.top{background:var(--accent)}
+.wk-val{font-size:15px}
