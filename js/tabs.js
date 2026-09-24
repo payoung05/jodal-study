@@ -301,7 +301,7 @@ function renderStepIndex(){
     const z=STEP_ZONE[i]||'발주', zc=ZONE_COLOR[z];
     if(z!==STEP_ZONE[i-1]) x += '<div class="sp-zone" style="--zc:'+zc+'">'+z+'<span>'+((FE_ZONES.find(f=>f[0]===z)||['',''])[1].split(' · ')[0])+'</span></div>';
     x += '<button class="sp-tile'+(s.id===STEP_SEL?' sel':'')+'" style="--zc:'+zc+'" data-act="goStep" data-id="'+s.id+'">'+
-      '<span class="tn"><span>'+String(s.id).padStart(2,'0')+'</span></span>'+
+      '<span class="tn"><span>'+String(s.id).padStart(2,'0')+'</span><span class="tz"></span></span>'+
       '<span class="tl">'+s.name+'</span></button>';
   });
   x += '</div>';
