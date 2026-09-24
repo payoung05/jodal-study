@@ -293,13 +293,15 @@ function feJump(ev,key){ ev.preventDefault(); var el=document.getElementById('fe
 let STEP_SEL = 1;
 function selectStep(id){ STEP_SEL = id; renderStepDetail(); var d=document.getElementById('step_root'); if(d) d.scrollTop=0; }
 const STEP_ZONE = ['발주','발주','발주','발주','발주','입찰','입찰','입찰','입찰','입찰','계약·이행','계약·이행','계약·이행','계약·이행','계약·이행','계약·이행','대금·사후','대금·사후','대금·사후','대금·사후'];
-const ZONE_COLOR = {'발주':'var(--p-green)','입찰':'var(--p-blue)','계약·이행':'var(--p-orange)','대금·사후':'var(--p-magenta)'};
+const ZONE_COLOR = {'발주':'var(--z1)','입찰':'var(--z2)','계약·이행':'var(--z3)','대금·사후':'var(--z4)'};
 function renderStepIndex(){
   const root = document.getElementById('step_index'); if(!root) return;
   let x = '<div class="sp-head"><div class="kicker">'+STEPS.length+'단계</div><div class="ttl">계약 흐름</div></div><div class="sp-tiles">';
   STEPS.forEach((s,i)=>{
-    x += '<button class="sp-tile'+(s.id===STEP_SEL?' sel':'')+'" data-act="goStep" data-id="'+s.id+'">'+
-      '<span class="tn"><span>'+String(s.id).padStart(2,'0')+'</span><span class="tz" style="background:'+ZONE_COLOR[STEP_ZONE[i]||'발주']+'"></span></span>'+
+    const z=STEP_ZONE[i]||'발주', zc=ZONE_COLOR[z];
+    if(z!==STEP_ZONE[i-1]) x += '<div class="sp-zone" style="--zc:'+zc+'">'+z+'<span>'+((FE_ZONES.find(f=>f[0]===z)||['',''])[1].split(' · ')[0])+'</span></div>';
+    x += '<button class="sp-tile'+(s.id===STEP_SEL?' sel':'')+'" style="--zc:'+zc+'" data-act="goStep" data-id="'+s.id+'">'+
+      '<span class="tn"><span>'+String(s.id).padStart(2,'0')+'</span></span>'+
       '<span class="tl">'+s.name+'</span></button>';
   });
   x += '</div>';
@@ -387,7 +389,7 @@ const docChips=s=>'<div class="doc-chips">'+splitTop(s,[', ',' / ']).map(p=>'<sp
 function zoneBar(idx){
   return '<div class="zone-bar" aria-label="전체 20단계 중 '+(idx+1)+'단계">'+[...new Set(STEP_ZONE)].map(z=>{
     const bars=STEP_ZONE.map((x,i)=>x!==z?'':'<i class="'+(i<idx?'done':i===idx?'cur':'')+'"></i>').join('');
-    return '<div class="zb-seg'+(STEP_ZONE[idx]===z?' on':'')+'" style="flex:'+STEP_ZONE.filter(x=>x===z).length+'"><div class="zb-bars">'+bars+'</div><span>'+z+'</span></div>';
+    return '<div class="zb-seg'+(STEP_ZONE[idx]===z?' on':'')+'" style="--zc:'+ZONE_COLOR[z]+';flex:'+STEP_ZONE.filter(x=>x===z).length+'"><div class="zb-bars">'+bars+'</div><span>'+z+'</span></div>';
   }).join('')+'</div>';
 }
 

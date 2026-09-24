@@ -860,3 +860,18 @@ tr:hover td{background:var(--surface)}
 @media(max-width:860px){.build-stamp{display:none}}
 .rec-desc.mt-10{margin:12px 0 0;font-size:12px;color:var(--text-4)}
 .qz-basis{margin-top:8px;font-size:13px;color:var(--text-3)}.qz-basis a{color:var(--accent);text-decoration:none}.qz-basis a:hover{text-decoration:underline}
+/* 계약 흐름 구역 색: 발주·입찰·계약이행·대금사후 — 공사·물품·용역 색(--p-*)과 겹치지 않게 따로 */
+:root{--z1:#12A26B;--z2:#7B5CF0;--z3:#EE7A12;--z4:#DB3F8E}
+.sp-tiles{grid-auto-rows:auto;align-content:start}
+.sp-zone{grid-column:1/-1;display:flex;align-items:center;gap:6px;padding:8px 2px 0;font-size:13px;font-weight:700;color:color-mix(in srgb,var(--zc) 75%,#000)}
+.sp-zone::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--zc)}
+.sp-zone span{font-weight:500;color:var(--text-4);font-variant-numeric:tabular-nums}
+.sp-tile{background:color-mix(in srgb,var(--zc) 9%,var(--bg));box-shadow:inset 4px 0 0 var(--zc)}
+.sp-tile:hover{background:color-mix(in srgb,var(--zc) 17%,var(--bg))}
+.sp-tile.sel{background:var(--accent);box-shadow:inset 4px 0 0 var(--zc)}
+@media(max-width:860px){.sp-zone{display:none}}
+.zb-bars i{background:color-mix(in srgb,var(--zc) 16%,var(--bg))}
+.zb-bars i.done{background:color-mix(in srgb,var(--zc) 55%,var(--bg))}
+.zb-bars i.cur{background:var(--zc)}
+.zb-seg span{color:color-mix(in srgb,var(--zc) 70%,var(--text-4))}
+.zb-seg.on span{color:color-mix(in srgb,var(--zc) 75%,#000)}
