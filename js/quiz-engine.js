@@ -71,14 +71,14 @@ const explain=q=>`<div class="qz-explain"><div class="qz-explain-lbl">해설</di
 const QZ_SUBJ=['공공조달과 법제도 이해','공공조달계획 수립 및 분석','공공계약관리'];
 const QZ_MODE_LABELS = {full80:'전체 모의고사',mini20:'미니 모의고사',s1:'1과목 집중',s2:'2과목 집중',s3:'3과목 집중',flow:'계약 플로우',numbers:'핵심 수치',wrong:'오답 재출제'};
 const QZ_MODES = [
-  {key:'full80',label:'전체 모의고사',desc:'80문제 · 시험 동일 비율 (1과목30/2과목20/3과목30)',color:'#2AA048'},
-  {key:'mini20',label:'미니 모의고사',desc:'20문제 · 빠른 점검 (1과목8/2과목5/3과목7)',color:'#8A6D00'},
-  {key:'s1',label:'1과목 집중',desc:'공공조달과 법제도 이해 · 30문제',color:'#111111'},
-  {key:'s2',label:'2과목 집중',desc:'공공조달계획 수립 및 분석 · 30문제',color:'#B85C0A'},
-  {key:'s3',label:'3과목 집중',desc:'공공계약관리 · 30문제',color:'#B85C0A'},
-  {key:'flow',label:'계약 플로우 집중',desc:'절차·이행 위주 · 20문제',color:'#8A6D00'},
-  {key:'numbers',label:'핵심 수치 집중',desc:'숫자·계산형 위주 · 20문제',color:'#BB2040'},
-  {key:'wrong',label:'오답 재출제',desc:'틀린 문제 우선 · 20문제',color:'#2AA048'},
+  {key:'full80',label:'전체 모의고사',desc:'80문제 · 시험 동일 비율 (1과목30/2과목20/3과목30)',color:'#1F8A4C'},
+  {key:'mini20',label:'미니 모의고사',desc:'20문제 · 빠른 점검 (1과목8/2과목5/3과목7)',color:'#3268E8'},
+  {key:'s1',label:'1과목 집중',desc:'공공조달과 법제도 이해 · 30문제',color:'#191F28'},
+  {key:'s2',label:'2과목 집중',desc:'공공조달계획 수립 및 분석 · 30문제',color:'#D9730D'},
+  {key:'s3',label:'3과목 집중',desc:'공공계약관리 · 30문제',color:'#D9730D'},
+  {key:'flow',label:'계약 플로우 집중',desc:'절차·이행 위주 · 20문제',color:'#3268E8'},
+  {key:'numbers',label:'핵심 수치 집중',desc:'숫자·계산형 위주 · 20문제',color:'#E5484D'},
+  {key:'wrong',label:'오답 재출제',desc:'틀린 문제 우선 · 20문제',color:'#1F8A4C'},
 ];
 
 function qzGetRecent(){return store.get('qz_recent',[]);}
@@ -161,11 +161,11 @@ function qzResultView(e){
     subj=`<div class="qz-subj-tbl">${rows}<div class="qz-subj-avg"><span>평균</span><span class="${avg>=60?'':'fail'}">${avg}점 ${avg>=60?'· 합격선 통과':'· 60점 미달'}</span></div></div>`;
   }
   const again=`<button class="btn c-mute" data-act="start" data-k="${e.mode}">↺ 새로 풀기</button>`;
-  const btns=(wn?`<button class="btn filled" data-act="review" data-f="wrong">✗ 틀린 문제 (${wn})</button>`:'')+
+  const btns=(wn?`<button class="btn filled c-red" data-act="review" data-f="wrong">✗ 틀린 문제 (${wn})</button>`:'')+
     (f?`<button class="btn c-orange" data-act="review" data-f="flagged">★ 체크 (${f})</button>`:'')+
     `<button class="btn c-olive" data-act="review" data-f="all">전체 다시보기</button>`+again;
   return scoreCard('최종 점수',sc,n,rate,`맞음 ${sc} · 틀림 ${wn} · ★${f}`,subj,btns)+cards+
-    `<div class="qz-score-btns qz-foot">${wn?'<button class="btn filled" data-act="review" data-f="wrong">✗ 틀린 문제 복습</button>':''}${f?'<button class="btn c-orange" data-act="review" data-f="flagged">★ 체크한 문제</button>':''}${again}</div>`;
+    `<div class="qz-score-btns qz-foot">${wn?'<button class="btn filled c-red" data-act="review" data-f="wrong">✗ 틀린 문제 복습</button>':''}${f?'<button class="btn c-orange" data-act="review" data-f="flagged">★ 체크한 문제</button>':''}${again}</div>`;
 }
 
 function qzReviewView(e){
@@ -241,16 +241,16 @@ function wnRender(){
 // 실기 — 키워드 자동채점
 // ════════════════════════════════════════
 const PRAC_MODES = [
-  {key:'dan',label:'단답형 모음',desc:'단답형 10문제 (20문제 풀)',color:'#111111',type:'단답형',n:10},
-  {key:'cal',label:'계산형 모음',desc:'계산형 10문제 (20문제 풀)',color:'#8A6D00',type:'계산형',n:10},
-  {key:'sul',label:'서술형 모음',desc:'서술형 10문제 (20문제 풀)',color:'#B85C0A',type:'서술형',n:10},
-  {key:'sarye',label:'사례 판단형',desc:'사례 판단형 5문제',color:'#B85C0A',type:'사례판단형',n:5},
-  {key:'jeolcha',label:'절차 나열형',desc:'절차 나열형 10문제',color:'#2AA048',type:'절차나열형',n:10},
-  {key:'seoryu',label:'서류 작성형',desc:'서류 작성형 10문제',color:'#2AA048',type:'서류작성형',n:10},
-  {key:'risk',label:'리스크 대응형',desc:'',color:'#8A6D00',type:'리스크대응형',n:10},
-  {key:'edoc',label:'전자조달 실무형',desc:'',color:'#2AA048',type:'전자조달실무형',n:10},
-  {key:'comp',label:'종합 모의고사',desc:'전 유형 15문제 종합',color:'#BB2040',type:null,n:15},
-  {key:'wrong',label:'오답 재출제',desc:'틀린 실기 문제 우선',color:'#BB2040',type:'wrong',n:10},
+  {key:'dan',label:'단답형 모음',desc:'단답형 10문제 (20문제 풀)',color:'#191F28',type:'단답형',n:10},
+  {key:'cal',label:'계산형 모음',desc:'계산형 10문제 (20문제 풀)',color:'#3268E8',type:'계산형',n:10},
+  {key:'sul',label:'서술형 모음',desc:'서술형 10문제 (20문제 풀)',color:'#D9730D',type:'서술형',n:10},
+  {key:'sarye',label:'사례 판단형',desc:'사례 판단형 5문제',color:'#D9730D',type:'사례판단형',n:5},
+  {key:'jeolcha',label:'절차 나열형',desc:'절차 나열형 10문제',color:'#1F8A4C',type:'절차나열형',n:10},
+  {key:'seoryu',label:'서류 작성형',desc:'서류 작성형 10문제',color:'#1F8A4C',type:'서류작성형',n:10},
+  {key:'risk',label:'리스크 대응형',desc:'',color:'#3268E8',type:'리스크대응형',n:10},
+  {key:'edoc',label:'전자조달 실무형',desc:'',color:'#1F8A4C',type:'전자조달실무형',n:10},
+  {key:'comp',label:'종합 모의고사',desc:'전 유형 15문제 종합',color:'#E5484D',type:null,n:15},
+  {key:'wrong',label:'오답 재출제',desc:'틀린 실기 문제 우선',color:'#E5484D',type:'wrong',n:10},
 ];
 
 function pracPickQuestions(mode){

@@ -37,7 +37,7 @@ function setFlowFilter(f){ FLOW_FILTER=f; renderFlow(); }
 // ═══════════════════════════════════════
 // 계약 흐름 — 통독형 페이지 (STEP 8 + SVG 도해)
 // ═══════════════════════════════════════
-var FE_C = {ink:'#111111', dim:'#555555', soft:'#7a7a7a', line:'#111111', red:'#BB2040', gs:'#F7C914', mp:'#AED141', yy:'#E5EA98', bg:'#F4F4F0', surf:'#EBEBE6', blue:'#2AA048', gold:'#B85C0A'};
+var FE_C = {ink:'#191F28', dim:'#4E5968', soft:'#8B95A1', line:'#191F28', red:'#E5484D', gs:'#FFC94D', mp:'#86D4A0', yy:'#9DB8FF', bg:'#FFFFFF', surf:'#F2F4F6', blue:'#1F8A4C', gold:'#D9730D'};
 function feSvg(w,h,inner){ return '<svg viewBox="0 0 '+w+' '+h+'" width="100%" role="img" xmlns="http://www.w3.org/2000/svg" class="fe-svg">'+inner+'</svg>'; }
 function feT(x,y,s,o){ o=o||{}; return '<text x="'+x+'" y="'+y+'" font-size="'+(o.fs||14)+'" font-weight="'+(o.fw||500)+'" fill="'+(o.c||FE_C.ink)+'" text-anchor="'+(o.a||'start')+'"'+(o.op?' opacity="'+o.op+'"':'')+'>'+s+'</text>'; }
 function feBox(x,y,w,h,fill,stroke){ return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+(fill||FE_C.bg)+'" stroke="'+(stroke||FE_C.line)+'" stroke-width="2"/>'; }
@@ -280,7 +280,7 @@ function renderFlow(){
     h+='<div class="fe-hd"><div class="fe-num">'+String(s.id).padStart(2,'0')+'</div><div><div class="fe-ttl">'+s.name+'</div><div class="fe-thesis">'+s.tagline+'</div></div></div>';
     if(ex.fig) h+='<div class="fe-fig">'+ex.fig()+'</div>';
     h+='<div class="fe-body"><p>'+hl(s.desc)+'</p></div>';
-    h+='<div class="fe-kv"><div class="fe-kv-row"><span class="fe-lbl">핵심 수치</span><span>'+hl(s.numbers)+'</span></div><div class="fe-kv-row"><span class="fe-lbl">관련 문서</span><span>'+s.docs+'</span></div><div class="fe-kv-row"><span class="fe-lbl">시험 포인트</span><span>'+s.examPoint+'</span></div></div>';
+    h+='<div class="fe-kv"><div class="fe-kv-row"><span class="fe-lbl">핵심 수치</span><div>'+numTable(s.numbers)+'</div></div><div class="fe-kv-row"><span class="fe-lbl">관련 문서</span>'+docChips(s.docs)+'</div><div class="fe-kv-row"><span class="fe-lbl">시험 포인트</span>'+pointList(s.examPoint)+'</div></div>';
     h+='<div class="fe-lbl mt-20">공사 · 물품 · 용역</div>'+cmpHtml(s.compare);
     if(extra.trap&&extra.trap.length) h+='<blockquote class="fe-trap"><span class="fe-lbl">시험 함정</span>'+extra.trap.map(function(t){return '<div>'+hl(t)+'</div>';}).join('')+'</blockquote>';
     h+=evHtml(ex.ev);
@@ -296,7 +296,7 @@ const STEP_ZONE = ['발주','발주','발주','발주','발주','입찰','입찰
 const ZONE_COLOR = {'발주':'var(--p-green)','입찰':'var(--p-blue)','계약·이행':'var(--p-orange)','대금·사후':'var(--p-magenta)'};
 function renderStepIndex(){
   const root = document.getElementById('step_index'); if(!root) return;
-  let x = '<div class="sp-head"><div class="kicker">Flow · '+STEPS.length+' steps</div><div class="ttl">전체 플로우</div></div><div class="sp-tiles">';
+  let x = '<div class="sp-head"><div class="kicker">'+STEPS.length+'단계</div><div class="ttl">계약 흐름</div></div><div class="sp-tiles">';
   STEPS.forEach((s,i)=>{
     x += '<button class="sp-tile'+(s.id===STEP_SEL?' sel':'')+'" data-act="goStep" data-id="'+s.id+'">'+
       '<span class="tn"><span>'+String(s.id).padStart(2,'0')+'</span><span class="tz" style="background:'+ZONE_COLOR[STEP_ZONE[i]||'발주']+'"></span></span>'+
@@ -359,6 +359,36 @@ function hlNum(t){
     .replace(/(\d+(?:[.,]\d+)?\s*(?:%|억원|억|만원|천만원|년|개월|일|원|개)|1\/\d+)/g,
       '<span class="num-pill">$1</span>')
     .replace(/\s+\/\s+/g,'<br>');
+}
+
+// "A / B / C" → 조각들 (괄호 안의 구분자는 나누지 않음)
+function splitTop(s,seps){
+  const out=[]; let d=0, cur=''; s=String(s);
+  for(let i=0;i<s.length;i++){
+    const c=s[i]; if(c==='(') d++; else if(c===')') d--;
+    const sep=d===0&&seps.find(x=>s.startsWith(x,i));
+    if(sep){ out.push(cur.trim()); cur=''; i+=sep.length-1; } else cur+=c;
+  }
+  if(cur.trim()) out.push(cur.trim());
+  return out;
+}
+// 핵심 수치: 여러 개거나 "구분: 값"이면 표, 하나뿐이면 글 상자
+function numTable(s){
+  const items=splitTop(s,[' / ']);
+  if(items.length<2&&s.indexOf(': ')<0) return '<div class="sd-num-box">'+hlNum(s)+'</div>';
+  return '<table class="kv-tbl">'+items.map(it=>{
+    const m=it.match(/^([^:]+):\s*(.+)$/)||it.match(/^(.*?[^\d\s(])\s+((?:최대|최소|적어도)?\s*\(?\d.*)$/);
+    return m?'<tr><th>'+m[1]+'</th><td>'+hlNum(m[2].replace(/^\((.*)\)$/,'$1'))+'</td></tr>':'<tr><td colspan="2">'+hlNum(it)+'</td></tr>';
+  }).join('')+'</table>';
+}
+const pointList=s=>'<ul class="pt-list">'+splitTop(s,[' / ']).map(p=>'<li>'+p+'</li>').join('')+'</ul>';
+const docChips=s=>'<div class="doc-chips">'+splitTop(s,[', ',' / ']).map(p=>'<span>'+p+'</span>').join('')+'</div>';
+// 발주 → 입찰 → 계약·이행 → 대금·사후 중 지금 단계 위치 (단계 하나 = 막대 한 칸)
+function zoneBar(idx){
+  return '<div class="zone-bar" aria-label="전체 20단계 중 '+(idx+1)+'단계">'+[...new Set(STEP_ZONE)].map(z=>{
+    const bars=STEP_ZONE.map((x,i)=>x!==z?'':'<i class="'+(i<idx?'done':i===idx?'cur':'')+'"></i>').join('');
+    return '<div class="zb-seg'+(STEP_ZONE[idx]===z?' on':'')+'" style="flex:'+STEP_ZONE.filter(x=>x===z).length+'"><div class="zb-bars">'+bars+'</div><span>'+z+'</span></div>';
+  }).join('')+'</div>';
 }
 
 // ═══════════════════════════════════════
@@ -431,7 +461,7 @@ function renderStepDetail() {
 
         <!-- 왼쪽 본문 -->
         <div class="sd-main">
-          <div class="sd-head"><div class="sd-kicker">Step ${String(s.id).padStart(2,'0')} / ${STEPS.length} · ${STEP_ZONE[curIdx]||''}</div><div class="sd-name">${s.name}</div><div class="sd-tagline">${s.tagline}</div></div>
+          <div class="sd-head">${zoneBar(curIdx)}<div class="sd-kicker">${s.id}단계 · ${STEP_ZONE[curIdx]||''}</div><div class="sd-name">${s.name}</div><div class="sd-tagline">${s.tagline}</div></div>
           <div class="sd-body">
             <div class="sd-sec-title">개요</div>
             <div class="sd-desc">${s.desc}</div>
@@ -439,11 +469,11 @@ function renderStepDetail() {
             <div class="sd-terms">${termsHtml}</div>
             <div>${termDetailsHtml}</div>
             <div class="sd-sec-title">관련 문서</div>
-            <div class="sd-desc">${s.docs}</div>
+            ${docChips(s.docs)}
             <div class="sd-sec-title">핵심 수치</div>
-            <div class="sd-num-box">${hlNum(s.numbers)}</div>
+            ${numTable(s.numbers)}
             <div class="sd-sec-title">시험 포인트</div>
-            <div class="sd-desc">${s.examPoint}</div>
+            ${pointList(s.examPoint)}
             ${extraHtml}
             <div class="sd-sec-title">공사 · 물품 · 용역 차이</div>
             <div class="cmp-grid">
@@ -485,7 +515,7 @@ function toggleTerm(key, el) {
 // ═══════════════════════════════════════
 // 사업 유형별 절차 매트릭스 데이터
 const BIZ_MATRIX = [
-  { type:'공사', icon:'', color:'#B85C0A',
+  { type:'공사', icon:'', color:'#D9730D',
     items:[
       { name:'일반 공사', tag:'기본형',
         rows:[
@@ -516,7 +546,7 @@ const BIZ_MATRIX = [
           ['적용','기술집약 대형 공사'],
         ]},
     ]},
-  { type:'물품', icon:'', color:'#111111',
+  { type:'물품', icon:'', color:'#191F28',
     items:[
       { name:'일반 물품 (제조·구매)', tag:'기본형',
         rows:[
@@ -546,7 +576,7 @@ const BIZ_MATRIX = [
           ['벤처나라','벤처기업 인증 제품 우선구매'],
         ]},
     ]},
-  { type:'용역', icon:'', color:'#2AA048',
+  { type:'용역', icon:'', color:'#1F8A4C',
     items:[
       { name:'일반 용역', tag:'기본형',
         rows:[
@@ -608,7 +638,7 @@ function renderCmp() {
 }
 
 const FC_ALL_CATS=['전체','모른 것만',...[...new Set(CARDS.map(c=>c.cat))]];
-const CAT_COLORS={'영어 약어':'#8A6D00','공공조달 개요':'#8A6D00','공공조달 원칙':'#111111','전자조달':'#2AA048','전략적 조달':'#B85C0A','민법·계약':'#BB2040','공정조달':'#B85C0A','입찰공고':'#8A6D00','낙찰방법':'#111111','계약관리':'#2AA048','MAS':'#B85C0A','공사계약':'#BB2040','회계 기초':'#B85C0A'};
+const CAT_COLORS={'영어 약어':'#3268E8','공공조달 개요':'#3268E8','공공조달 원칙':'#191F28','전자조달':'#1F8A4C','전략적 조달':'#D9730D','민법·계약':'#E5484D','공정조달':'#D9730D','입찰공고':'#3268E8','낙찰방법':'#191F28','계약관리':'#1F8A4C','MAS':'#D9730D','공사계약':'#E5484D','회계 기초':'#D9730D'};
 
 let fcState={cat:'전체',idx:0,flipped:false,known:new Set(),unk:new Set()};
 
@@ -628,12 +658,12 @@ function fcRender(){
   const total=fcState.cat==='전체'?CARDS.length:fcState.cat==='모른 것만'?fcState.unk.size:CARDS.filter(c=>c.cat===fcState.cat).length;
   const knownN=fcState.cat==='전체'?fcState.known.size:fcState.cat==='모른 것만'?0:CARDS.filter((c,i)=>c.cat===fcState.cat&&fcState.known.has(i)).length;
   const prog=total>0?Math.round(knownN/total*100):0;
-  const ac=cur?(CAT_COLORS[cur.cat]||'#8A6D00'):'#8A6D00';
+  const ac=cur?(CAT_COLORS[cur.cat]||'#3268E8'):'#3268E8';
 
   let catsHtml=FC_ALL_CATS.map(c=>{
     const isU=c==='모른 것만';
     const sel=fcState.cat===c;
-    const col=isU?'#BB2040':'#8A6D00';
+    const col=isU?'#E5484D':'#3268E8';
     return `<button class="fc-cat${sel?' sel':''}" style="--ac:${col}" data-act="fcCat" data-cat="${c}">${c}${isU&&fcState.unk.size>0?' ('+fcState.unk.size+')':''}</button>`;
   }).join('');
 
@@ -751,19 +781,19 @@ function renderWeak(){
   r.innerHTML = '<div class="flow-title">약점 <span>분석</span></div><div class="flow-sub">오답노트 기반 분석 · 자주 틀리는 영역 표시</div>'+
     '<div class="box">'+
       '<div class="box-ttl c-red">필기 약점 — 과목별</div>'+
-      bars(topN(pBySubj,3),'#BB2040')+
+      bars(topN(pBySubj,3),'#E5484D')+
     '</div>'+
     '<div class="box">'+
       '<div class="box-ttl c-orange">필기 약점 — 주요 영역 TOP 5</div>'+
-      bars(topN(pByMajor,5),'#B85C0A')+
+      bars(topN(pByMajor,5),'#D9730D')+
     '</div>'+
     '<div class="box">'+
       '<div class="box-ttl c-green">자주 틀리는 태그 TOP 5</div>'+
-      bars(topN(pByTag,5),'#2AA048')+
+      bars(topN(pByTag,5),'#1F8A4C')+
     '</div>'+
     '<div class="box">'+
       '<div class="box-ttl c-green">실기 약점 — 유형별</div>'+
-      bars(topN(sByType,5),'#2AA048')+
+      bars(topN(sByType,5),'#1F8A4C')+
     '</div>'+
     '<div class="box">'+
       '<div class="box-ttl">추천 복습</div>'+
@@ -774,7 +804,7 @@ function renderWeak(){
 
 // ─── 자유 배치 포스트잇 ───
 var SCOLS=['#fff176','#f8bbd0','#b2f0b2','#b3e5fc','#ffe0b2','#e1bee7'];
-var SHDRS=['#f9e84e','#f48fb1','#81c784','#8A6D00','#ffb74d','#ce93d8'];
+var SHDRS=['#f9e84e','#f48fb1','#81c784','#3268E8','#ffb74d','#ce93d8'];
 var sZMax=9000;
 function sLoad(){return store.get('sticky_v2',[]);}
 function sSave(d){store.set('sticky_v2',d);}
@@ -797,7 +827,7 @@ function sMakeEl(m){
     var d=document.createElement('div');
     d.className='sticky-dot';
     d.style.background=col;
-    d.style.borderColor=col===m.color?'#111111':'transparent';
+    d.style.borderColor=col===m.color?'#191F28':'transparent';
     d.addEventListener('click',function(e){
       e.stopPropagation();
       var arr=sLoad();
