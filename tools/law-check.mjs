@@ -29,5 +29,17 @@ for (const b of base.admrul) {
   if (cur['행정규칙일련번호'] !== b.id) changed.push({ kind: '예규', name: b.name, oldId: b.id, newId: cur['행정규칙일련번호'], old시행일자: b.시행일자, new시행일자: cur['시행일자'], 발령일자: cur['발령일자'] });
   if (process.argv.includes('--update')) Object.assign(b, { id: cur['행정규칙일련번호'], 시행일자: cur['시행일자'], 발령일자: cur['발령일자'] });
 }
-if (process.argv.includes('--update')) { base.checkedAt = new Date().toISOString().slice(0, 10); fs.writeFileSync(FILE, JSON.stringify(base, null, 1) + '\n'); }
+if (process.argv.includes('--update')) {
+  const today = new Date().toISOString().slice(0, 10);
+  base.checkedAt = today; fs.writeFileSync(FILE, JSON.stringify(base, null, 1) + '\n');
+  // data/law-log.js 맨 위에 기록 추가 (한 줄 = 한 건, 요약·앱반영은 점검 에이전트가 채움)
+  const LOG = new URL('../data/law-log.js', import.meta.url), src = fs.readFileSync(LOG, 'utf8');
+  const lines = src.split('\n'), head = lines.slice(0, lines.indexOf('const LAW_LOG = [') + 1), entries = lines.filter(l => l.startsWith('{'));
+  const logged = entries.map(l => JSON.parse(l.replace(/,$/, '')));
+  const add = [];
+  if (changed.length) add.push({ date: today, kind: '개정', title: changed.length + '건 개정 반영', items: changed.map(c => ({ name: c.name.replace(/^\([^)]*\)\s*/, ''), 시행일자: c.new시행일자 || '', 이전: c.old시행일자 || '', 제개정: c.제개정 || c.error || '', 요약: '', 앱반영: '' })) });
+  const up = upcoming.filter(u => !logged.some(e => e.kind === '예고' && e.items.some(i => i.name === u.name && i.시행일자 === u.시행일자)));
+  if (up.length) add.push({ date: today, kind: '예고', title: '공포됨 · 시행 전', items: up.map(u => ({ name: u.name, 시행일자: u.시행일자, 요약: '', 앱반영: '시행일에 반영' })) });
+  if (add.length) fs.writeFileSync(LOG, head.join('\n') + '\n' + add.concat(logged).map(e => JSON.stringify(e) + ',').join('\n') + '\n];\n');
+}
 console.log(JSON.stringify({ checkedAt: new Date().toISOString().slice(0, 10), changed, upcoming }, null, 1));

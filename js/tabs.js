@@ -977,6 +977,19 @@ function runSearch(){
   }).join('')+(hits.length>80?'<div class="srch-empty">상위 80건만 표시 — 키워드를 더 구체적으로 입력하세요.</div>':'');
 }
 
+// ─── 법령 반영 기록 (data/law-log.js, 매주 점검이 개정을 찾으면 맨 위에 추가) ───
+function renderLawLog(){
+  const el=document.getElementById('lawLog'); if(!el||typeof LAW_LOG==='undefined'||!LAW_LOG.length) return;
+  const d=s=>String(s||'').replace(/^(\d{4})(\d{2})(\d{2})$/,(m,y,mo,da)=>y+'.'+(+mo)+'.'+(+da));
+  const last=LAW_LOG[0], news=LAW_LOG.filter(e=>e.kind!=='기준').length;
+  el.innerHTML='<summary><b>법령 반영 기록</b><span>'+(news?'개정 '+news+'건 · ':'')+'마지막 '+last.date+'</span></summary>'+
+    LAW_LOG.map(e=>'<div class="ll-entry"><div class="ll-hd"><span class="ll-kind k-'+e.kind+'">'+e.kind+'</span>'+e.date+' · '+e.title+'</div>'+
+      '<div class="tbl-wrap"><table><thead><tr><th>법령·예규</th><th>시행일</th>'+(e.kind==='기준'?'':'<th>바뀐 내용</th><th>앱 반영</th>')+'</tr></thead><tbody>'+
+      e.items.map(i=>'<tr><td>'+i.name+'</td><td class="ll-date">'+d(i.시행일자)+(i.이전?'<br><small>이전 '+d(i.이전)+'</small>':'')+'</td>'+
+        (e.kind==='기준'?'':'<td>'+(i.요약||i.제개정||'')+'</td><td>'+(i.앱반영||'확인 중')+'</td>')+'</tr>').join('')+
+      '</tbody></table></div></div>').join('');
+}
+
 // ─── 화면 버튼 연결: onclick="…" 문자열 대신 data-act (bindActs는 store.js) ───
 bindActs(document.body,{
   tab:(d,b)=>switchTab(d.tab,b),

@@ -7,3 +7,4 @@ fcRender();
 qz.render();
 wnRender();
 renderDday();
+renderLawLog();
