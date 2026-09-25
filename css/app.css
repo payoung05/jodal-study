@@ -973,3 +973,50 @@ tr:hover td,.kv-tbl tr:hover td{background:transparent}
 .wk-track i{border-radius:999px;background:#B9CCF6}
 .wk-track i.top{background:var(--accent)}
 .wk-val{font-size:15px}
+/* 표·약점 숫자를 Halaska UI(ui.halaska.com) 느낌으로: 무채색, 머리행은 색 없이 작은 회색 글자, 아주 옅은 가는 선, 16px 둥근 틀 */
+table,.cmptab,.law-vs,.rev-panel table,.kv-tbl,.bm-kv,.pref table.kv,.pref table.chg,.pref table.cmp,.tbl-wrap{border-color:#EEEEEE;border-radius:16px}
+.tbl-wrap table,.law-log table{border:0;border-radius:0}
+thead th,.cmptab th,.law-vs th,.pref table.cmp th,.pref table.chg th{background:transparent;color:#767676;font-size:12px;font-weight:600;letter-spacing:.03em;border-bottom:1px solid #EEEEEE}
+tbody th,.kv-tbl th,.bm-kv th,.pref table.kv th,.cmptab td:first-child,.rev-panel td.nm,.pref table.chg td:first-child,.pref table.cmp td:first-child,.law-vs td.td-key{background:transparent;color:#767676;font-weight:600}
+td,.kv-tbl td,.bm-kv td,.cmptab td,.law-vs td,.rev-panel td,.pref table.kv td,.pref table.chg td,.pref table.cmp td,.kv-tbl th,.bm-kv th,.pref table.kv th,tbody th{border-bottom-color:#EEEEEE}
+td{color:#3D3D3D}
+tbody tr:hover td,tbody tr:hover th{background:#F7F7F7}
+.cmptab tr:hover td:first-child{background:#F7F7F7}
+.pref table.kv tr.pt th{background:transparent;color:var(--d-green)}
+.cmp-tbl td+td,.cmp-tbl th+th{border-left-color:#EEEEEE}
+.cmp-tbl td{color:#3D3D3D}
+/* 약점 숫자 요약: 상자 없이 작은 회색 이름 + 큰 숫자 (Halaska Stat) */
+.wk-kpis{background:var(--surface);border-radius:var(--r-lg);padding:20px 24px;gap:24px}
+.wk-kpi{background:none;padding:0;border-radius:0}
+.wk-kpi .k{font-size:13px;font-weight:500;color:#767676}
+.wk-kpi .v{font-size:32px;font-weight:700;color:#3D3D3D}
+.wk-kpi .v small{color:#767676;font-weight:500}
+.wk-kpi+.wk-kpi{border-left:1px solid #E5E5E5;padding-left:24px}
+@media(max-width:860px){.wk-kpi+.wk-kpi{border-left:0;padding-left:0}.wk-kpi:last-child{border-top:1px solid #E5E5E5;padding-top:16px}}
+/* 공사·물품·용역 비교 표: 머리행을 업종 색으로 칠해 한눈에 */
+.cmp-tbl thead th{background:color-mix(in srgb,var(--cc) 45%,var(--bg));color:var(--text);font-size:14px;font-weight:700;letter-spacing:0;border-bottom:0}
+.cmp-tbl th::before{display:none}
+.cmp-tbl thead th.dim{opacity:.35}
+/* 약점: 아이콘 숫자 카드 + 변화 + 추천 복습 타임라인 + 오늘 할 일 */
+.wk-kpi{display:grid;grid-template-columns:auto 1fr;column-gap:12px;align-content:start}
+.wk-kpi>*:not(.wk-ic){grid-column:2}
+.wk-ic{grid-row:1 / span 3;display:grid;place-items:center;width:40px;height:40px;border-radius:12px;background:var(--bg);color:var(--accent)}
+.wk-tr{margin-top:4px;font-size:13px;color:#767676;font-variant-numeric:tabular-nums}
+.wk-tr.up{color:var(--bad)}.wk-tr.down{color:var(--good)}
+.wk-next{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:12px;margin-bottom:12px}
+.wk-next .box{margin:0;background:var(--surface);border:0;border-radius:var(--r-lg);padding:20px 22px}
+.wk-tl{list-style:none;margin:4px 0 0;padding:0;position:relative}
+.wk-tl li{position:relative;display:flex;gap:14px;padding:0 0 16px}
+.wk-tl li:last-child{padding-bottom:0}
+.wk-tl li:not(:last-child)::before{content:"";position:absolute;left:13px;top:28px;bottom:2px;width:2px;background:var(--surface-3)}
+.wk-dot{flex:0 0 28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--bg);color:var(--text-3);font-size:13px;font-weight:700}
+.wk-tl li:first-child .wk-dot{background:var(--accent);color:#fff}
+.wk-tl b{display:block;font-size:15px;color:var(--text)}
+.wk-tl small{display:block;margin-top:2px;font-size:13px;color:#767676}
+.wk-go{display:flex;flex-direction:column;align-items:flex-start}
+.wk-go .k{font-size:13px;color:#767676;font-weight:500}
+.wk-go b{margin-top:6px;font-size:20px;line-height:1.35;color:var(--text);word-break:keep-all}
+.wk-go p{margin:4px 0 16px;font-size:14px;color:#767676;word-break:keep-all}
+.wk-go .btn{margin-top:auto}
+.wk-recs{display:none}
+@media(max-width:860px){.wk-next{grid-template-columns:1fr}}

@@ -790,25 +790,28 @@ function renderWeak(){
   const subjRate=Object.keys(subjTotal).map(function(s){return [s,Math.round((pBySubj[s]||0)/subjTotal[s]*100)];}).sort(function(a,b){return b[1]-a[1];});
   const pN=Object.keys(pNotes).length, sN=Object.keys(sNotes).length, both={}; [pByMajor,sByMajor].forEach(function(o){for(var k in o) both[k]=(both[k]||0)+o[k];}); const worst=topN(both,1)[0];
   
-  // 추천 복습
-  let recs=[];
-  if(worst) recs.push('약한 영역 "'+worst[0]+'" 집중 복습');
-  const topTag = topN(pByTag,3);
-  if(topTag.length>0){
-    if(topTag.some(function(t){return t[0]==='숫자'||t[0]==='계산';}))
-      recs.push('필기 "핵심 수치 집중 모드" 20문제');
-    if(topTag.some(function(t){return t[0]==='절차'||t[0]==='이행';}))
-      recs.push('필기 "계약 플로우 집중 모드" 20문제');
+  // 이번 주·지난주 새 오답 수 (오답노트 wrongAt 기준) — 늘면 빨강 ↑, 줄면 초록 ↓
+  const WK=7*864e5, now=Date.now();
+  function trend(o){
+    let a=0,b=0; Object.values(o).forEach(function(q){const d=now-(q.wrongAt||0); if(d<WK)a++; else if(d<2*WK)b++;});
+    if(!a&&!b) return '<div class="wk-tr">이번 주 새 오답 없음</div>';
+    const df=a-b; return '<div class="wk-tr'+(df>0?' up':df<0?' down':'')+'">이번 주 '+a+'개 · 지난주보다 '+(df>0?'↑ '+df:df<0?'↓ '+(-df):'같음')+'</div>';
   }
-  if(Object.keys(pNotes).length>0) recs.push('필기 "오답 재출제" 모드');
-  if(Object.keys(sNotes).length>0) recs.push('실기 "오답 재출제" 모드');
-  if(recs.length===0) recs=['아직 데이터가 부족해. 모의고사를 풀어보세요.'];
-  
+  const ic=d=>'<span class="wk-ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+d+'</svg></span>';
+  // 추천 복습: 할 일 타임라인
+  const recs=[];
+  if(worst) recs.push(['약한 영역 집중 복습','"'+worst[0]+'" · '+worst[1]+'회 틀림']);
+  const topTag=topN(pByTag,3);
+  if(topTag.some(function(t){return t[0]==='숫자'||t[0]==='계산';})) recs.push(['핵심 수치 집중 모드','필기 20문제 · 숫자·계산을 자주 틀려요']);
+  if(topTag.some(function(t){return t[0]==='절차'||t[0]==='이행';})) recs.push(['계약 플로우 집중 모드','필기 20문제 · 절차 문제를 자주 틀려요']);
+  if(pN) recs.push(['필기 오답 다시 풀기','틀린 '+pN+'문항 · 오답 재출제 모드']);
+  if(sN) recs.push(['실기 오답 다시 풀기','틀린 '+sN+'문항 · 오답 재출제 모드']);
+
   r.innerHTML = '<div class="flow-title">약점 <span>분석</span></div><div class="flow-sub">오답노트로 본 자주 틀리는 곳</div>'+
     '<div class="wk-kpis">'+
-      '<div class="wk-kpi"><div class="k">필기 오답</div><div class="v">'+pN+'<small>/ '+QUESTIONS.length+'문항</small></div></div>'+
-      '<div class="wk-kpi"><div class="k">실기 오답</div><div class="v">'+sN+'<small>/ '+PRAC_QUESTIONS.length+'문항</small></div></div>'+
-      '<div class="wk-kpi"><div class="k">가장 약한 영역</div><div class="v sm">'+(worst?worst[0]:'—')+'</div></div>'+
+      '<div class="wk-kpi">'+ic('<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>')+'<div class="k">필기 오답</div><div class="v">'+pN+'<small>/ '+QUESTIONS.length+'문항</small></div>'+trend(pNotes)+'</div>'+
+      '<div class="wk-kpi">'+ic('<rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>')+'<div class="k">실기 오답</div><div class="v">'+sN+'<small>/ '+PRAC_QUESTIONS.length+'문항</small></div>'+trend(sNotes)+'</div>'+
+      '<div class="wk-kpi">'+ic('<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>')+'<div class="k">가장 약한 영역</div><div class="v sm">'+(worst?worst[0]:'—')+'</div>'+(worst?'<div class="wk-tr">'+worst[1]+'회 틀림</div>':'')+'</div>'+
     '</div>'+
     (pN+sN===0?'<div class="box wk-start"><div>아직 틀린 문제가 없어요. 모의고사를 풀면 여기에 약한 곳이 쌓여요.</div><button class="btn filled" data-act="tab" data-tab="quiz_tab">모의고사 풀기</button></div>':'')+
     (pN+sN===0?'':'<div class="wk-grid">'+
@@ -816,9 +819,9 @@ function renderWeak(){
     '<div class="box"><div class="box-ttl">필기 많이 틀린 영역 TOP 5</div>'+bars(topN(pByMajor,5),'회')+'</div>'+
     '<div class="box"><div class="box-ttl">자주 틀리는 주제 TOP 5</div>'+bars(topN(pByTag,5),'회')+'</div>'+
     '<div class="box"><div class="box-ttl">실기 유형별 오답</div>'+bars(topN(sByType,5),'회')+'</div>'+'</div>'+
-    '<div class="box">'+
-      '<div class="box-ttl">추천 복습</div>'+
-      '<div class="wk-recs">'+recs.map(function(t,i){return (i+1)+'. '+t;}).join('<br>')+'</div>'+
+    '<div class="wk-next">'+
+      '<div class="box wk-plan"><div class="box-ttl">추천 복습 순서</div><ol class="wk-tl">'+recs.map(function(x,i){return '<li><span class="wk-dot">'+(i+1)+'</span><div><b>'+x[0]+'</b><small>'+x[1]+'</small></div></li>';}).join('')+'</ol></div>'+
+      '<div class="box wk-go"><div class="k">오늘 할 일</div><b>'+(recs[0]?recs[0][0]:'모의고사 풀기')+'</b><p>'+(recs[0]?recs[0][1]:'')+'</p><button class="btn filled" data-act="tab" data-tab="quiz_tab">이어서 공부하기</button></div>'+
     '</div>')+
     '<button class="btn wk-dday" data-act="examDate">시험일 <b class="dday-n">'+ddayText()+'</b></button>'+
     '<div class="box"><div class="box-ttl">학습 기록 옮기기</div>'+
