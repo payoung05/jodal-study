@@ -2,7 +2,7 @@
 const store={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v);}catch(e){return d;}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}};
 
 // 학습 기록 백업·복원: 이 앱이 쓰는 키만 (같은 github.io 주소의 다른 앱 기록은 건드리지 않음)
-const RECORD_KEY=/^(wrong_notes|prac_wrong|qz_recent|sticky_v2|exam_date|jodal_game_v1|step_note_\d+)$/;
+const RECORD_KEY=/^(wrong_notes|prac_wrong|qz_recent|sticky_v2|exam_date|jodal_game_v1|step_note_\d+|tab_note_\w+)$/;
 function exportRecords(){
   const data={};
   for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(RECORD_KEY.test(k))data[k]=localStorage.getItem(k);}

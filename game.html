@@ -163,6 +163,20 @@ body{-webkit-font-smoothing:antialiased}
 .pcard.wrong{background:#FDECEC;border-color:var(--red);color:var(--red)}
 .pick-msg{min-height:22px;margin-top:10px;color:var(--red);font-size:14px;font-weight:600}
 .pick-msg.ok{color:var(--jade)}
+.pick-hint{margin-top:4px;margin-bottom:10px;font-size:14px;color:var(--dim)}
+.quit{display:block;margin:14px auto 0;padding:8px 16px;font-size:14px;font-weight:600;color:var(--dim);background:none;border:1px solid var(--line);border-radius:999px}
+.quit:hover{color:var(--ink)}
+/* 넓은 화면(가로): 장면은 왼쪽, 고르기·문제는 오른쪽 + 글자 키움 */
+@media(min-width:1000px){
+  .view{max-width:760px}
+  #v-board{max-width:1180px}
+  body{zoom:1.12}
+  .play-grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:28px;align-items:start}
+  .play-grid .pg-l{position:sticky;top:12px}
+  #v-board #scnBrief,#v-board .playmeta{max-width:none}
+}
+@media(min-width:1500px){body{zoom:1.25}}
+.exp.ok b{color:var(--jade)}
 .choice.sel{background:#EAF1FE;border-color:var(--gold);color:var(--gold)}
 .exp .next{display:block;margin-top:12px}
 .qpanel{margin:4px auto 0}
@@ -204,6 +218,7 @@ body{-webkit-font-smoothing:antialiased}
       <div class="answers" id="answers"></div>
       <div class="exp" id="exp"></div>
     </div>
+    <button class="quit" data-quit="speed">그만하기</button>
   </div>
 
   <div class="result" id="result">
@@ -233,14 +248,18 @@ body{-webkit-font-smoothing:antialiased}
   </div>
 
   <div class="play" id="bPlay">
+   <div class="play-grid"><div class="pg-l">
     <div class="brief" id="scnBrief"></div>
     <div class="playmeta">
       <span>진행 <b id="bProg">0</b>/<span id="bTotal">0</span> · <b id="bScore">0</b>점</span>
       <span class="hearts" id="bHearts" aria-label="남은 하트"></span>
     </div>
     <div class="scene"><canvas class="scene-cv" id="scene" width="200" height="80" aria-hidden="true"></canvas><div class="scene-lbl" id="sceneLbl"></div></div>
+    <button class="quit" data-quit="board">그만하기</button>
+   </div><div class="pg-r">
     <div id="pickBox">
-      <div class="pick-q">다음에 할 일은?</div>
+      <div class="pick-q" id="pickQ">다음에 할 일은?</div>
+      <div class="pick-hint">카드 중 <b>바로 다음</b> 일은 하나뿐이고, 나머지는 더 나중에 할 일이에요.</div>
       <div class="pick-cards" id="pickCards"></div>
       <div class="pick-msg" id="pickMsg" aria-live="polite"></div>
     </div>
@@ -253,6 +272,7 @@ body{-webkit-font-smoothing:antialiased}
         <div class="exp" id="bExp"></div>
       </div>
     </div>
+   </div></div>
   </div>
 
   <div class="result" id="bResult">
@@ -427,6 +447,7 @@ document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
   t.classList.add('on');
   document.getElementById('v-'+t.dataset.v).classList.add('on');
   if(t.dataset.v==='note') renderNote();
+  if(t.dataset.v!=='speed') quitSpeed();
 }));
 
 /* ───── 로비 ───── */
@@ -789,10 +810,10 @@ function drawScene(cv,tasks,z,heroX,frame,cur){
 }
 const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
 function walkTo(i,done){ // 다른 구역이면 오른쪽으로 나가서 새 장면 왼쪽에서 들어옴
- const z=zoneOfStep(J.tasks[i].s), tx=postX(J.tasks,i)+10, cv=$('scene');
+ const j0=J, z=zoneOfStep(J.tasks[i].s), tx=postX(J.tasks,i)+10, cv=$('scene');
  const seg=(zz,from,to,cb)=>{
   if(RM){drawScene(cv,J.tasks,zz,to,0,J.idx);return cb()}
-  let x=from,f=0;const iv=setInterval(()=>{x=Math.min(to,x+3);f^=1;if(f)S_step();drawScene(cv,J.tasks,zz,x,f,J.idx);if(x>=to){clearInterval(iv);drawScene(cv,J.tasks,zz,to,0,J.idx);cb()}},70)};
+  let x=from,f=0;const iv=setInterval(()=>{if(J!==j0)return clearInterval(iv);x=Math.min(to,x+3);f^=1;if(f)S_step();drawScene(cv,J.tasks,zz,x,f,J.idx);if(x>=to){clearInterval(iv);drawScene(cv,J.tasks,zz,to,0,J.idx);cb()}},70)};
  const fin=()=>{J.x=tx;J.z=z;hud();done()};
  if(J.z!==z) seg(J.z,J.x,210,()=>{$('sceneLbl').textContent=ZONE_NAME[z];seg(z,-10,tx,fin)}); else seg(z,J.x,tx,fin);
 }
@@ -803,10 +824,10 @@ function bSave(){ST.board=bST;save(ST)}
 function bLobbyRender(){$('bBestV').textContent=bST.best;$('bClearV').textContent=bST.clears;drawScene($('lobbyScene'),JOURNEY['물품'],0,44,0,-1)}
 let J=null, bCur=null;
 function hud(){
- const t=J.tasks[J.idx];
  $('bProg').textContent=J.idx;$('bTotal').textContent=J.tasks.length;$('bScore').textContent=J.score;
  $('bHearts').textContent='♥'.repeat(Math.max(J.hearts,0))+'♡'.repeat(3-Math.max(J.hearts,0));
- $('sceneLbl').textContent=ZONE_NAME[J.z]+(t&&zoneOfStep(t.s)===J.z?' · '+STEPS[t.s-1].name:'');
+ const d=J.tasks[J.at]; // 고른 일 기준 — 고르기 전엔 다음 일 이름을 미리 보여 주지 않음
+ $('sceneLbl').textContent=ZONE_NAME[J.z]+(d&&zoneOfStep(d.s)===J.z?' · '+d.s+'단계 '+STEPS[d.s-1].name:'');
 }
 function bStart(){
  updStreak();
@@ -819,7 +840,8 @@ function bStart(){
 function pick(done){
  if(J.idx>=J.tasks.length) return bEnd(true);
  $('qPanel').style.display='none';$('pickBox').style.display='block';
- $('pickMsg').className='pick-msg'+(done?' ok':'');$('pickMsg').textContent=done?'✓ '+done:'';
+ $('pickMsg').className='pick-msg';$('pickMsg').textContent='';
+ $('pickQ').textContent=done?'✓ 「'+done+'」 끝! 바로 다음에 할 일은?':'이 사건에서 맨 처음 할 일은?';
  const cur=J.tasks[J.idx], later=J.tasks.filter(t=>t.s>cur.s);
  const box=$('pickCards');box.innerHTML='';
  shuffle([cur].concat(shuffle(later).slice(0,3))).forEach(t=>{const b=document.createElement('button');b.className='pcard';b.textContent=t.n;b.onclick=()=>choose(t,b);box.appendChild(b)});
@@ -827,12 +849,12 @@ function pick(done){
 function choose(t,b){
  if(J.busy||J.hearts<=0)return;
  const cur=J.tasks[J.idx];
- if(t===cur){S_ok();J.busy=true;b.classList.add('right');walkTo(J.idx,()=>{J.busy=false;startMissions()});return}
+ if(t===cur){S_ok();J.busy=true;J.at=J.idx;b.classList.add('right');walkTo(J.idx,()=>{J.busy=false;startMissions()});return}
  S_bad();b.classList.add('wrong');b.disabled=true;J.hearts--;hud();
- const later='"'+t.n+'"은 '+STEPS[t.s-1].name+' 단계 일이에요.';
- J.wrong.push({q:(J.idx?'"'+J.tasks[J.idx-1].n+'" 다음에 할 일은?':'맨 처음 할 일은?'),a:cur.n,exp:later});
+ const later='「'+t.n+'」은 '+t.s+'단계('+STEPS[t.s-1].name+') 일이라 더 나중이에요. 바로 다음 일은 '+cur.s+'단계('+STEPS[cur.s-1].name+')에 있어요.';
+ J.wrong.push({q:(J.idx?'「'+J.tasks[J.idx-1].n+'」 다음에 할 일은?':'맨 처음 할 일은?'),a:cur.n,exp:later});
  $('pickMsg').className='pick-msg';$('pickMsg').textContent='아직 일러요 — '+later;
- if(J.hearts<=0)setTimeout(()=>bEnd(false),900);
+ if(J.hearts<=0){const j0=J;setTimeout(()=>{if(J===j0)bEnd(false)},900)}
 }
 function startMissions(){
  const t=J.tasks[J.idx];
@@ -876,10 +898,13 @@ function bJudge(ok,btn,stg){
  if(J.answered)return;J.answered=true;
  const st=$('bStampEl');
  if(ok){S_ok();confetti($('bCard'));J.score+=bCur.ev?10:7;hud();
-  st.textContent=bCur.ev?'해 결':'적 격';st.className='stamp ok show';if(btn)btn.classList.add('right');setTimeout(nextMission,800);return}
+  st.textContent=bCur.ev?'해 결':'적 격';st.className='stamp ok show';if(btn)btn.classList.add('right');
+  $('bExp').innerHTML='<b>맞아요! 정답: '+ansTxtB(stg)+'</b> · '+stg.exp;$('bExp').className='exp on ok';
+ } else {
  S_bad();J.hearts--;hud();J.wrong.push({q:bCur.q,a:ansTxtB(stg),exp:stg.exp});
  st.textContent='감사지적';st.className='stamp bad show';if(btn)btn.classList.add('wrong');
  $('bExp').innerHTML='<b>정답: '+ansTxtB(stg)+'</b> · '+stg.exp;$('bExp').className='exp on';
+ }
  const nb=document.createElement('button');nb.className='go ghost next';nb.textContent=J.hearts>0?'다음':'결과 보기';nb.onclick=nextMission;$('bExp').appendChild(nb);
 }
 function bEnd(clear){
@@ -892,6 +917,11 @@ function bEnd(clear){
  bSave();bLobbyRender();
 }
 $('bStartBtn').onclick=bStart;$('bRetry').onclick=bStart;
+/* 그만하기: 진행 중인 판을 버리고 대기실로. 앱에서 다른 탭으로 나가면 스피드전(시간제)만 멈춤 */
+function quitSpeed(){ if(!timer) return; clearInterval(timer); timer=null; $('play').style.display='none'; $('lobby').style.display='block'; renderLobby(); }
+function quitBoard(){ J=null; $('bPlay').style.display='none'; $('bLobby').style.display='block'; bLobbyRender(); }
+document.querySelectorAll('[data-quit]').forEach(b=>b.onclick=()=>b.dataset.quit==='speed'?quitSpeed():quitBoard());
+addEventListener('message',e=>{ if(e.data==='jodal:leave') quitSpeed(); });
 $('bToLobby').onclick=()=>{$('bResult').style.display='none';$('bLobby').style.display='block';bLobbyRender()};
 bLobbyRender();
 

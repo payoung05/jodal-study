@@ -96,13 +96,17 @@ function gameTest(){
      round=2; click($('#bRetry')); return setTimeout(()=>{ // 틀린 카드만 3번 → 게임 끝
       for(let k=0;k<3;k++){const b=[...d.querySelectorAll('.pcard:not([disabled])')].find(b=>b.textContent!==J().tasks[J().idx].n); if(b) click(b);}
       setTimeout(()=>{ ok(vis('bResult')&&J().hearts===0,'여정: 단계 순서 3번 틀리면 끝');
-       ok(errs.length===0,'여정: JS 오류 없음 '+errs.join('|')); out.textContent=log.join('\n'); },1500);
+       click($('#bRetry')); click($('[data-quit=board]')); ok(vis('bLobby')&&!vis('bPlay'),'여정: 그만하기 → 대기실');
+       $('.tab[data-v=speed]').click(); click($('#startBtn')); w.postMessage('jodal:leave','*');
+       setTimeout(()=>{ ok(!w.eval('timer')&&vis('lobby'),'스피드전: 앱에서 나가면 멈춤');
+       ok(errs.length===0,'여정: JS 오류 없음 '+errs.join('|')); out.textContent=log.join('\n'); },100); },1500);
      },300);
     }
    }
    if(j.busy) return;
    if(vis('pickBox')){ const b=[...d.querySelectorAll('.pcard')].find(b=>b.textContent===j.tasks[j.idx].n); if(b&&!b.classList.contains('right')) click(b); return; }
-   if(!vis('qPanel')||j.answered) return;
+   if(!vis('qPanel')) return;
+   if(j.answered){ const nb=$('#bExp .next'); if(nb) click(nb); return; }
    const q=w.eval('bCur'); asked++; kinds[q.t]=1;
    const btns=[...d.querySelectorAll('#bA .choice')];
    if(q.t==='ox') click(btns.find(b=>b.textContent===(q.a?'O':'X')));
