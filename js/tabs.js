@@ -272,15 +272,18 @@ function renderFlow(){
         (e.docs?'<div class="fe-ev-docs">'+e.docs.join(' · ')+'</div>':'')+'</div>';
     }).join('')+'</div>';
   }
-  function cmpHtml(c){
-    var cols=[['gs','공사',c.gs],['mp','물품',c.mp],['yy','용역',c.yy]];
-    return '<div class="fe-cmp">'+cols.map(function(k){ var dim=(FLOW_FILTER!=='all'&&FLOW_FILTER!==k[0]); return '<div class="fe-cmp-cell c-'+k[0]+(dim?' dim':'')+'"><div class="cmp-type">'+k[1]+'</div><div class="cmp-text">'+hl(k[2])+'</div></div>'; }).join('')+'</div>';
-  }
+  function cmpHtml(c){ return cmpTable(c,hl,FLOW_FILTER!=='all'?FLOW_FILTER:null); }
   var h='<div class="page-title">계약 흐름 <span>20단계</span></div><div class="page-sub">수요 발생부터 사후관리까지. 모든 단계에 공사·물품·용역을 나란히 놓았다</div>';
   h+='<div class="fl-filters">';
   [['all','전체'],['gs','공사'],['mp','물품'],['yy','용역']].forEach(function(f){ h+='<button class="'+(FLOW_FILTER===f[0]?'active':'')+'" data-act="flowFilter" data-f="'+f[0]+'">'+f[1]+'</button>'; });
   h+='</div>';
   if(FLOW_FILTER!=='all') h+='<div class="fl-filter-note">'+TYPE[FLOW_FILTER]+' 강조 중 · 다른 유형은 흐리게 표시</div>';
+  // 한눈에 보는 흐름도: 구역 4개를 화살표 블록으로, 안에 단계 이름(누르면 이동)
+  h+='<div class="fe-map">'+FE_ZONES.map(function(z,zi){
+    var ss=STEPS.filter(function(s,i){return STEP_ZONE[i]===z[0];}), rng=z[1].split(' · ');
+    return '<div class="fm-z" style="--zc:'+ZONE_COLOR[z[0]]+';--k:'+zi+'"><div class="fm-no"><small>STEP</small>'+rng[0]+'</div>'+
+      '<div class="fm-body"><b>'+z[0]+'</b><p>'+rng[1]+'</p><ol>'+ss.map(function(s){return '<li><a href="#fe_'+s.key+'" data-act="feJump" data-key="'+s.key+'"><span>'+String(s.id).padStart(2,'0')+'</span>'+s.name+'</a></li>';}).join('')+'</ol></div></div>';
+  }).join('')+'</div>';
   h+='<nav class="fe-index" id="fe_index">'+STEPS.map(function(s){return '<a href="#fe_'+s.key+'" data-act="feJump" data-key="'+s.key+'"><b>'+String(s.id).padStart(2,'0')+'</b>'+s.name+'</a>';}).join('')+'</nav>';
   var lastZone='';
   STEPS.forEach(function(s,i){
@@ -320,7 +323,8 @@ function renderStepIndex(){
   root.innerHTML = x;
 }
 function setExamDate(){ var cur=localStorage.getItem('exam_date')||''; var v=prompt('시험일을 입력하세요 (YYYY-MM-DD)', cur); if(v===null) return; if(v.trim()==='') localStorage.removeItem('exam_date'); else localStorage.setItem('exam_date', v.trim()); renderDday(); }
-function renderDday(){ var el=document.getElementById('ddayN'); if(!el) return; var d=localStorage.getItem('exam_date'); if(!d){ el.textContent='설정'; return; } var t=new Date(d); if(isNaN(t)){ el.textContent='설정'; return; } var diff=Math.ceil((t - new Date().setHours(0,0,0,0))/86400000); el.textContent = diff>=0 ? 'D-'+diff : 'D+'+(-diff); }
+function ddayText(){ var d=localStorage.getItem('exam_date'); if(!d) return '설정'; var t=new Date(d); if(isNaN(t)) return '설정'; var diff=Math.ceil((t - new Date().setHours(0,0,0,0))/86400000); return diff>=0 ? 'D-'+diff : 'D+'+(-diff); }
+function renderDday(){ var v=ddayText(); document.querySelectorAll('#ddayN,.dday-n').forEach(function(e){ e.textContent=v; }); } // 사이드바 + 약점 탭 시험일 버튼
 
 
 // 단계별 보강 데이터: 실무 체크리스트 + 시험 함정
@@ -387,11 +391,20 @@ function splitTop(s,seps){
   return out;
 }
 // 핵심 수치: 여러 개거나 "구분: 값"이면 표, 하나뿐이면 글 상자
+// 공사·물품·용역 비교 표: 업종을 열로, " / "로 나뉜 부분은 같은 순서끼리 한 줄에 (dim: 흐리게 할 업종 빼고)
+function cmpTable(c,fmt,dim){
+  fmt=fmt||(x=>x);
+  const K=[['gs','공사'],['mp','물품'],['yy','용역']], parts=K.map(k=>splitTop(String(c[k[0]]||''),[' / ']));
+  const n=Math.max(...parts.map(p=>p.length)), off=j=>dim&&dim!==K[j][0]?' dim':'';
+  return '<div class="tbl-wrap cmp-tbl"><table><thead><tr>'+K.map((k,j)=>'<th class="c-'+k[0]+off(j)+'">'+k[1]+'</th>').join('')+'</tr></thead><tbody>'+
+    Array.from({length:n},(_,i)=>'<tr>'+parts.map((p,j)=>'<td class="'+off(j).trim()+'">'+(p[i]?fmt(p[i]):'')+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>';
+}
 function numTable(s){
   const items=splitTop(s,[' / ']);
   if(items.length<2&&s.indexOf(': ')<0) return '<div class="sd-num-box">'+hlNum(s)+'</div>';
   return '<table class="kv-tbl">'+items.map(it=>{
-    const m=it.match(/^([^:]+):\s*(.+)$/)||it.match(/^(.*?[^\d\s(])\s+((?:최대|최소|적어도)?\s*\(?\d.*)$/);
+    let m=it.match(/^([^:]+):\s*(.+)$/)||it.match(/^(.*?[^\d\s(])\s+((?:최대|최소|적어도)?\s*\(?\d.*)$/);
+    if(m&&m[1].split('(').length!==m[1].split(')').length) m=null; // "회계연도(매년 1.1~12.31)"처럼 괄호 안에서 자르지 않게
     return m?'<tr><th>'+m[1]+'</th><td>'+hlNum(m[2].replace(/^\((.*)\)$/,'$1'))+'</td></tr>':'<tr><td colspan="2">'+hlNum(it)+'</td></tr>';
   }).join('')+'</table>';
 }
@@ -490,11 +503,7 @@ function renderStepDetail() {
             ${pointList(s.examPoint)}
             ${extraHtml}
             <div class="sd-sec-title">공사 · 물품 · 용역 차이</div>
-            <div class="cmp-grid">
-              <div class="cmp-cell c-gs"><div class="cmp-type">공사</div><div class="cmp-text">${s.compare.gs}</div></div>
-              <div class="cmp-cell c-mp"><div class="cmp-type">물품</div><div class="cmp-text">${s.compare.mp}</div></div>
-              <div class="cmp-cell c-yy"><div class="cmp-type">용역</div><div class="cmp-text">${s.compare.yy}</div></div>
-            </div>
+            ${cmpTable(s.compare)}
           </div>
         </div>
 
@@ -537,7 +546,7 @@ const BIZ_MATRIX = [
           ['사전심사','200억원 이상 주요 공종 PQ 적용'],
           ['낙찰자 결정','100억 미만 적격심사 / 100억↑ 종합심사낙찰제'],
           ['발주문서','설계서 · 도면 · 시방서 · 물량내역서'],
-          ['보증금','입찰 5% / 계약 15% / 이행보증서 40% / 저가낙찰 50%'],
+          ['보증금','입찰 5% / 계약 10% / 이행보증서 40% / 저가낙찰 50%'],
           ['지체상금률','0.05% / 일 (한도 30%)'],
           ['하자담보','1~10년 공종별 (철근콘크리트 10년)'],
           ['선금 의무','100억↑ 30% / 20~100억 40% / 20억 미만 50%'],
@@ -768,51 +777,53 @@ function renderWeak(){
   function topN(obj,n){
     return Object.entries(obj).sort(function(a,b){return b[1]-a[1];}).slice(0,n);
   }
-  function bars(arr,color){
-    if(arr.length===0)return '<div class="wk-empty">데이터 없음</div>';
-    const max=Math.max.apply(null,arr.map(function(e){return e[1];}));
-    return arr.map(function(e){
-      const w=Math.round(e[1]/max*100);
-      return '<div class="wk-row"><div class="wk-row-hd"><span>'+e[0]+'</span><span class="wk-n">'+e[1]+'회</span></div><div class="wk-track"><div style="width:'+w+'%;background:'+color+'"></div></div></div>';
-    }).join('');
+  // 가로 막대: 한 색(파랑)만, 1위만 진하게 · 값은 막대 끝 글자로 (dataviz: 크기 비교 = 한 색 순차)
+  function bars(arr,unit,max){
+    if(!arr.length||!arr.some(function(e){return e[1];})) return '<div class="wk-empty">아직 틀린 문제가 없어요.</div>';
+    const top=Math.max.apply(null,arr.map(function(e){return e[1];})); max=max||top;
+    return '<div class="wk-chart">'+arr.map(function(e,i){
+      return '<div class="wk-bar" title="'+e[0]+' — '+e[1]+unit+'"><span class="wk-lbl">'+e[0]+'</span>'+
+        '<span class="wk-track"><i class="'+(e[1]===top?'top':'')+'" style="width:'+(e[1]?Math.max(e[1]/max*100,2):0)+'%"></i></span><span class="wk-val">'+e[1]+unit+'</span></div>';
+    }).join('')+'</div>';
   }
+  const subjTotal={}; QUESTIONS.forEach(function(q){subjTotal[q.subject]=(subjTotal[q.subject]||0)+1;});
+  const subjRate=Object.keys(subjTotal).map(function(s){return [s,Math.round((pBySubj[s]||0)/subjTotal[s]*100)];}).sort(function(a,b){return b[1]-a[1];});
+  const pN=Object.keys(pNotes).length, sN=Object.keys(sNotes).length, both={}; [pByMajor,sByMajor].forEach(function(o){for(var k in o) both[k]=(both[k]||0)+o[k];}); const worst=topN(both,1)[0];
   
-  // 추천 복습
-  let recs=[];
-  const topMajor = topN(pByMajor,1).concat(topN(sByMajor,1));
-  if(topMajor.length>0 && topMajor[0]) recs.push('1. 약한 영역 "'+topMajor[0][0]+'" 집중 복습');
-  const topTag = topN(pByTag,3);
-  if(topTag.length>0){
-    if(topTag.some(function(t){return t[0]==='숫자'||t[0]==='계산';}))
-      recs.push('2. 필기 "핵심 수치 집중 모드" 20문제');
-    if(topTag.some(function(t){return t[0]==='절차'||t[0]==='이행';}))
-      recs.push('3. 필기 "계약 플로우 집중 모드" 20문제');
+  // 이번 주·지난주 새 오답 수 (오답노트 wrongAt 기준) — 늘면 빨강 ↑, 줄면 초록 ↓
+  const WK=7*864e5, now=Date.now();
+  function trend(o){
+    let a=0,b=0; Object.values(o).forEach(function(q){const d=now-(q.wrongAt||0); if(d<WK)a++; else if(d<2*WK)b++;});
+    if(!a&&!b) return '<div class="wk-tr">이번 주 새 오답 없음</div>';
+    const df=a-b; return '<div class="wk-tr'+(df>0?' up':df<0?' down':'')+'">이번 주 '+a+'개 · 지난주보다 '+(df>0?'↑ '+df:df<0?'↓ '+(-df):'같음')+'</div>';
   }
-  if(Object.keys(pNotes).length>0) recs.push('4. 필기 "오답 재출제" 모드');
-  if(Object.keys(sNotes).length>0) recs.push('5. 실기 "오답 재출제" 모드');
-  if(recs.length===0) recs=['아직 데이터가 부족해. 모의고사를 풀어보세요.'];
-  
-  r.innerHTML = '<div class="flow-title">약점 <span>분석</span></div><div class="flow-sub">오답노트 기반 분석 · 자주 틀리는 영역 표시</div>'+
-    '<div class="box">'+
-      '<div class="box-ttl c-red">필기 약점 — 과목별</div>'+
-      bars(topN(pBySubj,3),'#E5484D')+
+  const ic=d=>'<span class="wk-ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+d+'</svg></span>';
+  // 추천 복습: 할 일 타임라인
+  const recs=[];
+  if(worst) recs.push(['약한 영역 집중 복습','"'+worst[0]+'" · '+worst[1]+'회 틀림']);
+  const topTag=topN(pByTag,3);
+  if(topTag.some(function(t){return t[0]==='숫자'||t[0]==='계산';})) recs.push(['핵심 수치 집중 모드','필기 20문제 · 숫자·계산을 자주 틀려요']);
+  if(topTag.some(function(t){return t[0]==='절차'||t[0]==='이행';})) recs.push(['계약 플로우 집중 모드','필기 20문제 · 절차 문제를 자주 틀려요']);
+  if(pN) recs.push(['필기 오답 다시 풀기','틀린 '+pN+'문항 · 오답 재출제 모드']);
+  if(sN) recs.push(['실기 오답 다시 풀기','틀린 '+sN+'문항 · 오답 재출제 모드']);
+
+  r.innerHTML = '<div class="flow-title">약점 <span>분석</span></div><div class="flow-sub">오답노트로 본 자주 틀리는 곳</div>'+
+    '<div class="wk-kpis">'+
+      '<div class="wk-kpi">'+ic('<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>')+'<div class="k">필기 오답</div><div class="v">'+pN+'<small>/ '+QUESTIONS.length+'문항</small></div>'+trend(pNotes)+'</div>'+
+      '<div class="wk-kpi">'+ic('<rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>')+'<div class="k">실기 오답</div><div class="v">'+sN+'<small>/ '+PRAC_QUESTIONS.length+'문항</small></div>'+trend(sNotes)+'</div>'+
+      '<div class="wk-kpi">'+ic('<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>')+'<div class="k">가장 약한 영역</div><div class="v sm">'+(worst?worst[0]:'—')+'</div>'+(worst?'<div class="wk-tr">'+worst[1]+'회 틀림</div>':'')+'</div>'+
     '</div>'+
-    '<div class="box">'+
-      '<div class="box-ttl c-orange">필기 약점 — 주요 영역 TOP 5</div>'+
-      bars(topN(pByMajor,5),'#D9730D')+
-    '</div>'+
-    '<div class="box">'+
-      '<div class="box-ttl c-green">자주 틀리는 태그 TOP 5</div>'+
-      bars(topN(pByTag,5),'#1F8A4C')+
-    '</div>'+
-    '<div class="box">'+
-      '<div class="box-ttl c-green">실기 약점 — 유형별</div>'+
-      bars(topN(sByType,5),'#1F8A4C')+
-    '</div>'+
-    '<div class="box">'+
-      '<div class="box-ttl">추천 복습</div>'+
-      '<div class="wk-recs">'+recs.join('<br>')+'</div>'+
-    '</div>'+
+    (pN+sN===0?'<div class="box wk-start"><div>아직 틀린 문제가 없어요. 모의고사를 풀면 여기에 약한 곳이 쌓여요.</div><button class="btn filled" data-act="tab" data-tab="quiz_tab">모의고사 풀기</button></div>':'')+
+    (pN+sN===0?'':'<div class="wk-grid">'+
+    '<div class="box"><div class="box-ttl">필기 과목별 틀린 비율</div>'+bars(subjRate,'%',100)+'</div>'+
+    '<div class="box"><div class="box-ttl">필기 많이 틀린 영역 TOP 5</div>'+bars(topN(pByMajor,5),'회')+'</div>'+
+    '<div class="box"><div class="box-ttl">자주 틀리는 주제 TOP 5</div>'+bars(topN(pByTag,5),'회')+'</div>'+
+    '<div class="box"><div class="box-ttl">실기 유형별 오답</div>'+bars(topN(sByType,5),'회')+'</div>'+'</div>'+
+    '<div class="wk-next">'+
+      '<div class="box wk-plan"><div class="box-ttl">추천 복습 순서</div><ol class="wk-tl">'+recs.map(function(x,i){return '<li><span class="wk-dot">'+(i+1)+'</span><div><b>'+x[0]+'</b><small>'+x[1]+'</small></div></li>';}).join('')+'</ol></div>'+
+      '<div class="box wk-go"><div class="k">오늘 할 일</div><b>'+(recs[0]?recs[0][0]:'모의고사 풀기')+'</b><p>'+(recs[0]?recs[0][1]:'')+'</p><button class="btn filled" data-act="tab" data-tab="quiz_tab">이어서 공부하기</button></div>'+
+    '</div>')+
+    '<button class="btn wk-dday" data-act="examDate">시험일 <b class="dday-n">'+ddayText()+'</b></button>'+
     '<div class="box"><div class="box-ttl">학습 기록 옮기기</div>'+
       '<div class="rec-desc">오답노트·메모·포스트잇·게임 기록은 이 기기의 브라우저에만 저장돼요. 파일로 저장해 두면 브라우저를 정리해도 되살리고, PC↔패드로 옮길 수 있어요.</div>'+
       '<div class="rec-btns"><button class="btn filled" data-act="exportRec">기록 저장</button><button class="btn" data-act="importRec">기록 불러오기</button></div>'+

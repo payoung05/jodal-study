@@ -896,3 +896,127 @@ tr:hover td{background:var(--surface)}
   body[data-memo] .side-memo{width:400px}
   body[data-memo] #new-sticky-btn{right:424px}
 }
+/* 표: 흰 바탕 둥근 틀 · 옅은 파랑 머리행 · 옅은 회색 항목 칸 · 가는 가로줄만 */
+table,.cmptab,.law-vs,.rev-panel table,.kv-tbl,.bm-kv,.pref table.kv,.pref table.chg,.pref table.cmp{border-collapse:separate;border-spacing:0;background:var(--bg);border:1px solid var(--line);border-radius:12px;overflow:hidden;font-size:15px}
+.tbl-wrap table,.law-log table{border:0;border-radius:0}
+thead th,.cmptab th,.law-vs th,.pref table.cmp th,.pref table.chg th{background:#EEF3FD;color:#2553C7;font-weight:700;font-size:14px;padding:12px 16px;border:0;border-bottom:1px solid #D6E2FA;white-space:nowrap;text-align:left}
+tbody th,.kv-tbl th,.bm-kv th,.pref table.kv th{background:var(--surface);color:var(--text);font-weight:600;font-size:14px;padding:12px 16px;border:0;border-bottom:1px solid var(--line);white-space:nowrap;vertical-align:top;text-align:left;line-height:1.65}
+td,.kv-tbl td,.bm-kv td,.cmptab td,.law-vs td,.rev-panel td,.pref table.kv td,.pref table.chg td,.pref table.cmp td{padding:12px 16px;border:0;border-bottom:1px solid var(--line);line-height:1.65;color:var(--text-2)}
+.cmptab td:first-child,.rev-panel td.nm,.pref table.chg td:first-child,.pref table.cmp td:first-child,.law-vs td.td-key{background:var(--surface);color:var(--text);font-weight:600}
+tr:last-child>td,tr:last-child>th,.pref table.kv tr:last-child th,.pref table.kv tr:last-child td,.kv-tbl tr:last-child th,.kv-tbl tr:last-child td{border-bottom:0}
+tr:hover td,.kv-tbl tr:hover td{background:transparent}
+.cmptab tr:hover td:first-child{background:var(--surface)}
+.pref .v-base,.pref .v-up,.pref .v-free,.pref .v-none{background:none;border-radius:0}
+.pref td.v-base,.pref td.v-up,.pref td.v-free,.pref td.v-none{display:table-cell;padding:12px 16px;font-weight:700}
+.pref .v-up{color:#2553C7}.pref .v-base{color:var(--d-green)}
+.pref table.kv tr.pt th{background:#EAF6EE}
+/* 전체 흐름도: 구역 4개를 화살표 블록으로 (단계가 갈수록 진해짐) */
+.fe-map{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin:8px 0 var(--s6)}
+.fm-z{position:relative;padding-top:52px}
+.fm-no{position:absolute;top:0;left:22px;z-index:1;font-size:38px;font-weight:800;line-height:1;color:color-mix(in srgb,var(--zc) 80%,#000);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.fm-no small{display:block;font-size:12px;font-weight:700;letter-spacing:.14em;margin-bottom:2px}
+.fm-body{height:100%;padding:26px 30px 22px 36px;background:color-mix(in srgb,var(--zc) calc(8% + var(--k) * 5%),var(--bg));clip-path:polygon(0 0,calc(100% - 22px) 0,100% 50%,calc(100% - 22px) 100%,0 100%,22px 50%)}
+.fm-z:first-child .fm-body{clip-path:polygon(0 0,calc(100% - 22px) 0,100% 50%,calc(100% - 22px) 100%,0 100%);padding-left:22px;border-radius:12px 0 0 12px}
+.fm-z:last-child .fm-body{clip-path:polygon(0 0,100% 0,100% 100%,0 100%,22px 50%);border-radius:0 12px 12px 0}
+.fm-body b{display:block;font-size:19px;font-weight:800;color:color-mix(in srgb,var(--zc) 80%,#000);margin-bottom:4px}
+.fm-body p{font-size:13px;color:var(--text-3);line-height:1.5;margin:0 0 12px;word-break:keep-all}
+.fm-body ol{list-style:none;margin:0;padding:0}
+.fm-body li a{display:flex;gap:8px;padding:4px 0;font-size:15px;font-weight:600;color:var(--text);text-decoration:none}
+.fm-body li a span{color:color-mix(in srgb,var(--zc) 80%,#000);font-variant-numeric:tabular-nums;font-weight:700}
+.fm-body li a:hover{text-decoration:underline}
+.fe-zone{background:color-mix(in srgb,var(--zc) 10%,var(--bg))}
+.fe-zone-n{color:color-mix(in srgb,var(--zc) 80%,#000)}
+@media(max-width:860px){
+  .fe-map{grid-template-columns:1fr;gap:12px}
+  .fm-z{padding-top:0;display:grid;grid-template-columns:72px 1fr;align-items:start}
+  .fm-no{position:static;font-size:26px;padding-top:18px}
+  .fm-body,.fm-z:first-child .fm-body,.fm-z:last-child .fm-body{clip-path:none;border-radius:12px;padding:16px 18px}
+}
+/* 약점 분석: 숫자 카드 + 가로 막대(한 색, 1위만 진하게) */
+.wk-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:0 0 16px}
+.wk-kpi{background:var(--surface);border-radius:12px;padding:16px 20px}
+.wk-kpi .k{font-size:14px;color:var(--text-3);font-weight:600}
+.wk-kpi .v{margin-top:4px;font-size:36px;font-weight:800;line-height:1.1;color:var(--text);font-variant-numeric:tabular-nums}
+.wk-kpi .v small{font-size:14px;font-weight:600;color:var(--text-4);margin-left:6px}
+.wk-kpi .v.sm{font-size:20px;line-height:1.35;word-break:keep-all}
+.wk-start{display:flex;align-items:center;justify-content:space-between;gap:16px;font-size:15px;color:var(--text-2)}
+.wk-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.wk-grid .box{margin:0}
+.wk-chart{display:grid;gap:10px;margin-top:4px}
+.wk-bar{display:grid;grid-template-columns:minmax(0,11em) minmax(0,1fr) 3.5em;align-items:center;gap:12px}
+.wk-lbl{font-size:14px;color:var(--text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wk-track{height:12px;background:var(--surface-2);border-radius:0 4px 4px 0;overflow:hidden}
+.wk-track i{display:block;height:100%;background:#A9C1F5;border-radius:0 4px 4px 0}
+.wk-track i.top{background:var(--accent)}
+.wk-val{font-size:14px;font-weight:700;color:var(--text);text-align:right;font-variant-numeric:tabular-nums}
+.wk-empty{font-size:14px;color:var(--text-4);padding:8px 0}
+@media(max-width:860px){.wk-kpis{grid-template-columns:1fr 1fr}.wk-kpi:last-child{grid-column:1/-1}.wk-grid{grid-template-columns:1fr}.wk-bar{grid-template-columns:7em minmax(0,1fr) 3em}}
+.wk-grid .box,.wk-start{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:18px 20px}
+.wk-grid{margin-bottom:12px}
+/* 휴대폰: 하단 탭 8개가 한 줄에 다 보이게 시험일 상자는 빼고, 약점 탭 버튼으로 */
+.wk-dday{display:none}
+@media(max-width:560px){#tabbar .sb-dday{display:none}.wk-dday{display:inline-flex;gap:6px;margin:0 0 12px}.wk-dday b{color:var(--accent)}}
+/* 공사·물품·용역 비교 표 */
+.cmp-tbl{margin:0 0 8px}
+.cmp-tbl table{table-layout:fixed}
+.cmp-tbl th::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--cc);margin-right:6px;vertical-align:1px}
+.cmp-tbl td{font-size:15px;color:var(--text);word-break:keep-all;vertical-align:top}
+.cmp-tbl td+td,.cmp-tbl th+th{border-left:1px solid var(--line)}
+.cmp-tbl .dim{opacity:.35}
+@media(max-width:560px){.cmp-tbl td,.cmp-tbl th{padding:10px 10px;font-size:14px}}
+/* 약점 차트를 앱 카드 스타일에 맞춤: 테두리 없는 회색 둥근 카드 + 둥근 막대 */
+.wk-grid .box,.wk-start{background:var(--surface);border:0;border-radius:var(--r-lg);padding:20px 22px}
+.wk-grid .box-ttl{font-size:16px;margin-bottom:14px}
+.wk-chart{gap:12px}
+.wk-lbl{font-size:15px;color:var(--text)}
+.wk-track{height:14px;background:var(--bg);border-radius:999px}
+.wk-track i{border-radius:999px;background:#B9CCF6}
+.wk-track i.top{background:var(--accent)}
+.wk-val{font-size:15px}
+/* 표·약점 숫자를 Halaska UI(ui.halaska.com) 느낌으로: 무채색, 머리행은 색 없이 작은 회색 글자, 아주 옅은 가는 선, 16px 둥근 틀 */
+table,.cmptab,.law-vs,.rev-panel table,.kv-tbl,.bm-kv,.pref table.kv,.pref table.chg,.pref table.cmp,.tbl-wrap{border-color:#EEEEEE;border-radius:16px}
+.tbl-wrap table,.law-log table{border:0;border-radius:0}
+thead th,.cmptab th,.law-vs th,.pref table.cmp th,.pref table.chg th{background:transparent;color:#767676;font-size:12px;font-weight:600;letter-spacing:.03em;border-bottom:1px solid #EEEEEE}
+tbody th,.kv-tbl th,.bm-kv th,.pref table.kv th,.cmptab td:first-child,.rev-panel td.nm,.pref table.chg td:first-child,.pref table.cmp td:first-child,.law-vs td.td-key{background:transparent;color:#767676;font-weight:600}
+td,.kv-tbl td,.bm-kv td,.cmptab td,.law-vs td,.rev-panel td,.pref table.kv td,.pref table.chg td,.pref table.cmp td,.kv-tbl th,.bm-kv th,.pref table.kv th,tbody th{border-bottom-color:#EEEEEE}
+td{color:#3D3D3D}
+tbody tr:hover td,tbody tr:hover th{background:#F7F7F7}
+.cmptab tr:hover td:first-child{background:#F7F7F7}
+.pref table.kv tr.pt th{background:transparent;color:var(--d-green)}
+.cmp-tbl td+td,.cmp-tbl th+th{border-left-color:#EEEEEE}
+.cmp-tbl td{color:#3D3D3D}
+/* 약점 숫자 요약: 상자 없이 작은 회색 이름 + 큰 숫자 (Halaska Stat) */
+.wk-kpis{background:var(--surface);border-radius:var(--r-lg);padding:20px 24px;gap:24px}
+.wk-kpi{background:none;padding:0;border-radius:0}
+.wk-kpi .k{font-size:13px;font-weight:500;color:#767676}
+.wk-kpi .v{font-size:32px;font-weight:700;color:#3D3D3D}
+.wk-kpi .v small{color:#767676;font-weight:500}
+.wk-kpi+.wk-kpi{border-left:1px solid #E5E5E5;padding-left:24px}
+@media(max-width:860px){.wk-kpi+.wk-kpi{border-left:0;padding-left:0}.wk-kpi:last-child{border-top:1px solid #E5E5E5;padding-top:16px}}
+/* 공사·물품·용역 비교 표: 머리행을 업종 색으로 칠해 한눈에 */
+.cmp-tbl thead th{background:color-mix(in srgb,var(--cc) 45%,var(--bg));color:var(--text);font-size:14px;font-weight:700;letter-spacing:0;border-bottom:0}
+.cmp-tbl th::before{display:none}
+.cmp-tbl thead th.dim{opacity:.35}
+/* 약점: 아이콘 숫자 카드 + 변화 + 추천 복습 타임라인 + 오늘 할 일 */
+.wk-kpi{display:grid;grid-template-columns:auto 1fr;column-gap:12px;align-content:start}
+.wk-kpi>*:not(.wk-ic){grid-column:2}
+.wk-ic{grid-row:1 / span 3;display:grid;place-items:center;width:40px;height:40px;border-radius:12px;background:var(--bg);color:var(--accent)}
+.wk-tr{margin-top:4px;font-size:13px;color:#767676;font-variant-numeric:tabular-nums}
+.wk-tr.up{color:var(--bad)}.wk-tr.down{color:var(--good)}
+.wk-next{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:12px;margin-bottom:12px}
+.wk-next .box{margin:0;background:var(--surface);border:0;border-radius:var(--r-lg);padding:20px 22px}
+.wk-tl{list-style:none;margin:4px 0 0;padding:0;position:relative}
+.wk-tl li{position:relative;display:flex;gap:14px;padding:0 0 16px}
+.wk-tl li:last-child{padding-bottom:0}
+.wk-tl li:not(:last-child)::before{content:"";position:absolute;left:13px;top:28px;bottom:2px;width:2px;background:var(--surface-3)}
+.wk-dot{flex:0 0 28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--bg);color:var(--text-3);font-size:13px;font-weight:700}
+.wk-tl li:first-child .wk-dot{background:var(--accent);color:#fff}
+.wk-tl b{display:block;font-size:15px;color:var(--text)}
+.wk-tl small{display:block;margin-top:2px;font-size:13px;color:#767676}
+.wk-go{display:flex;flex-direction:column;align-items:flex-start}
+.wk-go .k{font-size:13px;color:#767676;font-weight:500}
+.wk-go b{margin-top:6px;font-size:20px;line-height:1.35;color:var(--text);word-break:keep-all}
+.wk-go p{margin:4px 0 16px;font-size:14px;color:#767676;word-break:keep-all}
+.wk-go .btn{margin-top:auto}
+.wk-recs{display:none}
+@media(max-width:860px){.wk-next{grid-template-columns:1fr}}
