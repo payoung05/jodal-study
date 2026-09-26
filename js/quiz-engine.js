@@ -291,33 +291,50 @@ function pracSolveView(e){
       <div class="qz-q">${i+1}. ${q.question}</div>
       <textarea class="pr-ta" data-ans="${q.id}" aria-label="${i+1}번 답안" placeholder="답안을 입력하세요...">${esc(e.answers[q.id])}</textarea>
     </div>`).join('');
-  return solveHead('실기 · '+(m?m.label:''),`${done}/${qs.length} 작성 완료 · 키워드 자동채점`,done,qs.length)+cards+
+  return solveHead('실기 · '+(m?m.label:''),`${done}/${qs.length} 작성 완료 · 채점 후 모범답안과 비교`,done,qs.length)+cards+
     '<div class="qz-submit-wrap"><button class="qz-submit" data-act="submit">채점하기</button></div>';
 }
 
+// 채점: 키워드로 먼저 추정 → 모범답안과 나란히 보고 내가 맞음·절반·틀림으로 확정(확정하면 그 점수로 바뀜)
+const SELF_GRADE=[[1,'맞음'],[0.5,'절반'],[0,'틀림']];
 function pracResultView(e){
   const qs=e.qs;
-  let total=0, max=0;
-  qs.forEach(q=>{ total+=e.results[q.id].score; max+=q.maxScore; });
+  let total=0, max=0, selfN=0;
+  qs.forEach(q=>{ const r=e.results[q.id]; total+=r.score; max+=q.maxScore; if(r.self!=null) selfN++; });
   const rate=max>0?total/max:0;
   const cards=qs.map((q,i)=>{
     const r=e.results[q.id], rc=r.pct>=80?'ok':r.pct>=50?'mid':'ng';
-    const kws=(lbl,list,cls,mark)=>list.length?`<div class="pr-kws"><span class="pr-lbl">${lbl}</span>${list.map(k=>`<span class="kw ${cls}">${mark} ${k}</span>`).join('')}</div>`:'';
+    const kws=(list,cls,mark)=>list.map(k=>`<span class="kw ${cls}">${mark} ${k}</span>`).join('');
+    const pts=(q.gradingPoint||[]).length?`<ul class="pr-pts">${q.gradingPoint.map(g=>`<li>${g}</li>`).join('')}</ul>`:'';
+    const btns=SELF_GRADE.map(([v,l])=>`<button class="pr-sg${r.self===v?' on':''}" data-act="self" data-id="${q.id}" data-v="${v}" aria-pressed="${r.self===v}">${l}</button>`).join('');
     return `<div class="qz-res-card ${rc}">
-      <div class="qz-res-hd"><span class="rv-verdict ${rc}">${r.score} / ${q.maxScore}점 (${r.pct}%)</span><span class="qz-subj">${q.type} · ${q.major}</span></div>
+      <div class="qz-res-hd"><span class="rv-verdict ${rc}">${r.score} / ${q.maxScore}점${r.self!=null?' · 내 채점':' · 키워드 추정 '+r.pct+'%'}</span><span class="qz-subj">${q.type} · ${q.major}</span></div>
       <div class="rv-q">${i+1}. ${q.question}</div>
-      <div class="pr-ans"><div class="pr-lbl">내 답안</div><div class="pr-txt">${esc(e.answers[q.id]||'(미응답)')}</div></div>
-      ${kws('포함 키워드',r.hit,'ok','✓')}${kws('누락 키워드',r.miss,'ng','✗')}
-      <div class="pr-model"><div class="pr-lbl">모범답안</div><div class="pr-txt">${q.modelAnswer}</div></div>
+      <div class="pr-cmp">
+        <div class="pr-ans"><div class="pr-lbl">내 답안</div><div class="pr-txt">${esc(e.answers[q.id]||'(미응답)')}</div></div>
+        <div class="pr-model"><div class="pr-lbl">모범답안</div><div class="pr-txt">${q.modelAnswer}</div>${pts?'<div class="pr-lbl pr-pts-lbl">채점 기준</div>'+pts:''}</div>
+      </div>
+      <div class="pr-kws"><span class="pr-lbl">키워드</span>${kws(r.hit,'ok','✓')}${kws(r.miss,'ng','✗')}</div>
+      <div class="pr-self"><span class="pr-self-q">모범답안과 비교해 보면?</span>${btns}</div>
       ${explain(q)}</div>`;
   }).join('');
-  return scoreCard('실기 점수',total.toFixed(1),max,rate,`정답률 ${Math.round(rate*100)}%`,'',
+  return scoreCard('실기 점수',total.toFixed(1),max,rate,`정답률 ${Math.round(rate*100)}% · 내 채점 ${selfN}/${qs.length}문제 (나머지는 키워드 추정)`,'',
     `<button class="btn filled" data-act="start" data-k="${e.mode}">↺ 같은 모드 새로</button><button class="btn" data-act="go" data-to="select">다른 모드</button>`)+cards;
+}
+function pracSelfGrade(e,d){
+  const q=e.qs.find(x=>x.id===d.id), r=e.results[d.id], v=+d.v;
+  if(!q||!r) return;
+  Object.assign(r,{self:v, score:v*q.maxScore, pct:v*100, ok:v>=0.5});
+  const notes=store.get('prac_wrong',{});
+  if(r.ok) delete notes[q.id]; else notes[q.id]=Object.assign({},q,{wrongAt:Date.now()},{myAnswer:e.answers[q.id]||'',score:r.score,pct:r.pct});
+  store.set('prac_wrong',notes);
+  const y=window.scrollY; e.render(); window.scrollTo(0,y); wnRender(); renderWeak();
 }
 
 const prac=QuizEngine({
   root:'prac_root', wrongKey:'prac_wrong', pick:pracPickQuestions, grade:pracGradeOne,
   noteOf:(a,r)=>({myAnswer:a||'',score:r.score,pct:r.pct}),
+  acts:e=>({self:d=>pracSelfGrade(e,d)}),
   views:{
     select:e=>{ const c=countBy(PRAC_QUESTIONS,'type');
       const modes=PRAC_MODES.map(m=>c[m.type]?Object.assign({},m,{desc:m.label.replace(/ 모음$/,'')+' '+Math.min(m.n,c[m.type])+'문제 ('+c[m.type]+'문제 풀)'}):m);

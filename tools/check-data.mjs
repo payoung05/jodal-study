@@ -5,9 +5,9 @@ import fs from 'fs';
 import vm from 'vm';
 const R = new URL('../', import.meta.url), read = f => fs.readFileSync(new URL(f, R), 'utf8');
 const ctx = {}; vm.createContext(ctx);
-for (const f of ['data/steps.js', 'data/cards.js', 'data/questions.js', 'data/prac.js', 'data/journey.js', 'data/law-log.js'])
+for (const f of ['data/steps.js', 'data/cards.js', 'data/questions.js', 'data/prac.js', 'data/journey.js', 'data/law-log.js', 'data/syllabus.js'])
   vm.runInContext(read(f).replace(/^const (\w+)/gm, 'var $1'), ctx, { filename: f });
-const { STEPS, CARDS, QUESTIONS, PRAC_QUESTIONS, JOURNEY, JOURNEY_GROUP, LAW_LOG } = ctx;
+const { STEPS, CARDS, QUESTIONS, PRAC_QUESTIONS, JOURNEY, JOURNEY_GROUP, LAW_LOG, SYLLABUS_ITEMS } = ctx;
 const err = [], warn = [];
 const uniq = (list, name) => { const seen = new Set(); list.forEach(x => { if (seen.has(x.id)) err.push(`${name}: 번호 중복 ${x.id}`); seen.add(x.id); }); };
 
@@ -19,6 +19,10 @@ QUESTIONS.forEach(q => {
   else if (!Number.isInteger(q.answer) || q.answer < 0 || q.answer >= q.options.length) err.push(`필기 ${q.id}: 정답 번호 ${q.answer}가 보기 범위 밖`);
   else if (new Set(q.options).size !== q.options.length) err.push(`필기 ${q.id}: 같은 보기가 두 번`);
 });
+// 출제기준: 필기 문제마다 세세항목 번호(ss) 하나. 문제 0개인 세세항목은 개수만 출력(빈 곳 = 보충할 곳)
+const ssIds = new Set(SYLLABUS_ITEMS.map(i => i.id)), ssN = {};
+QUESTIONS.forEach(q => { if (!ssIds.has(q.ss)) err.push(`필기 ${q.id}: 출제기준 번호(ss) "${q.ss || ''}"가 syllabus.js에 없음`); else ssN[q.ss] = (ssN[q.ss] || 0) + 1; });
+const ssEmpty = SYLLABUS_ITEMS.filter(i => !ssN[i.id]);
 // 근거 조문 링크는 법제처 주소만
 [...QUESTIONS, ...PRAC_QUESTIONS].forEach(q => {
   if (q.basis && !/^https:\/\/www\.law\.go\.kr\//.test(q.basisUrl || '')) err.push(`${q.id}: 근거(basis)는 있는데 법제처 원문 링크(basisUrl)가 없음`);
@@ -69,6 +73,7 @@ const withBasis = [...QUESTIONS, ...PRAC_QUESTIONS].filter(q => q.basis).length;
 const summary = [
   `필기 ${QUESTIONS.length} · 실기 ${PRAC_QUESTIONS.length} (근거 조문 ${withBasis}개) · 카드 ${CARDS.length} · 단계 ${STEPS.length} · 사건 ${scn}종`,
   `여정 할 일: ${counts.join(' / ')}`,
+  `출제기준 세세항목 ${SYLLABUS_ITEMS.length}개 중 문제 있는 곳 ${SYLLABUS_ITEMS.length - ssEmpty.length}개 · 빈 곳 ${ssEmpty.length}개` + (process.env.SS_LIST ? ':\n  ' + ssEmpty.map(i => i.id + ' ' + i.name).join('\n  ') : ' (SS_LIST=1 로 목록)'),
   `constraints 금지 규칙 ${rules}개 · 규칙 시험 예시 ${examples}개 검사`,
 ];
 console.log(summary.join('\n'));

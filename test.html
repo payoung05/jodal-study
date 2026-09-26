@@ -42,6 +42,12 @@ f.onload=()=>{ const w=f.contentWindow,d=w.document,errs=[];w.onerror=(m)=>errs.
  click($('#prac_root [data-act=submit]'));
  ok(w.eval('prac').results[p0.id].pct===100&&$('#prac_root .qz-score-card'),'실기 채점 (키워드 전부 → 100%)');
  ok(Object.keys(JSON.parse(w.localStorage.prac_wrong)).length===9,'실기 오답 9개 저장');
+ const p1=w.eval('prac').qs[1]; click($(`#prac_root [data-act=self][data-id="${p1.id}"][data-v="1"]`));
+ ok(w.eval('prac').results[p1.id].score===p1.maxScore&&Object.keys(JSON.parse(w.localStorage.prac_wrong)).length===8,'실기 직접 채점: 맞음 → 만점 + 오답노트에서 빠짐');
+ click($(`#prac_root [data-act=self][data-id="${p0.id}"][data-v="0"]`));
+ ok(w.eval('prac').results[p0.id].score===0&&JSON.parse(w.localStorage.prac_wrong)[p0.id],'실기 직접 채점: 틀림 → 0점 + 오답노트에 추가');
+ ok(!$('#recNudge').hidden,'기록 저장 알림: 기록 있고 저장 안 했으면 표시');
+ click($('[data-act=recLater]')); ok($('#recNudge').hidden,'기록 저장 알림: 나중에 → 숨김');
  // ── 탭·서브탭
  click($('.tab-btn[data-tab=quiz_tab]')); click($$('#quiz_tab .sub-btn')[1]); ok($('#sub_prac').classList.contains('active')&&$$('#quiz_tab .sub-btn')[1].classList.contains('active'),'문제 서브탭 전환');
  click($('.tab-btn[data-tab=concept_tab]')); ok($('#concept_tab').classList.contains('active')&&$('.tab-btn[data-tab=concept_tab]').classList.contains('active'),'탭 전환');

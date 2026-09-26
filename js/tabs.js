@@ -832,16 +832,19 @@ function fcReset(){fcState={...fcState,known:new Set(),unk:new Set(),idx:0,flipp
 // ─────────────────────────────────────
 // 약점분석
 // ─────────────────────────────────────
-function renderWeak(){
+function renderWeak(){ recNudge(); // 기록이 바뀌는 곳(채점·오답)마다 불리므로 백업 알림도 같이 갱신
   const r=document.getElementById('weak_root');
   if(!r) return;
   const pNotes=store.get('wrong_notes',{}),sNotes=store.get('prac_wrong',{});
+  // 영역 = 공식 출제기준 세부항목 (옛 오답노트엔 ss가 없어 최신 문제에서 찾음)
+  const SS=Object.fromEntries(SYLLABUS_ITEMS.map(i=>[i.id,i])), QS=Object.fromEntries(QUESTIONS.map(x=>[x.id,x.ss]));
+  const ssSub=q=>{ const it=SS[q.ss||QS[q.id]]; return it?it.sub:q.major; };
   
   // 필기 통계: 과목별·태그별 오답수
   const pBySubj={}, pByTag={}, pByMajor={};
   Object.values(pNotes).forEach(function(q){
     pBySubj[q.subject]=(pBySubj[q.subject]||0)+1;
-    pByMajor[q.major]=(pByMajor[q.major]||0)+1;
+    const k=ssSub(q); pByMajor[k]=(pByMajor[k]||0)+1;
     (q.tag||[]).forEach(function(t){pByTag[t]=(pByTag[t]||0)+1;});
   });
   // 실기 통계
@@ -893,7 +896,7 @@ function renderWeak(){
     (pN+sN===0?'<div class="box wk-start"><div>아직 틀린 문제가 없어요. 모의고사를 풀면 여기에 약한 곳이 쌓여요.</div><button class="btn filled" data-act="tab" data-tab="quiz_tab">모의고사 풀기</button></div>':'')+
     (pN+sN===0?'':'<div class="wk-grid">'+
     '<div class="box"><div class="box-ttl">필기 과목별 틀린 비율</div>'+bars(subjRate,'%',100)+'</div>'+
-    '<div class="box"><div class="box-ttl">필기 많이 틀린 영역 TOP 5</div>'+bars(topN(pByMajor,5),'회')+'</div>'+
+    '<div class="box"><div class="box-ttl">필기 많이 틀린 출제기준 항목 TOP 5</div>'+bars(topN(pByMajor,5),'회')+'</div>'+
     '<div class="box"><div class="box-ttl">자주 틀리는 주제 TOP 5</div>'+bars(topN(pByTag,5),'회')+'</div>'+
     '<div class="box"><div class="box-ttl">실기 유형별 오답</div>'+bars(topN(sByType,5),'회')+'</div>'+'</div>'+
     '<div class="wk-next">'+
@@ -1117,6 +1120,7 @@ bindActs(document.body,{
   bold:()=>document.execCommand('bold'),
   exportRec:exportRecords,
   importRec:()=>document.getElementById('recFile').click(),
+  recLater:()=>{ store.set('rec_snooze',Date.now()+3*DAY); recNudge(); },
   fcCat:d=>fcSetCat(d.cat), fcFlip:fcFlip, fcKnow:fcKnow, fcUnknow:fcUnknow, fcNext:fcNext, fcReset:fcReset,
 });
 document.addEventListener('mousedown',ev=>{ if(ev.target.closest('[data-act=bold]')) ev.preventDefault(); }); // 메모 포커스 유지
