@@ -364,7 +364,8 @@ function renderFlow(){
 function feJump(ev,key){ ev.preventDefault(); var el=document.getElementById('fe_'+key); if(!el) return; var sc=el.closest('.sub-content')||el.closest('.tab-content'); var idx=document.getElementById('fe_index'); var off=(idx?idx.offsetHeight:0)+52; if(sc){ sc.scrollTo({top:el.offsetTop-off,behavior:'smooth'}); } }
 
 let STEP_SEL = 1;
-function selectStep(id){ STEP_SEL = id; renderStepDetail(); var d=document.getElementById('step_root'); if(d) d.scrollTop=0; }
+function selectStep(id){ STEP_SEL = id; renderStepDetail(); var d=document.getElementById('step_root'); if(d) d.scrollTop=0;
+  var t=document.querySelector('.sp-tile.sel'); if(t&&t.parentElement.scrollWidth>t.parentElement.clientWidth) t.scrollIntoView({inline:'center',block:'nearest'}); } // 가로 단계 줄(패드·휴대폰)에서 고른 단계를 가운데로
 const STEP_ZONE = ['발주','발주','발주','발주','발주','입찰','입찰','입찰','입찰','입찰','계약·이행','계약·이행','계약·이행','계약·이행','계약·이행','계약·이행','대금·사후','대금·사후','대금·사후','대금·사후'];
 const ZONE_COLOR = {'발주':'var(--z1)','입찰':'var(--z2)','계약·이행':'var(--z3)','대금·사후':'var(--z4)'};
 function renderStepIndex(){
