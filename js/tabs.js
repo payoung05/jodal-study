@@ -6,7 +6,8 @@ function switchTab(id, btn) {
   document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById(id).classList.add('active');
-  if (btn) btn.classList.add('active');
+  document.body.dataset.mode = document.getElementById(id).dataset.mode || '';
+  document.querySelectorAll('.tab-btn[data-tab="'+id+'"]').forEach(function(b){ b.classList.add('active'); });
   sideMemoFor(id);
   var gf = document.getElementById('gameFrame');   // 게임에서 나가면 시간제 게임 멈춤
   if (id !== 'game_tab' && gf && gf.contentWindow) gf.contentWindow.postMessage('jodal:leave', '*');
@@ -697,7 +698,7 @@ function fcRender(){
     cardHtml=`<div class="fc-card${fcState.flipped?' flipped':isUnk?' unk':''}" style="--ac:${ac}" data-act="fcFlip">
       <span class="fc-card-cat">${cur.cat}</span>
       ${isUnk?'<span class="fc-unk">✗ 모름</span>':''}
-      <span class="fc-card-hint">${fcState.flipped?'앞면':'탭→정답'}</span>
+      <span class="fc-card-hint">${fcState.flipped?'눌러서 앞면 보기':'눌러서 뜻 보기'}</span>
       <span class="fc-card-pos">${si+1}/${pool.length}</span>
       ${!fcState.flipped
         ?`<div class="fc-term">${cur.term}</div>`
@@ -706,12 +707,11 @@ function fcRender(){
     </div>`;
   }
 
+  // 암기: 큰 두 버튼(몰라·알았어)으로 빠르게, 넘기기·처음부터는 작은 글자 버튼
   let btnsHtml=pool.length>0?`<div class="fc-btns">
-    <button class="btn c-text" data-act="fcKnow">✓ 알았어</button>
-    <button class="btn c-red" data-act="fcUnknow">✗ 몰라</button>
-    <button class="btn c-gray" data-act="fcNext">→ 다음</button>
-    <button class="btn c-ink" data-act="fcReset">↺ 초기화</button>
-  </div>`:'';
+    <button class="fc-ans no" data-act="fcUnknow">몰라</button>
+    <button class="fc-ans yes" data-act="fcKnow">알았어</button>
+  </div><div class="fc-sub"><button class="fc-link" data-act="fcNext">건너뛰기</button><button class="fc-link" data-act="fcReset">처음부터</button></div>`:'';
 
   root.innerHTML=`
     <div class="fc-cats">${catsHtml}</div>
