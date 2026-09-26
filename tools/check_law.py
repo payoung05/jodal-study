@@ -6,7 +6,7 @@
 
 - 숫자·기간·비율(%, 100분의 N, 1천분의 N, 'N일 이내/전/마다', 'N억원 미만' 같은 규칙 값)을 뽑아
   인용된 조문 원문에 같은 값이 있는지 본다. 계산 문제의 주어진 값(계약금액 8천만원 등)은 규칙이 아니라 건너뛴다.
-- 인용 조문은 문구 속 '국가계약법 시행령 §33·§35', '제50조①', 'basis' 필드, 수치 탭 카드는 아래 CARD_REFS 에서 온다.
+- 인용 조문은 문구 속 '국가계약법 시행령 §33·§35', '제50조①', 'basis' 필드, data/law-refs.js(문항별 연결), 수치 탭 카드는 아래 CARD_REFS 에서 온다.
 - 차이가 있으면 종료 코드 1 (GitHub Actions 에 걸기 좋게).
 """
 import datetime, html, json, pathlib, re, subprocess, sys, urllib.parse, urllib.request
@@ -190,6 +190,7 @@ def values(text, rule_only=True):
     for m in re.finditer(r'(?<![\d.])(\d+(?:\.\d+)?)\s*%', t): out.append(('%', float(m[1]), m[0]))
     for unit, pat in (('일', r'(?<![\d.])(\d{1,3})\s*일(?!반|부|정|괄|체|자|수|시)'), ('년', r'(?<![\d.])(\d{1,2})\s*년'), ('개월', r'(?<![\d.])(\d{1,2})\s*개월')):
         for m in re.finditer(pat, t):
+            if unit == '일' and re.search(r'월\s*$', t[:m.start()]): continue  # '4월 15일' 같은 날짜는 기간이 아님
             out.append((unit, float(m[1]), m[0]))
     for m in AMT.finditer(t):
         out.append(('원', won(m[1]), m[0].strip()))
@@ -226,15 +227,21 @@ def app_items():
         items.append((f'수치 탭 · {label}', f'{n}{u} {clean(desc)}', r if r != 'image' else 'image', False))
     data = json.loads(subprocess.run(['node', '-e', '''
 const vm=require("vm"),fs=require("fs"),c={};vm.createContext(c);
-for(const f of ["data/questions.js","data/prac.js"])vm.runInContext(fs.readFileSync(f,"utf8").replace(/^const (\\w+)/gm,"var $1"),c);
-console.log(JSON.stringify({q:c.QUESTIONS,p:c.PRAC_QUESTIONS}))'''], cwd=R, capture_output=True, text=True, encoding='utf-8').stdout)
-    calc = lambda q: '계산' in (q.get('tag') or []) or q.get('type') == '계산형'  # 계산 문제는 주어진 값·결과가 많아 규칙 문구(이상·미만…) 붙은 값만
+for(const f of ["data/questions.js","data/prac.js","data/law-refs.js"])vm.runInContext(fs.readFileSync(f,"utf8").replace(/^const (\\w+)/gm,"var $1"),c);
+console.log(JSON.stringify({q:c.QUESTIONS,p:c.PRAC_QUESTIONS,r:c.LAW_REFS}))'''], cwd=R, capture_output=True, text=True, encoding='utf-8').stdout)
+    calc = lambda q: '계산' in (q.get('tag') or []) or q.get('type') in ('계산형', '사례판단형')  # 계산·사례 문제는 주어진 값·결과가 많아 규칙 문구(이상·미만…) 붙은 값만
+    # data/law-refs.js: 문구에 조문 번호가 없는 문항의 근거 조문(사람·Claude가 연결). verdict image = 별표 그림이라 대조 불가
+    def linked(q, rf):
+        lr = data['r'].get(q['id'])
+        if not lr: return rf
+        if lr.get('verdict') == 'image': return 'image'
+        return rf + [(r['law'], str(r['jo'])) for r in lr.get('refs', []) if r['law'] in ALIAS]
     for q in data['q']:  # 필기: 오답 보기는 일부러 틀린 값이라 빼고, 정답 보기 + 해설만
         text = q['options'][q['answer']] + ' / ' + q['explanation']
-        items.append((f'필기 {q["id"]}', text, refs((q.get('basis') or '') + ' ' + q['explanation']), calc(q)))
+        items.append((f'필기 {q["id"]}', text, linked(q, refs((q.get('basis') or '') + ' ' + q['explanation'])), calc(q)))
     for q in data['p']:
         text = q['modelAnswer'] + ' / ' + q['explanation']
-        items.append((f'실기 {q["id"]}', text, refs((q.get('basis') or '') + ' ' + q['explanation'] + ' ' + q['modelAnswer']), calc(q)))
+        items.append((f'실기 {q["id"]}', text, linked(q, refs((q.get('basis') or '') + ' ' + q['explanation'] + ' ' + q['modelAnswer'])), calc(q)))
     return items
 
 
