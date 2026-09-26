@@ -21,7 +21,7 @@
    - upcoming(시행예정)은 공포됐지만 아직 시행 전이다. 무엇이 언제 바뀌는지만 보고서에 적고 앱은 고치지 않는다.
 
 3. 달라진 조문과 관련된 앱 내용을 찾는다. clause-check 가 출력한 문항 ID는 **반드시 모두** 원문과 대조해 표 2에 올린다(맞으면 '영향 없음', 틀리면 고칠 곳). 그 밖의 곳은 아래처럼 찾는다.
-   - 대상: data/questions.js(필기), data/prac.js(실기), data/cards.js(단어카드), data/steps.js(20단계 설명·핵심 수치), data/journey.js(조달 여정 게임 업무), index.html(수치 탭·법령 탭·우대제도 표와 조문 발췌), js/tabs.js(STEP_EXTRA 체크리스트·BIZ_MATRIX·FE_EV 등), game.html(SCN 사건, GEN 문제, EV 이벤트, 스피드전 Q).
+   - 대상: data/questions.js(필기), data/prac.js(실기), data/cards.js(단어카드), data/steps.js(20단계 설명·핵심 수치), index.html(수치 탭·법령 탭·우대제도 표와 조문 발췌), js/tabs.js(STEP_EXTRA 체크리스트·BIZ_MATRIX·FE_EV 등).
    - 조문 번호('시행령 26조', '§26', '제26조', '26조①'), 약칭(국가계약법·시행령·시행규칙·지방계약법·조달사업법·집행기준·공사계약일반조건 등), 바뀐 숫자(금액·비율·기한)로 grep 한다.
    - `python tools/check_law.py` 로 앱의 숫자가 인용 조문 원문에 있는지 본다(차이가 있으면 표로 나옴). TYPESAFE_API_KEY 가 있으면 `python tools/jev-check.py --only <문항ID,…>` 로 1차 판정을 받아도 된다(수정 후보·사람 검토는 참고일 뿐, 최종 판단은 원문 대조).
 

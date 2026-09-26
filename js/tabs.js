@@ -9,22 +9,12 @@ function switchTab(id, btn) {
   document.body.dataset.mode = document.getElementById(id).dataset.mode || '';
   document.querySelectorAll('.tab-btn[data-tab="'+id+'"]').forEach(function(b){ b.classList.add('active'); });
   sideMemoFor(id);
-  var gf = document.getElementById('gameFrame');   // 게임에서 나가면 시간제 게임 멈춤
-  if (id !== 'game_tab' && gf && gf.contentWindow) gf.contentWindow.postMessage('jodal:leave', '*');
-  if (id === 'game_tab') {
-    var fr = document.getElementById('gameFrame');
-    if (!fr.dataset.loaded) {
-      var tpl = document.getElementById('gameTpl');   // build.py 단일 파일엔 template로 들어 있음
-      if (tpl) fr.srcdoc = tpl.innerHTML; else fr.src = 'game.html';
-      fr.dataset.loaded = '1';
-    }
-  }
   if (id === 'search_tab') {
     var si = document.getElementById('srchInput');
     if (si) setTimeout(function(){ si.focus(); }, 50);
   }
 }
-// 넓은 화면 오른쪽 메모: 탭마다 따로 저장 (개념 탭은 단계 메모, 게임은 제외)
+// 넓은 화면 오른쪽 메모: 탭마다 따로 저장 (개념 탭은 단계 메모)
 var MEMO_TABS={num_tab:'수치',law_tab:'법령',quiz_tab:'문제',fc_tab:'카드',weak_tab:'약점',search_tab:'검색'};
 function sideMemoFor(id){
   var ed=document.getElementById('sideMemo'); if(!ed) return;
@@ -905,7 +895,7 @@ function renderWeak(){ recNudge(); // 기록이 바뀌는 곳(채점·오답)마
     '</div>')+
     '<button class="btn wk-dday" data-act="examDate">시험일 <b class="dday-n">'+ddayText()+'</b></button>'+
     '<div class="box"><div class="box-ttl">학습 기록 옮기기</div>'+
-      '<div class="rec-desc">오답노트·메모·포스트잇·게임 기록은 이 기기의 브라우저에만 저장돼요. 파일로 저장해 두면 브라우저를 정리해도 되살리고, PC↔패드로 옮길 수 있어요.</div>'+
+      '<div class="rec-desc">오답노트·메모·포스트잇 기록은 이 기기의 브라우저에만 저장돼요. 파일로 저장해 두면 브라우저를 정리해도 되살리고, PC↔패드로 옮길 수 있어요.</div>'+
       '<div class="rec-btns"><button class="btn filled" data-act="exportRec">기록 저장</button><button class="btn" data-act="importRec">기록 불러오기</button></div>'+
       '<input type="file" id="recFile" accept=".json,application/json" hidden>'+
       '<div class="rec-desc mt-10">앱 버전: '+buildLabel()+'</div>'+

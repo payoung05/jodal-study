@@ -30,7 +30,7 @@
 - 4 필기·실기 전체 조문 연결(law-refs 373문항) + `tools/jev-check.py` 판정 → 사람 검토 185개를 원문 대조: 틀림 24 · 부정확 40
 - 5 수정 146건(`tools/apply-fixes.mjs`, 표: reports/law-fix-2026-09-27.md), constraints 금지 규칙 19개
 - 6 월요일 루틴 지시문(`tools/law-check-routine.md`)에 clause-check 단계 추가 — 루틴은 main 의 이 파일을 읽으므로 이 브랜치가 합쳐진 뒤부터 적용
-- 남음: 4의 화면·게임 파일 조문 연결(index.html·steps.js·tabs.js·game.html·journey.js), 7
+- 남음: 4의 화면 파일 조문 연결(index.html·steps.js·tabs.js·cards.js), 7. 게임(game.html·journey.js)은 2026-09-27 앱에서 삭제
 
 ## 원문 대조로 확인된 틀린 곳 (앱 전체에 같은 오류가 퍼져 있음)
 

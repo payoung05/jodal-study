@@ -74,52 +74,11 @@ f.onload=()=>{ const w=f.contentWindow,d=w.document,errs=[];w.onerror=(m)=>errs.
  click($('.tab-btn[data-tab=search_tab]')); const si=$('#srchInput'); si.value='보증금'; si.dispatchEvent(new w.Event('input',{bubbles:true}));
  ok($$('#srchRes .srch-card').length>0,'검색 입력');
  click($('#srchFilters [data-f=p]')); ok(/실기/.test($('#srchHint').textContent)&&$('#srchFilters [data-f=p]').classList.contains('active'),'검색 필터');
- // ── 포스트잇·게임
+ // ── 포스트잇
  const n0=$$('.sticky-note').length; click($('#new-sticky-btn')); ok($$('.sticky-note').length===n0+1,'포스트잇 추가');
- click($('.tab-btn[data-tab=game_tab]')); ok(/game\.html$/.test($('#gameFrame').src),'게임 iframe = game.html');
  ok(!d.querySelector('[onclick],[oninput],[onblur],[onmousedown]'),'화면에 onclick 문자열 없음');
  ok(errs.length===0,'JS 오류 없음 '+errs.join('|'));
  }catch(x){log.push('ERROR '+x.stack)}
  out.textContent=log.join('\n');
- gameTest();
 };
-// ── 조달 여정: 정답만 골라 20단계 완주 → 다음 판은 단계 카드를 계속 틀려 하트 3개 소진
-function gameTest(){
- const g=document.createElement('iframe');g.src='game.html';g.style.cssText='width:820px;height:900px';document.body.appendChild(g);
- g.onload=()=>{ const w=g.contentWindow,d=w.document,$=s=>d.querySelector(s),errs=[];w.onerror=m=>errs.push(m);
-  const J=()=>w.eval('J'), STEPS=w.eval('STEPS'), vis=id=>d.getElementById(id).style.display!=='none';
-  const click=el=>el.dispatchEvent(new w.MouseEvent('click',{bubbles:true}));
-  let asked=0, kinds={}, round=1;
-  const only=new URLSearchParams(location.search).get('kind'); // test.html?kind=용역 → 그 업종 사건만
-  if(only) w.eval("SCN.splice(0,SCN.length,...SCN.filter(s=>s.kind==='"+only+"'))");
-  $('.tab[data-v=board]').click(); click($('#bStartBtn'));
-  ok(/— /.test($('#scnBrief').textContent),'여정: 사건 한 건 배정');
-  const tick=setInterval(()=>{ try{
-   const j=J();
-   if(vis('bResult')){ clearInterval(tick);
-    if(round===1){ ok(j.idx===j.tasks.length&&j.hearts===3&&/완주/.test($('#bSub').textContent),'여정: '+j.S.kind+'·'+j.S.method+' 사건 '+j.tasks.length+'개 업무 완주 (문제 '+asked+'개: '+Object.keys(kinds).join('·')+')');
-     ok(kinds.multi&&kinds.num&&(kinds.ox||kinds.mc),'여정: 서류 고르기·계산·판단 모두 출제');
-     round=2; click($('#bRetry')); return setTimeout(()=>{ // 틀린 카드만 3번 → 게임 끝
-      for(let k=0;k<3;k++){const b=[...d.querySelectorAll('.pcard:not([disabled])')].find(b=>b.textContent!==J().tasks[J().idx].n); if(b) click(b);}
-      setTimeout(()=>{ ok(vis('bResult')&&J().hearts===0,'여정: 단계 순서 3번 틀리면 끝');
-       click($('#bRetry')); click($('[data-quit=board]')); ok(vis('bLobby')&&!vis('bPlay'),'여정: 그만하기 → 대기실');
-       $('.tab[data-v=speed]').click(); click($('#startBtn')); w.postMessage('jodal:leave','*');
-       setTimeout(()=>{ ok(!w.eval('timer')&&vis('lobby'),'스피드전: 앱에서 나가면 멈춤');
-       ok(errs.length===0,'여정: JS 오류 없음 '+errs.join('|')); out.textContent=log.join('\n'); },100); },1500);
-     },300);
-    }
-   }
-   if(j.busy) return;
-   if(vis('pickBox')){ const b=[...d.querySelectorAll('.pcard')].find(b=>b.textContent===j.tasks[j.idx].n); if(b&&!b.classList.contains('right')) click(b); return; }
-   if(!vis('qPanel')) return;
-   if(j.answered){ const nb=$('#bExp .next'); if(nb) click(nb); return; }
-   const q=w.eval('bCur'); asked++; kinds[q.t]=1;
-   const btns=[...d.querySelectorAll('#bA .choice')];
-   if(q.t==='ox') click(btns.find(b=>b.textContent===(q.a?'O':'X')));
-   else if(q.t==='mc') click(btns.find(b=>b.textContent===q.c[q.a]));
-   else if(q.t==='multi'){ q.a.forEach(i=>click(btns.find(b=>b.textContent===q.c[i]))); click($('#bA .go')); }
-   else { $('#bA input').value=String(Array.isArray(q.a)?q.a[0]:q.a); click($('#bA .submit')); }
-  }catch(x){clearInterval(tick);log.push('ERROR 여정 '+x.stack);out.textContent=log.join('\n');} },120);
- };
-}
 </script>

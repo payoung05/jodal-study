@@ -603,9 +603,7 @@ tbody tr:hover>td,tbody tr:hover>th{background:var(--surface)}
 .srch-card .ans b{color:var(--text)}
 .srch-empty{padding:48px 0;font-size:16px;color:var(--text-3)}
 
-/* ── 게임 · 포스트잇 · 메모 칸 ── */
-#game_tab{background:var(--bg)}
-#gameFrame{display:block;width:100%;height:100%;border:0}
+/* ── 포스트잇 · 메모 칸 ── */
 #new-sticky-btn{position:fixed;right:24px;bottom:24px;z-index:9999;width:48px;height:48px;border:0;border-radius:50%;background:var(--accent);color:#fff;font-size:26px;line-height:1;box-shadow:var(--shadow);cursor:pointer}
 #new-sticky-btn:hover{background:var(--accent-strong)}
 .sticky-note{position:fixed;display:flex;flex-direction:column;width:200px;border-radius:var(--r-md);background:var(--memo);box-shadow:var(--shadow);overflow:hidden;user-select:none}
