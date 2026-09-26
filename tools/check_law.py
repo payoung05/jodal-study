@@ -215,6 +215,9 @@ def closest(arts, kind, app_snip):
 
 
 # ── 앱에서 대조할 문구 모으기 ─────────────────────────────
+NEG = re.compile(r'(?:않은|않는|아닌|잘못된|어긋나는|볼\s*수\s*없는|거리가\s*먼|틀린)\s*것')  # 부정형 필기 문제
+
+
 def app_items():
     items = []
     page = (R / 'index.html').read_text(encoding='utf-8')
@@ -236,8 +239,8 @@ console.log(JSON.stringify({q:c.QUESTIONS,p:c.PRAC_QUESTIONS,r:c.LAW_REFS}))''']
         if not lr: return rf
         if lr.get('verdict') == 'image': return 'image'
         return rf + [(r['law'], str(r['jo'])) for r in lr.get('refs', []) if r['law'] in ALIAS]
-    for q in data['q']:  # 필기: 오답 보기는 일부러 틀린 값이라 빼고, 정답 보기 + 해설만
-        text = q['options'][q['answer']] + ' / ' + q['explanation']
+    for q in data['q']:  # 필기: 오답 보기는 일부러 틀린 값이라 빼고, 정답 보기 + 해설만. 부정형('옳지 않은 것')은 정답 보기도 틀린 문장이라 해설만
+        text = q['explanation'] if NEG.search(q['question']) else q['options'][q['answer']] + ' / ' + q['explanation']
         items.append((f'필기 {q["id"]}', text, linked(q, refs((q.get('basis') or '') + ' ' + q['explanation'])), calc(q)))
     for q in data['p']:
         text = q['modelAnswer'] + ' / ' + q['explanation']
