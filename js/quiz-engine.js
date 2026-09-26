@@ -38,15 +38,15 @@ function renderModeMenu(title,sub,modes,wrongCount){
   const cards=modes.map(m=>{
     const w=m.key==='wrong';
     return `<button class="menu-card" style="--mc:${m.color}" data-act="start" data-k="${m.key}"${w&&!wrongCount?' disabled':''}>
-      <span class="menu-ico"></span>
-      <span class="menu-body"><span class="menu-ttl">${m.label}${w&&wrongCount?` <span class="menu-n">(${wrongCount})</span>`:''}</span><span class="menu-desc">${m.desc}</span></span>
+      <span class="menu-ico">${(m.desc.match(/(\d+)문제/)||[])[1]||''}</span>
+      <span class="menu-body"><span class="menu-ttl">${m.label}${w&&wrongCount?` <span class="menu-n">(${wrongCount})</span>`:''}</span><span class="menu-desc">${m.desc.replace(/^\d+문제\s*·\s*/,'').replace(/\s*·\s*\d+문제$/,'')}</span></span>
       <span class="menu-go" aria-hidden="true">›</span></button>`;
   }).join('');
   return `<div class="page-title">${title}</div><div class="page-sub">${sub}</div><div class="menu-list">${cards}</div>`;
 }
 function solveHead(title,sub,done,total){
   return `<div class="qz-hd">
-    <div class="qz-hd-row"><div class="qz-title">${title}</div><button class="btn btn-sm c-ink" data-act="go" data-to="select">← 모드 변경</button></div>
+    <div class="qz-hd-row"><div class="qz-title">${title}</div><button class="btn btn-sm c-ink" data-act="go" data-to="select">다른 모드 고르기</button></div>
     <div class="qz-sub">${sub}</div>
     <div class="qz-bar"><div class="qz-bar-fill" style="width:${total?done/total*100:0}%"></div></div>
   </div>`;
@@ -228,8 +228,8 @@ function wnRender(){
   root.innerHTML=`<div class="qz-hd">
       <div class="qz-title">오답노트 <span class="n">${ids.length}</span></div>
       <div class="qz-sub">최근 틀린 문제부터 표시 · 모의고사 채점 시 자동 추가됨</div>
-      <div class="wn-tools"><button class="btn c-red" data-act="clear">↺ 전체 삭제</button></div>
-    </div>${cards}`;
+    </div>${cards}
+    <div class="wn-tools"><button class="wn-clear" data-act="clear">오답노트 모두 지우기</button></div>`;
 }
 (function(){
   const root=document.getElementById('wn_root'); if(!root) return;

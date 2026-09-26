@@ -6,7 +6,8 @@ function switchTab(id, btn) {
   document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById(id).classList.add('active');
-  if (btn) btn.classList.add('active');
+  document.body.dataset.mode = document.getElementById(id).dataset.mode || '';
+  document.querySelectorAll('.tab-btn[data-tab="'+id+'"]').forEach(function(b){ b.classList.add('active'); });
   sideMemoFor(id);
   var gf = document.getElementById('gameFrame');   // 게임에서 나가면 시간제 게임 멈춤
   if (id !== 'game_tab' && gf && gf.contentWindow) gf.contentWindow.postMessage('jodal:leave', '*');
@@ -49,44 +50,47 @@ function setFlowFilter(f){ FLOW_FILTER=f; renderFlow(); }
 // ═══════════════════════════════════════
 // 계약 흐름 — 통독형 페이지 (STEP 8 + SVG 도해)
 // ═══════════════════════════════════════
-var FE_C = {ink:'#191F28', dim:'#4E5968', soft:'#8B95A1', line:'#191F28', red:'#E5484D', gs:'#FFC94D', mp:'#86D4A0', yy:'#9DB8FF', bg:'#FFFFFF', surf:'#F2F4F6', blue:'#1F8A4C', gold:'#D9730D'};
+var FE_C = {ink:'#191F28', dim:'#4E5968', soft:'#6B7684', line:'#E5E8EB', red:'#E5484D', gs:'#FFD66B', mp:'#8FD9A8', yy:'#A9C1FF', bg:'#FFFFFF', surf:'#FFFFFF',
+  b9:'#0F3D91', b7:'#1F55C7', hi:'#3268E8', b3:'#8DB0F4', b2:'#C9D9FB', b1:'#EAF1FE', blue:'#1F8A4C', gold:'#D9730D'};
 function feSvg(w,h,inner){ return '<svg viewBox="0 0 '+w+' '+h+'" width="100%" role="img" xmlns="http://www.w3.org/2000/svg" class="fe-svg">'+inner+'</svg>'; }
 function feT(x,y,s,o){ o=o||{}; return '<text x="'+x+'" y="'+y+'" font-size="'+(o.fs||14)+'" font-weight="'+(o.fw||500)+'" fill="'+(o.c||FE_C.ink)+'" text-anchor="'+(o.a||'start')+'"'+(o.op?' opacity="'+o.op+'"':'')+'>'+s+'</text>'; }
-function feBox(x,y,w,h,fill,stroke){ return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+(fill||FE_C.bg)+'" stroke="'+(stroke||FE_C.line)+'" stroke-width="2"/>'; }
-function feArrow(x1,y1,x2,y2){ return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+FE_C.ink+'" stroke-width="2"/><polygon points="'+x2+','+y2+' '+(x2-8)+','+(y2-5)+' '+(x2-8)+','+(y2+5)+'" fill="'+FE_C.ink+'"/>'; }
+// 둥근 상자: 흰 상자만 옅은 테두리, 칠한 상자는 테두리 없음
+function feBox(x,y,w,h,fill){ fill=fill||FE_C.bg; return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="12" fill="'+fill+'"'+(fill===FE_C.bg?' stroke="'+FE_C.line+'" stroke-width="1.5"':'')+'/>'; }
+function feArrow(x1,y1,x2,y2){ return '<line x1="'+x1+'" y1="'+y1+'" x2="'+(x2-6)+'" y2="'+y2+'" stroke="'+FE_C.b3+'" stroke-width="2" stroke-linecap="round"/><polygon points="'+x2+','+y2+' '+(x2-9)+','+(y2-5)+' '+(x2-9)+','+(y2+5)+'" fill="'+FE_C.b3+'"/>'; }
+function feDot(cx,cy,r,fill){ return '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+fill+'"/>'; }
 
 // 01 준비: 금액 파이프라인
 function feFigPre(){
-  var items=[['추정가격','부가세 제외','계약방법·공고기간 결정'],['기초금액','설계금액 기반','복수예비가격 ±2%'],['예정가격','비공개','낙찰자 결정 기준'],['낙찰금액','낙찰률=낙찰÷예정','70% 미만은 저가낙찰'],['계약금액','= 낙찰금액 (부가세 포함)','보증금·지체상금의 기준']];
+  var items=[['추정가격','부가세 제외','계약방법·공고기간 결정'],['기초금액','설계·거래실례가격 등','복수예비가격 ±2%'],['예정가격','비공개','낙찰자 결정 기준'],['낙찰금액','낙찰률=낙찰÷예정','70% 미만은 저가낙찰'],['계약금액','= 낙찰금액 (부가세 포함)','보증금·지체상금의 기준']];
   var s='', W=880, bw=150, gap=30, x0=10, y=40;
   items.forEach(function(it,i){
     var x=x0+i*(bw+gap);
-    s+=feBox(x,y,bw,60,i===2?FE_C.ink:FE_C.bg);
+    s+=feBox(x,y,bw,60,i===2?FE_C.hi:FE_C.b1);
     s+=feT(x+bw/2,y+27,it[0],{fs:17,fw:800,a:'middle',c:i===2?'#fff':FE_C.ink});
     s+=feT(x+bw/2,y+47,it[1],{fs:12,a:'middle',c:i===2?'#fff':FE_C.dim});
     s+=feT(x+bw/2,y+90,it[2],{fs:12,a:'middle',c:FE_C.dim});
     if(i<items.length-1) s+=feArrow(x+bw+2,y+30,x+bw+gap-2,y+30);
   });
-  s+='<line x1="10" y1="150" x2="'+(W-10)+'" y2="150" stroke="'+FE_C.ink+'" stroke-width="1" opacity=".25"/>';
-  s+=feT(10,175,'수요 발생 → 예산 확보 → 발주문서 → 계약방법 결정 → 사전규격공개(5천만↑, 5일) → 입찰공고(7일) → 개찰·평가 → 낙찰',{fs:13,c:FE_C.dim});
+  s+='<line x1="10" y1="150" x2="'+(W-10)+'" y2="150" stroke="'+FE_C.line+'" stroke-width="1"/>';
+  s+=feT(10,175,'수요 발생 → 예산 확보 → 발주문서 → 계약방법 결정 → 사전규격공개(물품·용역, 5일) → 입찰공고(7일) → 개찰·평가 → 낙찰',{fs:13,c:FE_C.dim});
   return feSvg(W,190,s);
 }
 // 02 체결: 보증금 비율 막대
 function feFigSign(){
-  var rows=[['입찰보증금','입찰금액',5,FE_C.surf],['계약보증금 (공사 포함)','계약금액',10,FE_C.mp],['공사이행보증서','계약금액',40,FE_C.gs],['저가낙찰 이행보증 (예정가 70% 미만)','계약금액',50,FE_C.red]];
+  var rows=[['입찰보증금','입찰금액',5,FE_C.b2],['계약보증금 (공사 포함)','계약금액',10,FE_C.b3],['공사이행보증서','계약금액',40,FE_C.hi],['저가낙찰 이행보증 (예정가 70% 미만)','계약금액',50,FE_C.b9]];
   var s='', W=880, lx=300, maxw=520, rh=44, y0=14;
   rows.forEach(function(r,i){
     var y=y0+i*rh; var w=maxw*r[2]/50;
     s+=feT(lx-12,y+22,r[0],{fs:14,fw:700,a:'end'});
     s+=feT(lx-12,y+38,r[1]+'의',{fs:11,a:'end',c:FE_C.soft});
-    s+='<rect x="'+lx+'" y="'+(y+6)+'" width="'+w+'" height="26" fill="'+r[3]+'" stroke="'+FE_C.ink+'" stroke-width="2"/>';
+    s+='<rect x="'+lx+'" y="'+(y+6)+'" width="'+w+'" height="26" fill="'+r[3]+'" rx="6"/>';
     s+=feT(lx+w+10,y+25,r[2]+'%',{fs:18,fw:800,c:i===4?FE_C.red:FE_C.ink});
   });
   return feSvg(W,y0+rows.length*rh+4,s);
 }
 // 03 착수: 선금 계단 + 70% 한도
 function feFigStart(){
-  var s='', W=880; var cols=[['공사',[['100억↑',30],['20~100억',40],['20억↓',50]],FE_C.gs],['물품 · 용역',[['10억↑',30],['3~10억',40],['3억↓',50]],FE_C.mp]];
+  var s='', W=880; var cols=[['공사',[['100억↑',30],['20~100억',40],['20억↓',50]],FE_C.gs],['물품 제조 · 용역',[['10억↑',30],['3~10억',40],['3억↓',50]],FE_C.mp]];
   var chartH=160, base=200, unit=chartH/70;
   s+='<line x1="60" y1="'+(base-70*unit)+'" x2="'+(W-20)+'" y2="'+(base-70*unit)+'" stroke="'+FE_C.red+'" stroke-width="2" stroke-dasharray="6 4"/>';
   s+=feT(W-20,base-70*unit-8,'선금 총 한도 70%',{fs:13,fw:700,c:FE_C.red,a:'end'});
@@ -95,135 +99,134 @@ function feFigStart(){
     s+=feT(x0,base+44,c[0],{fs:15,fw:800});
     c[1].forEach(function(b,bi){
       var x=x0+bi*120, h=b[1]*unit;
-      s+='<rect x="'+x+'" y="'+(base-h)+'" width="96" height="'+h+'" fill="'+c[2]+'" stroke="'+FE_C.ink+'" stroke-width="2"/>';
+      s+='<rect x="'+x+'" y="'+(base-h)+'" width="96" height="'+h+'" fill="'+c[2]+'" rx="6"/>';
       s+=feT(x+48,base-h-8,b[1]+'%',{fs:16,fw:800,a:'middle'});
       s+=feT(x+48,base+20,b[0],{fs:12,a:'middle',c:FE_C.dim});
     });
   });
-  s+=feT(60,base+44+22,'의무지급률: 금액이 작을수록 높다 · 요청 후 14일 내 지급 · 선급금보증서(동액) 필수',{fs:12,c:FE_C.dim});
+  s+=feT(60,base+44+22,'최초 신청 시 지급률(이 금액까지): 금액이 작을수록 높다 · 청구 후 14일 내 지급 · 선급금보증서(선금액 + 약정이자 이상)',{fs:12,c:FE_C.dim});
   return feSvg(W,base+80,s);
 }
 // 04 이행: 분기도
 function feFigPerform(){
   var s='', W=880, y=40;
-  s+='<line x1="20" y1="'+y+'" x2="'+(W-20)+'" y2="'+y+'" stroke="'+FE_C.ink+'" stroke-width="3"/>';
+  s+='<line x1="20" y1="'+y+'" x2="'+(W-20)+'" y2="'+y+'" stroke="'+FE_C.b2+'" stroke-width="4" stroke-linecap="round"/>';
   s+=feT(20,y-14,'계약이행 본선  ·  기성대가 30일마다  ·  시공일지·중간보고',{fs:13,fw:700});
-  var br=[['설계변경','최초 계약 단가 적용','신규 비목은 협의',FE_C.surf],['물가변동(ESC)','90일 경과 + 3% 변동','둘 다 충족해야 청구',FE_C.surf],['지체 발생','공사 0.05 / 물품 0.075 / 용역 0.125 %·일','한도 30% · 불가항력 면제',FE_C.red],['계약 해지','보증금 국고 귀속','기성 정산 후 재발주',FE_C.surf]];
+  var br=[['설계변경','늘어난 물량은 계약단가','신규 비목은 당시 단가×낙찰률',FE_C.surf],['물가변동(ESC)','90일 경과 + 3% 변동','둘 다 충족해야 청구',FE_C.surf],['지체 발생','공사 0.05·물품 0.075·용역 0.125%/일','한도 30% · 불가항력 면제',FE_C.red],['계약 해지','보증금 국고 귀속','기성 정산 후 종결',FE_C.surf]];
   br.forEach(function(b,i){
-    var x=40+i*212;
-    s+='<line x1="'+(x+80)+'" y1="'+y+'" x2="'+(x+80)+'" y2="'+(y+40)+'" stroke="'+FE_C.ink+'" stroke-width="2"/>';
-    s+='<circle cx="'+(x+80)+'" cy="'+y+'" r="5" fill="'+FE_C.ink+'"/>';
-    s+=feBox(x,y+40,160,78,b[3]);
-    var dark=b[3]===FE_C.red;
-    s+=feT(x+80,y+64,b[0],{fs:16,fw:800,a:'middle',c:dark?'#fff':FE_C.ink});
-    s+=feT(x+80,y+84,b[1],{fs:11,a:'middle',c:dark?'#fff':FE_C.dim});
-    s+=feT(x+80,y+102,b[2],{fs:11,a:'middle',c:dark?'#fff':FE_C.dim});
+    var x=24+i*212, bw=196, mx=x+bw/2, dark=b[3]===FE_C.red;
+    s+='<line x1="'+mx+'" y1="'+y+'" x2="'+mx+'" y2="'+(y+40)+'" stroke="'+FE_C.b2+'" stroke-width="2"/>';
+    s+=feDot(mx,y,6,FE_C.hi);
+    s+=feBox(x,y+40,bw,78,dark?FE_C.hi:FE_C.bg);
+    s+=feT(mx,y+64,b[0],{fs:16,fw:800,a:'middle',c:dark?'#fff':FE_C.ink});
+    s+=feT(mx,y+84,b[1],{fs:11.5,a:'middle',c:dark?'#fff':FE_C.dim});
+    s+=feT(mx,y+102,b[2],{fs:11.5,a:'middle',c:dark?'#fff':FE_C.dim});
   });
-  s+=feT(40,y+150,'변경은 전부 변경계약서(서면). 구두 합의는 효력 없음',{fs:13,fw:700,c:FE_C.red});
+  s+=feT(24,y+150,'변경은 전부 변경계약서(서면). 구두 합의는 효력 없음',{fs:13,fw:700,c:FE_C.red});
   return feSvg(W,y+170,s);
 }
 // 05 검사: 타임라인 14일
 function feFigInspect(){
   var s='', W=880, y=70;
   var pts=[[40,'이행완료 통지'],[330,'검사 (14일 이내)'],[560,'검사조서'],[820,'대금 청구 가능']];
-  s+='<line x1="40" y1="'+y+'" x2="820" y2="'+y+'" stroke="'+FE_C.ink+'" stroke-width="3"/>';
-  pts.forEach(function(p,i){ s+='<circle cx="'+p[0]+'" cy="'+y+'" r="8" fill="'+(i===1?FE_C.red:FE_C.bg)+'" stroke="'+FE_C.ink+'" stroke-width="2"/>'; s+=feT(p[0],y+32,p[1],{fs:13,fw:700,a:i===0?'start':i===3?'end':'middle'}); });
-  s+='<rect x="140" y="'+(y-46)+'" width="90" height="28" fill="'+FE_C.red+'"/>'+feT(185,y-27,'14일',{fs:16,fw:800,a:'middle',c:'#fff'});
+  s+='<line x1="40" y1="'+y+'" x2="820" y2="'+y+'" stroke="'+FE_C.b2+'" stroke-width="4" stroke-linecap="round"/>';
+  pts.forEach(function(p,i){ s+='<circle cx="'+p[0]+'" cy="'+y+'" r="8" fill="'+(i===1?FE_C.hi:FE_C.bg)+'" stroke="'+(i===1?FE_C.hi:FE_C.b3)+'" stroke-width="3"/>'; s+=feT(p[0],y+32,p[1],{fs:13,fw:700,a:i===0?'start':i===3?'end':'middle'}); });
+  s+='<rect x="140" y="'+(y-46)+'" width="90" height="28" rx="8" fill="'+FE_C.hi+'"/>'+feT(185,y-27,'14일',{fs:16,fw:800,a:'middle',c:'#fff'});
   s+=feT(690,y-26,'불합격 → 보완·재검사',{fs:12,a:'middle',c:FE_C.dim});
-  s+=feT(40,y+70,'검사 ≠ 검수: 물품은 납품검수(수량·규격), 공사는 준공검사, 용역은 완료보고 검사',{fs:12,c:FE_C.dim});
+  s+=feT(40,y+70,'공사·물품·용역 모두 같은 검사 절차(국가계약법 제14조) · 불합격이면 보완 후 재검사',{fs:12,c:FE_C.dim});
   return feSvg(W,y+90,s);
 }
 // 06 대금: 5일 · 3일 · 30일
 function feFigPay(){
   var s='', W=880, y=60;
   function tl(y,a,b,days,note,red){
-    s+='<line x1="60" y1="'+y+'" x2="'+(W-60)+'" y2="'+y+'" stroke="'+FE_C.ink+'" stroke-width="2"/>';
-    s+='<circle cx="60" cy="'+y+'" r="7" fill="'+FE_C.bg+'" stroke="'+FE_C.ink+'" stroke-width="2"/><circle cx="'+(W-60)+'" cy="'+y+'" r="7" fill="'+FE_C.ink+'"/>';
+    s+='<line x1="60" y1="'+y+'" x2="'+(W-60)+'" y2="'+y+'" stroke="'+FE_C.b2+'" stroke-width="4" stroke-linecap="round"/>';
+    s+='<circle cx="60" cy="'+y+'" r="7" fill="'+FE_C.bg+'" stroke="'+FE_C.b3+'" stroke-width="3"/><circle cx="'+(W-60)+'" cy="'+y+'" r="7" fill="'+FE_C.hi+'"/>';
     s+=feT(60,y+26,a,{fs:13,fw:700}); s+=feT(W-60,y+26,b,{fs:13,fw:700,a:'end'});
-    s+='<rect x="'+(W/2-45)+'" y="'+(y-16)+'" width="90" height="32" fill="'+(red?FE_C.red:FE_C.ink)+'"/>'+feT(W/2,y+6,days,{fs:17,fw:800,a:'middle',c:'#fff'});
+    s+='<rect x="'+(W/2-45)+'" y="'+(y-16)+'" width="90" height="32" rx="8" fill="'+(red?FE_C.hi:FE_C.b7)+'"/>'+feT(W/2,y+6,days,{fs:17,fw:800,a:'middle',c:'#fff'});
     s+=feT(W/2,y+44,note,{fs:12,a:'middle',c:FE_C.dim});
   }
   tl(y,'검사완료일 · 청구일','대금 지급','5일','초과 시 지연이자 (금융기관 대출평균금리)',true);
   tl(y+95,'불가항력 사유 소멸','대금 지급','3일','천재지변 등으로 지급 불가했던 경우');
-  tl(y+190,'장기계속계약 기성','기성대가 지급','30일마다','선금 수령분은 비율만큼 공제');
+  tl(y+190,'기성 부분 (나눠서 지급)','기성대가 지급','30일마다','선금 수령분은 비율만큼 공제');
   return feSvg(W,y+250,s);
 }
 // 07 하자: 담보기간 막대
 function feFigDefect(){
-  var rows=[['철근콘크리트 · 철골',10],['방수 · 방습',5],['배관 · 전기',2],['도장 · 타일 마감',1]];
+  var rows=[['대형 교량·터널 구조부',10],['방수',3],['급배수·냉난방 설비',2],['미장·타일·도장',1]];
   var s='', W=880, lx=230, maxw=560, rh=40, y0=12;
   rows.forEach(function(r,i){ var y=y0+i*rh, w=maxw*r[1]/10;
     s+=feT(lx-12,y+24,r[0],{fs:14,fw:700,a:'end'});
-    s+='<rect x="'+lx+'" y="'+(y+6)+'" width="'+w+'" height="26" fill="'+(i===0?FE_C.gs:FE_C.surf)+'" stroke="'+FE_C.ink+'" stroke-width="2"/>';
+    s+='<rect x="'+lx+'" y="'+(y+6)+'" width="'+w+'" height="26" fill="'+[FE_C.b9,FE_C.hi,FE_C.b3,FE_C.b2][i]+'" rx="6"/>';
     s+=feT(lx+w+10,y+25,r[1]+'년',{fs:17,fw:800});
   });
   var yb=y0+rows.length*rh+16;
-  s+='<line x1="20" y1="'+yb+'" x2="'+(W-20)+'" y2="'+yb+'" stroke="'+FE_C.ink+'" stroke-width="1" opacity=".25"/>';
+  s+='<line x1="20" y1="'+yb+'" x2="'+(W-20)+'" y2="'+yb+'" stroke="'+FE_C.line+'" stroke-width="1"/>';
   s+=feT(20,yb+28,'하자보수보증금',{fs:13,fw:700});
-  var bs=[['공사','공종별 2~10%',FE_C.gs],['물품','3% (필요 시)',FE_C.mp],['용역','2% (필요 시)',FE_C.yy]];
-  bs.forEach(function(b,i){ var x=180+i*230; s+='<rect x="'+x+'" y="'+(yb+12)+'" width="14" height="14" fill="'+b[2]+'" stroke="'+FE_C.ink+'" stroke-width="2"/>'; s+=feT(x+22,yb+24,b[0]+'  '+b[1],{fs:13}); });
-  s+=feT(20,yb+56,'담보기간 종료 → 보증금 반환. 보수 거부 시 보증금으로 발주기관이 직접 집행',{fs:12,c:FE_C.dim});
+  var bs=[['공사','공종별 2~5%',FE_C.gs],['물품','3% (필요 시)',FE_C.mp],['용역','2% (필요 시)',FE_C.yy]];
+  bs.forEach(function(b,i){ var x=180+i*230; s+='<rect x="'+x+'" y="'+(yb+12)+'" width="14" height="14" fill="'+b[2]+'" rx="6"/>'; s+=feT(x+22,yb+24,b[0]+'  '+b[1],{fs:13}); });
+  s+=feT(20,yb+56,'담보기간 종료 → 보증금 반환 · 보수 안 하면 보증금 국고 귀속(보수 예산이 없으면 보수에 직접 사용)',{fs:12,c:FE_C.dim});
   return feSvg(W,yb+70,s);
 }
 // 08 사후: 이의신청 흐름
 function feFigAfter(){
   var s='', W=880, y=56;
-  var st=[['이의신청','행위일 30일 / 안 날 25일'],['중앙관서 심사','15일 이내 통지'],['재심 청구','통지 후 30일'],['분쟁조정위 조정','50일 이내 · 재판상 화해 효력'],['소송','행정·민사']];
+  var st=[['이의신청','행위일 30일 / 안 날 25일'],['중앙관서 심사','15일 이내 통지'],['재심 청구','통지 후 30일'],['분쟁조정위 조정','15일 내 이의 없으면 재판상 화해'],['소송','행정·민사']];
   var bw=150, gap=30;
   st.forEach(function(p,i){ var x=20+i*(bw+gap);
-    s+=feBox(x,y,bw,54,i===3?FE_C.ink:FE_C.bg);
+    s+=feBox(x,y,bw,54,i===3?FE_C.hi:FE_C.b1);
     s+=feT(x+bw/2,y+24,p[0],{fs:15,fw:800,a:'middle',c:i===3?'#fff':FE_C.ink});
     s+=feT(x+bw/2,y+43,p[1],{fs:10.5,a:'middle',c:i===3?'#fff':FE_C.dim});
     if(i<st.length-1) s+=feArrow(x+bw+2,y+27,x+bw+gap-2,y+27);
   });
   s+=feT(20,y+90,'부정당업자 제재: 담합·허위서류·불이행 → 최대 2년 입찰참가 제한 (기존 계약은 자동 무효 아님)',{fs:13,fw:700,c:FE_C.red});
-  s+=feT(20,y+114,'부당이득 → 환수 + 가산금 · 정산금액 최종 확정 · 계약이행실적증명 발급',{fs:12,c:FE_C.dim});
+  s+=feT(20,y+114,'부당이득 → 환수 · 정산금액 최종 확정 · 계약이행실적증명 발급',{fs:12,c:FE_C.dim});
   return feSvg(W,y+130,s);
 }
 
 var FE_EV = {
-  sungum:{ n:'선금 지급', docs:['선금 청구서','선급금보증서 (선금과 동액)'],
-    rows:[['한도','계약금액의 70% 초과 불가'],['공사','100억↑ 30% / 20~100억 40% / 20억↓ 50%'],['물품','10억↑ 30% / 3~10억 40% / 3억↓ 50%'],['용역','10억↑ 30% / 3~10억 40% / 3억↓ 50%'],['기한','요청 후 14일 이내 지급']]},
+  sungum:{ n:'선금 지급', docs:['선금 청구서','선급금보증서 (선금액 + 약정이자 이상)'],
+    rows:[['한도','계약금액의 70% 초과 불가'],['공사','100억↑ 30% / 20~100억 40% / 20억↓ 50%'],['물품 제조','10억↑ 30% / 3~10억 40% / 3억↓ 50%'],['용역','10억↑ 30% / 3~10억 40% / 3억↓ 50%'],['기한','요청 후 14일 이내 지급']]},
   haeje:{ n:'계약 해제', docs:['계약 해제 통보서','계약보증금 귀속 통보서'],
     rows:[['조건','이행 착수 전 또는 이행 불능'],['공사·물품·용역','계약보증금(계약금액의 10%) 국고 귀속'],['공사 이행보증서','보증기관이 이행하거나 보증금(40%) 납부'],['제재','손해배상·부정당업자 제재 가능']]},
   design:{ n:'설계변경 / 규격·과업 변경', docs:['설계변경 계획서·수량 산출서 (공사)','과업변경지시서 (용역)','변경계약서'],
-    rows:[['공사','현장조건 불일치·발주자 요구 → 수량·단가 재산출 → 계약금액 조정'],['물품','사양·규격 변경 합의 → 단가·수량 조정'],['용역','과업지시서 수정 → 과업 추가·삭제·변경'],['단가','최초 계약 단가 적용, 신규 비목은 협의']]},
+    rows:[['공사','현장조건 불일치·발주자 요구 → 수량·단가 재산출 → 계약금액 조정'],['물품','사양·규격 변경 합의 → 단가·수량 조정'],['용역','과업지시서 수정 → 과업 추가·삭제·변경'],['단가','늘어난 물량은 계약단가(예정가격단가가 더 낮으면 그 단가), 신규 비목은 당시 단가×낙찰률']]},
   esc:{ n:'물가변동 (ESC)', docs:['물가변동 조정 신청서','지수산출내역서 (ES) 또는 품목별 조정내역서','변경계약서'],
-    rows:[['조건','계약 후 90일 경과 + 지수 3% 이상 변동'],['방법','품목조정률 또는 지수조정률(ES)'],['공사','자재·노무·경비 지수 적용'],['용역','노무비 비중 높은 용역 적용'],['효력','조정기준일 이후 이행분 소급']]},
+    rows:[['조건','계약 후 90일 경과 + 지수 3% 이상 변동'],['방법','품목조정률 또는 지수조정률(ES)'],['공사','자재·노무·경비 지수 적용'],['용역','같은 요건 적용 · 단순노무용역은 노임 변동 시 노무비만 조정'],['효력','조정기준일 이후 이행분 소급']]},
   jiche:{ n:'지체 → 지체상금', docs:['지체상금 계산서 (발주기관)','지체 소명서 (면제 신청 시)'],
-    rows:[['공사','0.05% / 일 (=1/2000)'],['물품','0.075% / 일'],['용역','0.125% / 일'],['한도','계약금액의 30% · 초과 시 해지 가능'],['면제','천재지변·불가항력·발주자 귀책은 지체일수 제외']]},
+    rows:[['공사','0.05% / 일 (=1/2000)'],['물품','0.075% / 일'],['용역','0.125% / 일'],['한도','계약금액의 30% · 계약보증금 상당액에 이르면 해제·해지 가능'],['면제','천재지변·불가항력·발주자 귀책은 지체일수 제외']]},
   haiji:{ n:'계약 해지', docs:['계약 해지 통보서','기성금·납품분 정산서','부정당업자 제재 요청서 (필요 시)'],
-    rows:[['조건','계속 지체·부정당행위·부도·이행포기'],['공사','기성 정산 후 종결, 잔여 공사 재발주'],['물품','납품분 정산, 미납품분 손해배상'],['용역','완료 부분 정산, 미완료 과업 손해배상'],['제재','입찰참가 제한 1개월~2년']]},
+    rows:[['조건','계속 지체·부정당행위·부도·이행포기'],['공사','기성 정산 후 종결, 계약보증금 국고 귀속'],['물품','납품분 정산, 계약보증금 국고 귀속'],['용역','완료 부분 정산, 계약보증금 국고 귀속'],['제재','입찰참가 제한 1개월~2년']]},
   recheck:{ n:'검사 불합격 → 재검사', docs:['불합격 통보서','재시공·반품 요청서','보완 완료 확인서'],
     rows:[['공사','시공 불량 → 재시공 후 재검사'],['물품','수량 부족·품질 불량 → 반품 후 재납품'],['용역','산출물 미흡 → 보완 후 재검수'],['기한','기한 내 보완, 초과 시 지체상금']]},
   haja:{ n:'하자보수', docs:['하자 보수 요청서 (발주기관→업체)','하자보수 착수 신고서','하자보수 완료 확인서'],
-    rows:[['공사','철근콘크리트 10년 / 방수 5년 / 배관·전기 2년 / 마감 1년'],['물품','통상 1년'],['용역','3~6개월 (SW 등 별도 약정)'],['미이행','보수 거부 시 보증금으로 직접 집행']]},
+    rows:[['공사','대형 구조부 10년 / 방수 3년 / 급배수 설비 2년 / 미장·타일·도장 1년'],['물품','통상 1년'],['용역','1년 (별도 법률이 있으면 그에 따름)'],['미이행','하자보수보증금 국고 귀속 (보수 예산이 없으면 보수에 직접 사용)']]},
   dispute:{ n:'분쟁 → 조정', docs:['조정 신청서 (국가계약분쟁조정위원회)','증거서류·분쟁경위서'],
-    rows:[['신청','국가계약분쟁조정위원회'],['공사하자','공사하자심의위원회'],['효력','조정 성립 시 재판상 화해 효력']]},
+    rows:[['신청','국가계약분쟁조정위원회'],['효력','조정 후 15일 내 이의 없으면 재판상 화해 효력']]},
   jungsan:{ n:'정산 · 환수', docs:['최종 정산서','부당이득 환수 통보서 (필요 시)'],
-    rows:[['정산','설계변경·물가변동 모두 반영해 최종 확정'],['지연이자','지급기한 5일 초과 시 대출평균금리로 발생'],['부당이득','과다지급·부정수급 → 환수 + 가산금']]}
+    rows:[['정산','설계변경·물가변동 모두 반영해 최종 확정'],['지연이자','지급기한 5일 초과 시 대출평균금리로 발생'],['부당이득','과다지급·부정수급 → 환수']]}
 };
 
 // ─── 추가 도해: 계약방법 · 공고기간 · 지체상금 ───
 function feFigMethod(){
   var s='', W=880;
-  var cols=[['공사',FE_C.gs,[['종합공사','4억 이하'],['전문공사','2억 이하'],['그 밖의 공사','1.6억 이하']]],['물품',FE_C.mp,[['일반','2천만 이하'],['우대기업','1억 이하 (1인 견적 5천만)'],['MAS·혁신·우수제품','금액 무관 수의']]],['용역',FE_C.yy,[['일반','2천만 이하'],['우대기업','1억 이하 (1인 견적 5천만)'],['전문용역','협상에 의한 계약']]]];
+  var cols=[['공사',FE_C.gs,[['종합공사','4억 이하'],['전문공사','2억 이하'],['그 밖의 공사','1.6억 이하']]],['물품',FE_C.mp,[['일반','2천만 이하'],['우대기업 · 1인 견적 여성 등 5천만','1억 이하'],['혁신제품 · 우수조달물품','금액 무관 수의 가능']]],['용역',FE_C.yy,[['일반','2천만 이하'],['우대기업 · 1인 견적 여성 등 5천만','1억 이하'],['참고','협상계약은 경쟁 방식']]]];
   s+=feT(20,24,'수의계약 가능 한도 (추정가격 기준)',{fs:14,fw:700});
   cols.forEach(function(c,ci){ var x=20+ci*285;
-    s+='<rect x="'+x+'" y="38" width="265" height="30" fill="'+c[1]+'" stroke="'+FE_C.ink+'" stroke-width="2"/>'+feT(x+132,59,c[0],{fs:15,fw:800,a:'middle'});
-    c[2].forEach(function(r,ri){ var y=68+ri*40; s+='<rect x="'+x+'" y="'+y+'" width="265" height="40" fill="'+FE_C.bg+'" stroke="'+FE_C.ink+'" stroke-width="1"/>'; s+=feT(x+10,y+17,r[0],{fs:12,c:FE_C.dim}); s+=feT(x+10,y+33,r[1],{fs:14,fw:700}); });
+    s+='<rect x="'+x+'" y="38" width="265" height="30" rx="10" fill="'+c[1]+'"/>'+feT(x+132,59,c[0],{fs:15,fw:800,a:'middle'});
+    c[2].forEach(function(r,ri){ var y=68+ri*40; s+='<rect x="'+x+'" y="'+y+'" width="265" height="40" fill="'+FE_C.bg+'" stroke="'+FE_C.line+'" stroke-width="1"/>'; s+=feT(x+10,y+17,r[0],{fs:12,c:FE_C.dim}); s+=feT(x+10,y+33,r[1],{fs:14,fw:700}); });
   });
-  s+='<line x1="20" y1="205" x2="'+(W-20)+'" y2="205" stroke="'+FE_C.ink+'" stroke-width="1" opacity=".25"/>';
-  s+=feT(20,228,'그 위는 경쟁입찰 (원칙 일반경쟁 · 제한 · 지명)  →  공사는 100억↑ 종합심사낙찰제, 200억↑ 주요공종 PQ',{fs:13,fw:700});
-  s+=feT(20,250,'금액 판단은 항상 추정가격(부가세 제외). 사전규격공개는 5천만↑ 물품·용역, 최소 5일',{fs:12,c:FE_C.dim});
+  s+='<line x1="20" y1="205" x2="'+(W-20)+'" y2="205" stroke="'+FE_C.line+'" stroke-width="1"/>';
+  s+=feT(20,228,'그 위는 경쟁입찰 (원칙 일반경쟁 · 제한 · 지명)  →  공사는 100억↑ 종합심사낙찰제 · PQ는 발주기관 재량',{fs:13,fw:700});
+  s+=feT(20,250,'금액 판단은 항상 추정가격(부가세 제외). 사전규격공개는 물품·용역 경쟁입찰 5일(긴급 3일)',{fs:12,c:FE_C.dim});
   return feSvg(W,262,s);
 }
 function feFigNotice(){
-  var rows=[['일반 (마감일 전날 기산)',7,FE_C.surf],['긴급 · 재공고',5,FE_C.surf],['공사 현장설명 無 · 10억↓',7,FE_C.gs],['공사 현장설명 無 · 10~50억',15,FE_C.gs],['공사 현장설명 無 · 50억↑',40,FE_C.gs],['공사 PQ (현장설명일 전)',30,FE_C.gs],['협상계약 제안서 (단축 시 10일)',40,FE_C.yy],['국제입찰 (GPA)',40,FE_C.mp]];
+  var rows=[['일반 (마감일 전날 기산)',7,FE_C.surf],['긴급 · 재공고',5,FE_C.surf],['공사 현장설명 無 · 10억 미만',7,FE_C.gs],['공사 현장설명 無 · 10~50억',15,FE_C.gs],['공사 현장설명 無 · 50억↑',40,FE_C.gs],['공사 PQ (현장설명일 전)',30,FE_C.gs],['협상계약 제안서 (단축 시 10일)',40,FE_C.yy],['국제입찰 (GPA)',40,FE_C.mp]];
   var s='', W=880, lx=300, maxw=520, rh=36, y0=10;
   rows.forEach(function(r,i){ var y=y0+i*rh, w=maxw*r[1]/40;
     s+=feT(lx-12,y+23,r[0],{fs:13,fw:700,a:'end'});
-    s+='<rect x="'+lx+'" y="'+(y+6)+'" width="'+w+'" height="22" fill="'+r[2]+'" stroke="'+FE_C.ink+'" stroke-width="2"/>';
+    s+='<rect x="'+lx+'" y="'+(y+6)+'" width="'+w+'" height="22" rx="6" fill="'+r[2]+'"/>';
     s+=feT(lx+w+10,y+23,r[1]+'일',{fs:15,fw:800});
   });
   return feSvg(W,y0+rows.length*rh+6,s);
@@ -231,15 +234,67 @@ function feFigNotice(){
 function feFigDelay(){
   var rows=[['공사',0.05,FE_C.gs,'= 1/2000'],['물품 제조·구매',0.075,FE_C.mp,''],['용역·수리·가공·대여',0.125,FE_C.yy,'= 1/800'],['군용 음식료품',0.15,FE_C.surf,''],['운송·보관·양곡가공',0.25,FE_C.surf,'가장 높음']];
   var s='', W=880, lx=260, maxw=460, rh=38, y0=44;
-  s+='<rect x="20" y="8" width="'+(W-40)+'" height="28" fill="'+FE_C.ink+'"/>'+feT(W/2,27,'지체상금 = 계약금액 × 지체상금률(1일) × 지체일수   ·   누적 한도 계약금액의 30%',{fs:14,fw:700,a:'middle',c:'#fff'});
+  s+='<rect x="20" y="8" width="'+(W-40)+'" height="28" rx="10" fill="'+FE_C.hi+'"/>'+feT(W/2,27,'지체상금 = 계약금액 × 지체상금률(1일) × 지체일수   ·   누적 한도 계약금액의 30%',{fs:14,fw:700,a:'middle',c:'#fff'});
   rows.forEach(function(r,i){ var y=y0+i*rh, w=maxw*r[1]/0.25;
     s+=feT(lx-12,y+23,r[0],{fs:13,fw:700,a:'end'});
-    s+='<rect x="'+lx+'" y="'+(y+6)+'" width="'+w+'" height="22" fill="'+r[2]+'" stroke="'+FE_C.ink+'" stroke-width="2"/>';
+    s+='<rect x="'+lx+'" y="'+(y+6)+'" width="'+w+'" height="22" rx="6" fill="'+r[2]+'"/>';
     s+=feT(lx+w+10,y+23,r[1]+'%'+(r[3]?'  '+r[3]:''),{fs:14,fw:800});
   });
   var yb=y0+rows.length*rh+8;
   s+=feT(20,yb+14,'예) 1억 물품 8일 지체 → 1억 × 0.00075 × 8 = 600,000원  ·  천재지변·불가항력·발주자 귀책은 지체일수 제외',{fs:12,c:FE_C.dim});
   return feSvg(W,yb+26,s);
+}
+
+// ─── 추가 도해 (2026-09-26): 피라미드 · 중심 개념도 · 순환도 — 앱에 이미 있는 수치만 사용 ───
+// 09 평가: 공사 적격심사 낙찰하한율 피라미드 (금액이 작을수록 하한율이 높다)
+function feFigEval(){
+  var L=[['10억 미만','89.745%'],['10억~50억','88.745%'],['50억~100억','87.495%'],['100억 이상','종합심사낙찰제']];
+  var cols=[FE_C.b9,FE_C.b7,FE_C.hi,FE_C.b3], s='', W=880, cx=230, h=50, y0=24, step=100;
+  L.forEach(function(r,i){
+    var y=y0+i*(h+6), wt=40+i*step, wb=40+(i+1)*step;
+    s+='<polygon points="'+(cx-wt/2)+','+y+' '+(cx+wt/2)+','+y+' '+(cx+wb/2)+','+(y+h)+' '+(cx-wb/2)+','+(y+h)+'" fill="'+cols[i]+'"/>';
+    s+=feT(cx,y+h/2+6,i===3?'종합심사':r[1],{fs:i===3?14:16,fw:800,a:'middle',c:'#fff'});
+    var lx=cx+wb/2+10, ly=y+h/2;
+    s+='<line x1="'+lx+'" y1="'+ly+'" x2="520" y2="'+ly+'" stroke="'+FE_C.b2+'" stroke-width="2" stroke-dasharray="3 4"/>'+feDot(520,ly,5,cols[i]);
+    s+=feT(536,ly-2,r[0],{fs:15,fw:800}); s+=feT(536,ly+17,i===3?'적격심사 대신 종합심사낙찰제':'낙찰하한율 '+r[1],{fs:12,c:FE_C.dim});
+  });
+  s+=feT(20,y0+4*(h+6)+24,'공사 적격심사 낙찰하한율: 금액이 작을수록 높다  ·  물품(조달청, 고시금액 미만)은 86.245%',{fs:13,fw:700,c:FE_C.b7});
+  return feSvg(W,y0+4*(h+6)+40,s);
+}
+// 10 낙찰자 결정: 중심 개념도
+function feFigWin(){
+  var s='', W=880, cx=440, cy=132;
+  s+=feDot(cx,cy,92,FE_C.b1)+feDot(cx,cy,72,FE_C.b2)+feDot(cx,cy,56,FE_C.hi);
+  s+=feT(cx,cy-4,'낙찰자',{fs:17,fw:800,a:'middle',c:'#fff'})+feT(cx,cy+18,'결정',{fs:17,fw:800,a:'middle',c:'#fff'});
+  var N=[[40,30,'낙찰 통지','낙찰자 결정 통지서 발송'],[600,30,'협상에 의한 계약','협상 성립 후 10일 이내 계약'],[40,176,'계약을 안 하면','입찰보증금(5%) 국고 귀속'],[600,176,'계약 준비','계약보증금 10% · 계약서류']];
+  N.forEach(function(n){
+    var bx=n[0], by=n[1], bw=240, bh=66, ex=bx<cx?bx+bw:bx, ey=by+bh/2;
+    s+='<line x1="'+ex+'" y1="'+ey+'" x2="'+(bx<cx?cx-78:cx+78)+'" y2="'+(ey<cy?cy-30:cy+30)+'" stroke="'+FE_C.b3+'" stroke-width="2" stroke-dasharray="4 5"/>';
+    s+=feBox(bx,by,bw,bh,FE_C.bg)+feDot(ex,ey,5,FE_C.hi);
+    s+=feT(bx+18,by+28,n[2],{fs:15,fw:800})+feT(bx+18,by+49,n[3],{fs:12,c:FE_C.dim});
+  });
+  return feSvg(W,264,s);
+}
+// 17 대금 청구: 기성 순환도 (30일마다 돌아감)
+function feFigClaim(){
+  var s='', W=880, cx=440, cy=166, R=96;
+  s+='<circle cx="'+cx+'" cy="'+cy+'" r="'+R+'" fill="none" stroke="'+FE_C.b2+'" stroke-width="10"/>';
+  [45,135,225,315].forEach(function(d){ // 시계 방향 화살촉
+    var a=d*Math.PI/180, x=cx+R*Math.sin(a), y=cy-R*Math.cos(a), tx=Math.cos(a), ty=Math.sin(a);
+    s+='<polygon points="'+(x+tx*10)+','+(y+ty*10)+' '+(x-ty*8-tx*6)+','+(y+tx*8-ty*6)+' '+(x+ty*8-tx*6)+','+(y-tx*8-ty*6)+'" fill="'+FE_C.hi+'"/>';
+  });
+  s+=feT(cx,cy+4,'30일마다',{fs:22,fw:800,a:'middle',c:FE_C.hi})+feT(cx,cy+26,'기성대가',{fs:12,a:'middle',c:FE_C.dim});
+  var N=[[0,'기성 검사','완료된 만큼 확인'],[90,'기성 청구','대금청구서 · 검사조서'],[180,'기성대가 지급','검사 후 5일 이내'],[270,'다음 공정','이어서 이행']];
+  N.forEach(function(n,i){
+    var a=n[0]*Math.PI/180, x=cx+R*Math.sin(a), y=cy-R*Math.cos(a);
+    s+=feDot(x,y,22,i===2?FE_C.hi:FE_C.bg)+'<circle cx="'+x+'" cy="'+y+'" r="22" fill="none" stroke="'+FE_C.hi+'" stroke-width="2"/>';
+    s+=feT(x,y+6,String(i+1),{fs:15,fw:800,a:'middle',c:i===2?'#fff':FE_C.hi});
+    var right=n[0]===90, left=n[0]===270, tx=right?x+36:left?x-36:x, ty=n[0]===0?y-48:n[0]===180?y+44:y-2;
+    s+=feT(tx,ty,n[1],{fs:15,fw:800,a:right?'start':left?'end':'middle'})+feT(tx,ty+18,n[2],{fs:12,c:FE_C.dim,a:right?'start':left?'end':'middle'});
+  });
+  s+=feBox(20,266,240,50,FE_C.b1)+feT(36,296,'선금 받았으면 비율만큼 공제',{fs:13,fw:700,c:FE_C.b7});
+  s+=feBox(620,266,240,50,FE_C.b1)+feT(636,296,'마지막은 준공 청구로 정산',{fs:13,fw:700,c:FE_C.b7});
+  return feSvg(W,326,s);
 }
 
 // 단계별 부가정보: 도해 · 분기 이벤트 · 시험 함정 매핑
@@ -254,7 +309,10 @@ var FE_STEP_EXTRA = {
   inspect:{fig:feFigInspect, ev:['recheck']},
   pay:{fig:feFigPay},
   defect:{fig:feFigDefect, ev:['haja']},
-  after:{fig:feFigAfter, ev:['dispute','jungsan']}
+  after:{fig:feFigAfter, ev:['dispute','jungsan']},
+  eval:{fig:feFigEval},
+  win:{fig:feFigWin},
+  claim:{fig:feFigClaim}
 };
 var FE_ZONES=[['발주','01–05 · 무엇을 얼마에 어떻게 살지 정한다'],['입찰','06–10 · 공고에서 낙찰까지'],['계약·이행','11–16 · 체결하고, 시작하고, 변경하고, 검사한다'],['대금·사후','17–20 · 돈을 닫고 하자와 분쟁을 처리한다']];
 
@@ -306,7 +364,8 @@ function renderFlow(){
 function feJump(ev,key){ ev.preventDefault(); var el=document.getElementById('fe_'+key); if(!el) return; var sc=el.closest('.sub-content')||el.closest('.tab-content'); var idx=document.getElementById('fe_index'); var off=(idx?idx.offsetHeight:0)+52; if(sc){ sc.scrollTo({top:el.offsetTop-off,behavior:'smooth'}); } }
 
 let STEP_SEL = 1;
-function selectStep(id){ STEP_SEL = id; renderStepDetail(); var d=document.getElementById('step_root'); if(d) d.scrollTop=0; }
+function selectStep(id){ STEP_SEL = id; renderStepDetail(); var d=document.getElementById('step_root'); if(d) d.scrollTop=0;
+  var t=document.querySelector('.sp-tile.sel'); if(t&&t.parentElement.scrollWidth>t.parentElement.clientWidth) t.scrollIntoView({inline:'center',block:'nearest'}); } // 가로 단계 줄(패드·휴대폰)에서 고른 단계를 가운데로
 const STEP_ZONE = ['발주','발주','발주','발주','발주','입찰','입찰','입찰','입찰','입찰','계약·이행','계약·이행','계약·이행','계약·이행','계약·이행','계약·이행','대금·사후','대금·사후','대금·사후','대금·사후'];
 const ZONE_COLOR = {'발주':'var(--z1)','입찰':'var(--z2)','계약·이행':'var(--z3)','대금·사후':'var(--z4)'};
 function renderStepIndex(){
@@ -366,7 +425,7 @@ const STEP_EXTRA = {
   pay:{check:['청구 접수 후 5일 이내 지급','선금·기성금 기지급분 공제 확인','지연 시 지연이자 발생 인지'],
         trap:['지급기한 5일 / 초과 시 지연이자 발생','선금 기지급분 공제 누락 주의']},
   defect:{check:['하자보수보증금 증권 확인','하자담보책임기간 기산일 관리','보수 완료 확인서 수령'],
-        trap:['공사 하자기간 공종별 상이: 철근콘크리트 10년 / 방수 5년 / 일반마감 1년','보증금률: 공사 2~10% / 물품 3% / 용역 2%']},
+        trap:['공사 하자기간 공종별 상이: 대형 구조부 10년 / 방수 3년 / 미장·타일·도장 1년','보증금률: 공사 공종별 2~5%(법정 범위 2~10%) / 물품 3% / 용역 2%']},
   after:{check:['최종 정산서 작성(설계변경·ESC 반영)','계약이행실적증명 발급 대응','계약 문서 보존'],
         trap:['부당이득 → 환수 + 가산금','분쟁조정 신청은 90일 이내']},
 };
@@ -487,8 +546,9 @@ function renderStepDetail() {
       <div class="sd-card sd-layout" style="--sc:${s.color}" id="sd_${s.id}">
 
         <!-- 왼쪽 본문 -->
+        <div class="sd-head">${zoneBar(curIdx)}<div class="sd-kicker">${s.id}단계 · ${STEP_ZONE[curIdx]||''}</div><div class="sd-name">${s.name}</div><div class="sd-tagline">${s.tagline}</div></div>
+        ${(FE_STEP_EXTRA[s.key]||{}).fig?'<div class="sd-fig">'+FE_STEP_EXTRA[s.key].fig()+'</div>':''}
         <div class="sd-main">
-          <div class="sd-head">${zoneBar(curIdx)}<div class="sd-kicker">${s.id}단계 · ${STEP_ZONE[curIdx]||''}</div><div class="sd-name">${s.name}</div><div class="sd-tagline">${s.tagline}</div></div>
           <div class="sd-body">
             <div class="sd-sec-title">개요</div>
             <div class="sd-desc">${s.desc}</div>
@@ -614,7 +674,7 @@ const BIZ_MATRIX = [
       { name:'협상에 의한 계약', tag:'전문용역',
         rows:[
           ['특징','기술평가 후 고득점자 순으로 가격협상'],
-          ['배점','통상 기술 60 + 가격 40'],
+          ['배점','기본 기술 70 + 가격 30'],
           ['체결','협상 성립 후 10일 이내 계약'],
           ['적용','컨설팅 · IT개발 · 연구 등 전문용역'],
         ]},
@@ -697,7 +757,7 @@ function fcRender(){
     cardHtml=`<div class="fc-card${fcState.flipped?' flipped':isUnk?' unk':''}" style="--ac:${ac}" data-act="fcFlip">
       <span class="fc-card-cat">${cur.cat}</span>
       ${isUnk?'<span class="fc-unk">✗ 모름</span>':''}
-      <span class="fc-card-hint">${fcState.flipped?'앞면':'탭→정답'}</span>
+      <span class="fc-card-hint">${fcState.flipped?'눌러서 앞면 보기':'눌러서 뜻 보기'}</span>
       <span class="fc-card-pos">${si+1}/${pool.length}</span>
       ${!fcState.flipped
         ?`<div class="fc-term">${cur.term}</div>`
@@ -706,12 +766,11 @@ function fcRender(){
     </div>`;
   }
 
+  // 암기: 큰 두 버튼(몰라·알았어)으로 빠르게, 넘기기·처음부터는 작은 글자 버튼
   let btnsHtml=pool.length>0?`<div class="fc-btns">
-    <button class="btn c-text" data-act="fcKnow">✓ 알았어</button>
-    <button class="btn c-red" data-act="fcUnknow">✗ 몰라</button>
-    <button class="btn c-gray" data-act="fcNext">→ 다음</button>
-    <button class="btn c-ink" data-act="fcReset">↺ 초기화</button>
-  </div>`:'';
+    <button class="fc-ans no" data-act="fcUnknow">몰라</button>
+    <button class="fc-ans yes" data-act="fcKnow">알았어</button>
+  </div><div class="fc-sub"><button class="fc-link" data-act="fcNext">건너뛰기</button><button class="fc-link" data-act="fcReset">처음부터</button></div>`:'';
 
   root.innerHTML=`
     <div class="fc-cats">${catsHtml}</div>

@@ -1,7 +1,7 @@
 :root{
   --bg:#FFFFFF; --surface:#F2F4F6; --surface-2:#E8EBEE; --surface-3:#D9DEE3;
   --line:#E5E8EB; --line-soft:#EEF0F2;
-  --text:#191F28; --text-2:#333D4B; --text-3:#4E5968; --text-4:#8B95A1;
+  --text:#191F28; --text-2:#333D4B; --text-3:#4E5968; --text-4:#6B7684;
   --accent:#3268E8; --accent-soft:#EAF1FE; --bad:#E5484D; --bad-soft:#FDECEC; --good:#1F8A4C;
   --p-green:#86D4A0; --p-blue:#9DB8FF; --p-orange:#FFC94D; --p-magenta:#FFA26B; --p-violet:#1F8A4C;
   --d-green:#1F8A4C; --d-blue:#1F8A4C; --d-orange:#D9730D; --d-magenta:#E5484D; --d-violet:#3268E8;
@@ -1020,3 +1020,85 @@ tbody tr:hover td,tbody tr:hover th{background:#F7F7F7}
 .wk-go .btn{margin-top:auto}
 .wk-recs{display:none}
 @media(max-width:860px){.wk-next{grid-template-columns:1fr}}
+/* ═══ 2026-09-26 디자인 점검 반영 ═══ */
+/* 1) 모드 구분: 이해(파랑·문서형) / 암기(청록·카드형) / 실전(먹색·시험형) — 사이드바 묶음 + 화면 위 색 띠 + 선택 탭 색 */
+:root{--m-read:#3268E8;--m-drill:#0E9384;--m-test:#191F28}
+[data-mode=read]{--mc:var(--m-read)}[data-mode=drill]{--mc:var(--m-drill)}[data-mode=test]{--mc:var(--m-test)}
+.sb-group{display:flex;align-items:center;gap:6px;padding:14px 12px 4px;font-size:12px;font-weight:700;color:var(--text-3)}
+.sb-group::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--mc)}
+.sb-group:first-child{padding-top:4px}
+.tab-btn.active[data-mode]{background:color-mix(in srgb,var(--mc) 10%,var(--bg));color:var(--mc)}
+.tab-content[data-mode]::before{content:"";display:block;position:sticky;top:0;z-index:40;height:3px;background:var(--mc)}
+@media(max-width:860px){.sb-group{display:none}.tab-btn.active[data-mode]{background:none}}
+/* 2) 암기 카드: 흰 카드 + 큰 글자, 몰라·알았어 큰 버튼, 나머지는 작은 글자 버튼 */
+.fc-card{background:var(--bg);border:1px solid var(--line);box-shadow:0 1px 2px rgba(25,31,40,.04),0 8px 24px rgba(25,31,40,.06)}
+.fc-term{font-size:44px}
+.fc-btns{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+.fc-ans{height:60px;border:0;border-radius:14px;font:inherit;font-size:18px;font-weight:700;cursor:pointer;transition:transform .12s ease-out,background-color .12s}
+.fc-ans.no{background:var(--bad-soft);color:var(--bad)}
+.fc-ans.yes{background:var(--m-drill);color:#fff}
+.fc-sub{display:flex;gap:20px;margin-top:10px}
+.fc-link{background:none;border:0;padding:8px 0;font:inherit;font-size:14px;font-weight:600;color:var(--text-3);cursor:pointer}
+.fc-link:hover{color:var(--text)}
+.fc-cat.sel{background:var(--m-drill);border-color:var(--m-drill)}
+@media(max-width:560px){.fc-cats{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-right:-16px;padding-right:16px}.fc-cats::-webkit-scrollbar{display:none}.fc-cat{flex:0 0 auto}.fc-term{font-size:34px}}
+/* 3) 휴대폰: 수치 탭 개정표를 세로로 쌓기 */
+@media(max-width:560px){
+  .rev-panel table,.rev-panel tbody,.rev-panel tr,.rev-panel td{display:block;width:auto}
+  .rev-panel tr{padding:12px 16px;border-bottom:1px solid #EEEEEE}
+  .rev-panel tr:last-child{border-bottom:0}
+  .rev-panel td{padding:0!important;border:0!important;background:none!important}
+  .rev-panel td.old{display:inline-block;margin:4px 0 2px;font-size:13px}
+}
+/* 5) 문제 메뉴 네모 = 문제 수 */
+.menu-ico{display:grid;place-items:center;font-size:15px;font-weight:800;color:color-mix(in srgb,var(--mc,var(--accent)) 85%,#000);font-variant-numeric:tabular-nums}
+.wn-clear{background:none;border:0;padding:6px 0;font:inherit;font-size:14px;font-weight:600;color:var(--text-3);cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.wn-clear:hover{color:var(--bad)}
+/* 6) 1360~1499px 노트북: 오른쪽 메모 칸을 좁게 */
+@media(min-width:1360px) and (max-width:1499px){
+  body[data-memo] .tab-content{right:300px}
+  body[data-memo] .side-memo{display:block;position:fixed;top:0;right:0;bottom:0;width:300px;padding:28px 20px;border-left:1px solid var(--line);background:var(--bg);overflow-y:auto}
+  .side-memo .sd-note{min-height:calc(100% - 80px);display:flex;flex-direction:column}
+  .side-memo .sd-note-ed{flex:1;min-height:240px}
+  body[data-memo] #new-sticky-btn{right:324px}
+}
+/* 7) 검색 결과 한 줄 길이 제한 */
+.srch-res>*{max-width:880px}
+/* 9) 누를 때 반응 */
+.btn,.menu-card,.fc-cat,.tab-btn,.pcard{transition:transform .12s ease-out,background-color .12s}
+.btn:active,.menu-card:active,.fc-ans:active,.fc-cat:active{transform:scale(.97)}
+@media(prefers-reduced-motion:reduce){.btn:active,.menu-card:active,.fc-ans:active,.fc-cat:active{transform:none}}
+/* 2차 점검: 오답노트 머리줄 줄바꿈, 지우기는 목록 맨 아래 작은 글자 */
+.qz-res-hd{flex-wrap:wrap;row-gap:6px}
+.rv-verdict{white-space:nowrap}
+.wn-tools{margin:24px 0 8px;text-align:center}
+.wn-clear{font-size:13px;color:var(--text-4)}
+.sb-group:not([data-mode])::before{background:var(--text-4)}
+/* 도식: 단계별 상세에서는 제목 아래 전체 폭 (본문·오른쪽 칸 위) */
+.sd-head,.sd-fig{grid-column:1/-1}
+.sd-fig{background:var(--surface);border-radius:var(--r-lg);padding:20px 20px 16px;margin:0 0 8px}
+.sd-fig svg,.fe-fig svg{display:block;max-width:880px}
+.fe-fig{background:var(--surface);border-radius:var(--r-lg);padding:20px;border:0}
+@media(max-width:560px){.sd-fig,.fe-fig{padding:12px;overflow-x:auto}.sd-fig svg,.fe-fig svg{min-width:560px}}
+/* 패드 가로(861~1279px): 단계 목록을 위쪽 가로 줄로 → 단계 설명·도식이 전체 폭을 씀 (도식 글자가 작아지지 않게) */
+@media(min-width:861px) and (max-width:1279px){
+  .sp-wrap{grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr)}
+  .sp-index{border-right:0;border-bottom:1px solid var(--line);grid-template-rows:auto auto}
+  .sp-head{padding:14px 24px 8px}
+  .sp-tiles{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:136px;grid-auto-rows:60px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;padding:0 24px 12px}
+  .sp-tiles::-webkit-scrollbar{display:none}
+  .sp-tile{min-height:60px;padding:8px 12px}
+  .sp-tile .tn{font-size:17px}
+  .sp-tile .tl{font-size:14px;margin-top:4px}
+  .sp-zone{display:none}
+  .sp-detail{padding:20px 28px 60px}
+}
+.sd-layout{row-gap:16px}
+/* 수치 탭 공종별 낙찰하한율 표 */
+.floor-tbl{margin:0 0 12px}
+.floor-tbl td[rowspan],.floor-tbl tr.grp1 td:first-child{vertical-align:middle;font-weight:700;color:var(--text);background:var(--surface)}
+.floor-tbl td b{font-size:17px;color:var(--text);font-variant-numeric:tabular-nums}
+.floor-tbl small{font-weight:500;color:var(--text-3)}
+.floor-tbl table{table-layout:fixed}
+.floor-tbl td{word-break:keep-all}
+.floor-tbl td b{white-space:nowrap}
