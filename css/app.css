@@ -1094,3 +1094,11 @@ tbody tr:hover td,tbody tr:hover th{background:#F7F7F7}
   .sp-detail{padding:20px 28px 60px}
 }
 .sd-layout{row-gap:16px}
+/* 수치 탭 공종별 낙찰하한율 표 */
+.floor-tbl{margin:0 0 12px}
+.floor-tbl td[rowspan],.floor-tbl tr.grp1 td:first-child{vertical-align:middle;font-weight:700;color:var(--text);background:var(--surface)}
+.floor-tbl td b{font-size:17px;color:var(--text);font-variant-numeric:tabular-nums}
+.floor-tbl small{font-weight:500;color:var(--text-3)}
+.floor-tbl table{table-layout:fixed}
+.floor-tbl td{word-break:keep-all}
+.floor-tbl td b{white-space:nowrap}
