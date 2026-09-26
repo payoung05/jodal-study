@@ -1074,3 +1074,9 @@ tbody tr:hover td,tbody tr:hover th{background:#F7F7F7}
 .wn-tools{margin:24px 0 8px;text-align:center}
 .wn-clear{font-size:13px;color:var(--text-4)}
 .sb-group:not([data-mode])::before{background:var(--text-4)}
+/* 도식: 단계별 상세에서는 제목 아래 전체 폭 (본문·오른쪽 칸 위) */
+.sd-head,.sd-fig{grid-column:1/-1}
+.sd-fig{background:var(--surface);border-radius:var(--r-lg);padding:20px 20px 16px;margin:0 0 8px}
+.sd-fig svg,.fe-fig svg{display:block;max-width:880px}
+.fe-fig{background:var(--surface);border-radius:var(--r-lg);padding:20px;border:0}
+@media(max-width:560px){.sd-fig,.fe-fig{padding:12px;overflow-x:auto}.sd-fig svg,.fe-fig svg{min-width:560px}}
