@@ -22,6 +22,16 @@
 - `tools/jev-cases.json` + `tools/jev-test.py`: Jev 시험용 14문항(Claude가 틀림 7 / 맞음 7로 본 것). 키는 `tools/.jev-key` (gitignore됨)
 - 원문 캐시: `tools/.law-cache/2026-09-26_*.json` (조번호 → 조문 전체 텍스트)
 
+## 진행 (2026-09-27)
+
+- 1 Jev 시험: 요청에 `model` 필드가 빠져 있던 것만 고침. 14개 중 9개 같음 — 틀린 7개는 모두 0.03~0.11로 잡음 → 1차 필터로 사용
+- 2 `tools/clause-check.mjs` + `data/law-snap.json`(조문 132개): 한 글자 변경·조문 삭제를 fixture로 확인
+- 3 `check_law.py` 가 law-refs 조문도 읽음(근거 없음 53 → 10). 부정형('옳지 않은 것') 필기는 해설만 대조하도록 버그 수정
+- 4 필기·실기 전체 조문 연결(law-refs 373문항) + `tools/jev-check.py` 판정 → 사람 검토 185개를 원문 대조: 틀림 24 · 부정확 40
+- 5 수정 146건(`tools/apply-fixes.mjs`, 표: reports/law-fix-2026-09-27.md), constraints 금지 규칙 19개
+- 6 월요일 루틴 지시문(`tools/law-check-routine.md`)에 clause-check 단계 추가 — 루틴은 main 의 이 파일을 읽으므로 이 브랜치가 합쳐진 뒤부터 적용
+- 남음: 4의 화면·게임 파일 조문 연결(index.html·steps.js·tabs.js·game.html·journey.js), 7
+
 ## 원문 대조로 확인된 틀린 곳 (앱 전체에 같은 오류가 퍼져 있음)
 
 | 틀린 내용 | 현행 원문 | 앱 위치 |
