@@ -333,7 +333,7 @@ function renderFlow(){
   function cmpHtml(c){ return cmpTable(c,hl,FLOW_FILTER!=='all'?FLOW_FILTER:null); }
   var h='<div class="page-title">계약 흐름 <span>20단계</span></div><div class="page-sub">수요 발생부터 사후관리까지. 모든 단계에 공사·물품·용역을 나란히 놓았다</div>';
   h+='<div class="fl-filters">';
-  [['all','전체'],['gs','공사'],['mp','물품'],['yy','용역']].forEach(function(f){ h+='<button class="'+(FLOW_FILTER===f[0]?'active':'')+'" data-act="flowFilter" data-f="'+f[0]+'">'+f[1]+'</button>'; });
+  [['all','전체'],['gs','공사'],['mp','물품'],['yy','용역']].forEach(function(f){ h+='<button class="'+(FLOW_FILTER===f[0]?'active':'')+(f[0]==='all'?'':' c-'+f[0])+'" data-act="flowFilter" data-f="'+f[0]+'">'+f[1]+'</button>'; });
   h+='</div>';
   if(FLOW_FILTER!=='all') h+='<div class="fl-filter-note">'+TYPE[FLOW_FILTER]+' 강조 중 · 다른 유형은 흐리게 표시</div>';
   // 한눈에 보는 흐름도: 구역 4개를 화살표 블록으로, 안에 단계 이름(누르면 이동)

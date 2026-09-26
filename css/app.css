@@ -105,6 +105,8 @@ table,.num,.num-pill,.card-desc{font-variant-numeric:tabular-nums}
 .srch-filters{margin-top:12px;flex-wrap:wrap}
 .fl-filters button,.srch-filters button{padding:6px 16px;border:0;border-radius:var(--r-sm);background:none;color:var(--text-3);font-size:14px;font-weight:600;white-space:nowrap;cursor:pointer}
 .fl-filters button.active,.srch-filters button.active{background:var(--bg);color:var(--text);box-shadow:var(--shadow)}
+.fl-filters button[class*="c-"]::before{content:"";display:inline-block;width:8px;height:8px;margin-right:6px;border-radius:50%;background:var(--cc);vertical-align:1px}
+.fl-filters button.active[class*="c-"]{background:color-mix(in srgb,var(--cc) 45%,var(--bg));box-shadow:none}
 .fl-filter-note{margin:-16px 0 16px;font-size:14px;font-weight:600;color:var(--accent)}
 
 /* ── 표 (한 가지 모양: 흰 바탕 · 옅은 선 · 머리는 작은 회색 글자) ── */
@@ -293,7 +295,7 @@ tbody tr:hover>td,tbody tr:hover>th{background:var(--surface)}
 .bm-card{padding:0 0 8px;margin-bottom:24px}
 .bm-card.gs{--cc:var(--gs)}.bm-card.mp{--cc:var(--mp)}.bm-card.yy{--cc:var(--yy)}
 .bm-hd{margin-bottom:12px;font-size:20px;font-weight:800}
-.bm-hd::before{content:"";display:inline-block;width:10px;height:10px;margin-right:8px;border-radius:50%;background:var(--cc);vertical-align:2px}
+.bm-hd{display:inline-block;padding:4px 14px;border-radius:var(--pill);background:color-mix(in srgb,var(--cc) 45%,var(--bg))}
 .bm-item{background:var(--surface);border-radius:var(--r-md);padding:12px 16px;margin-bottom:8px}
 .bm-item-hd{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px}
 .bm-name{font-size:16px;font-weight:700}
@@ -301,8 +303,8 @@ tbody tr:hover>td,tbody tr:hover>th{background:var(--surface)}
 .bm-kv{font-size:16px}
 .bm-kv th{width:96px}
 .cmptab{font-size:16px}
-.cmptab th.gs::before,.cmptab th.mp::before,.cmptab th.yy::before{content:"";display:inline-block;width:8px;height:8px;margin-right:6px;border-radius:50%;background:var(--gs)}
-.cmptab th.mp::before{background:var(--mp)}.cmptab th.yy::before{background:var(--yy)}
+.cmptab th.gs{--cc:var(--gs)}.cmptab th.mp{--cc:var(--mp)}.cmptab th.yy{--cc:var(--yy)}
+.cmptab th.gs,.cmptab th.mp,.cmptab th.yy{background:color-mix(in srgb,var(--cc) 45%,var(--bg));color:var(--text);font-size:14px;font-weight:700}
 .cmptab td:first-child{font-weight:600;color:var(--text);white-space:nowrap}
 .cmptab .th-step{width:110px}
 
