@@ -542,36 +542,32 @@ function renderStepDetail() {
       '<div class="sd-note-ed" id="snote_'+s.id+'" data-step="'+s.id+'" contenteditable="true" data-placeholder="여기에 메모...">'+savedNote+'</div>'+
       '</div>';
 
-    html += `
-      <div class="sd-card sd-layout" style="--sc:${s.color}" id="sd_${s.id}">
+    // 확인 퀴즈: 이 단계의 핵심 용어·단계 이름이 들어간 필기 문제 중 3개 (틀리면 오답노트로)
+    const quizHtml = stepQuiz(s).map((q,qi)=>
+      '<div class="sdq" id="sdq_'+q.id+'"><div class="sdq-q">'+(qi+1)+'. '+q.question+'</div><div class="sdq-opts">'+
+      q.options.map((o,oi)=>'<button class="sdq-opt" data-act="sdq" data-id="'+q.id+'" data-i="'+oi+'">'+'①②③④'[oi]+' '+o+'</button>').join('')+
+      '</div><div class="sdq-exp"></div></div>').join('');
+    const moreHtml =
+      '<div class="sd-sec-title">핵심 용어 <small>눌러서 뜻 보기</small></div><div class="sd-terms">'+termsHtml+'</div><div>'+termDetailsHtml+'</div>'+
+      '<div class="sd-sec-title">관련 문서</div>'+docChips(s.docs)+
+      extraHtml.replace(/<div class="sd-sec-title">시험 함정<\/div>[\s\S]*$/,'');
+    const trapHtml = (extraHtml.match(/<div class="sd-sec-title">시험 함정<\/div>[\s\S]*$/)||[''])[0];
 
-        <!-- 왼쪽 본문 -->
+    html += `
+      <div class="sd-card sd-layout" id="sd_${s.id}">
         <div class="sd-head">${zoneBar(curIdx)}<div class="sd-kicker">${s.id}단계 · ${STEP_ZONE[curIdx]||''}</div><div class="sd-name">${s.name}</div><div class="sd-tagline">${s.tagline}</div></div>
+        <div class="sd-key"><div class="sd-key-lbl">요점</div><div class="sd-desc">${s.desc}</div>${pointList(s.examPoint)}</div>
         ${(FE_STEP_EXTRA[s.key]||{}).fig?'<div class="sd-fig">'+FE_STEP_EXTRA[s.key].fig()+'</div>':''}
         <div class="sd-main">
-          <div class="sd-body">
-            <div class="sd-sec-title">개요</div>
-            <div class="sd-desc">${s.desc}</div>
-            <div class="sd-sec-title">핵심 용어</div>
-            <div class="sd-terms">${termsHtml}</div>
-            <div>${termDetailsHtml}</div>
-            <div class="sd-sec-title">관련 문서</div>
-            ${docChips(s.docs)}
-            <div class="sd-sec-title">핵심 수치</div>
-            ${numTable(s.numbers)}
-            <div class="sd-sec-title">시험 포인트</div>
-            ${pointList(s.examPoint)}
-            ${extraHtml}
-            <div class="sd-sec-title">공사 · 물품 · 용역 차이</div>
-            ${cmpTable(s.compare)}
-          </div>
+          <div class="sd-sec-title">핵심 수치</div>
+          ${numTable(s.numbers)}
+          <div class="sd-sec-title">업종별로 보면</div>
+          ${cmpTable(s.compare)}
+          ${trapHtml}
+          ${quizHtml?'<div class="sd-sec-title">확인 퀴즈 <small>틀린 문제는 오답노트에 쌓여요</small></div>'+quizHtml:''}
+          <details class="sd-more"><summary>더 보기 — 용어 풀이 · 관련 문서 · 실무 체크리스트</summary>${moreHtml}</details>
         </div>
-
-        <!-- 오른쪽 사이드바 -->
-        <div class="sd-side">
-          ${amtBlock}${noteBlock}
-        </div>
-
+        <div class="sd-side">${amtBlock}${noteBlock}</div>
       </div>`;
   });
   const prev = STEPS[curIdx-1], next = STEPS[curIdx+1];
@@ -580,6 +576,28 @@ function renderStepDetail() {
 }
 
 
+// 단계별 확인 퀴즈: 단계마다 정해 둔 검색어가 문제 문장에 들어간 필기 문제 3개. 앞 단계에서 쓴 문제는 빼서 겹치지 않게 (한 번 계산해 둠)
+const STEP_QUIZ_KEYS={need:['수요조사','수요정보','소요량','수요'],budget:['예산','추정가격','계상','책정','회계연도'],doc:['설계서','과업내용서','규격서','시방서','발주문서','제안요청서'],
+  method:['계약방법','수의계약','일반경쟁','제한경쟁','지명경쟁'],pre:['사전규격'],notice:['입찰공고','공고'],submit:['입찰서','입찰보증금','전자투찰','무효입찰','제안서'],
+  open:['개찰','복수예비가격','예정가격'],eval:['적격심사','종합심사','평가위원','기술평가','낙찰하한율','제안서 평가'],win:['낙찰자','협상'],
+  sign:['계약보증금','계약서','이행보증','계약체결'],start:['착공','선금','착수'],perform:['기성','감독','이행관리','중간'],change:['설계변경','물가변동','계약변경','변경'],
+  delay:['지체상금','지체'],inspect:['검사','검수','준공'],claim:['대가 청구','청구','정산'],pay:['대가 지급','대가','지연이자','지급'],defect:['하자'],after:['분쟁','이의신청','부정당','제재','조정']};
+let STEP_QUIZ=null;
+function stepQuiz(s){
+  if(!STEP_QUIZ){ STEP_QUIZ={}; const used=new Set();
+    STEPS.forEach(st=>{ const keys=STEP_QUIZ_KEYS[st.key]||[];
+      STEP_QUIZ[st.key]=QUESTIONS.filter(q=>!used.has(q.id)).map(q=>[q,keys.reduce((n,k,i)=>n+(q.question.includes(k)?keys.length-i:0),0)])
+        .filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]).slice(0,3).map(x=>x[0]);
+      STEP_QUIZ[st.key].forEach(q=>used.add(q.id)); }); }
+  return STEP_QUIZ[s.key]||[];
+}
+function stepQuizAnswer(d){
+  const q=QUESTIONS.find(x=>x.id===d.id), box=document.getElementById('sdq_'+d.id); if(!q||!box||box.classList.contains('done')) return;
+  const pick=+d.i, ok=pick===q.answer; box.classList.add('done');
+  box.querySelectorAll('.sdq-opt').forEach((b,i)=>{ b.disabled=true; if(i===q.answer) b.classList.add('ok'); else if(i===pick) b.classList.add('ng'); });
+  box.querySelector('.sdq-exp').innerHTML='<div class="sdq-verdict '+(ok?'ok':'ng')+'">'+(ok?'맞았어요':'틀렸어요 · 오답노트에 추가했어요')+'</div>'+explain(q);
+  if(!ok){ const n=store.get('wrong_notes',{}); n[q.id]=Object.assign({},q,{wrongAt:Date.now(),mySelection:pick}); store.set('wrong_notes',n); if(typeof wnRender==='function') wnRender(); renderWeak(); }
+}
 function toggleTerm(key, el) {
   const detail = document.getElementById('td_' + key);
   if (!detail) return;
@@ -1095,6 +1113,7 @@ bindActs(document.body,{
   feJump:(d,b,ev)=>feJump(ev,d.key),
   goStep:d=>selectStep(+d.id),
   term:(d,b)=>toggleTerm(d.key,b),
+  sdq:d=>stepQuizAnswer(d),
   bold:()=>document.execCommand('bold'),
   exportRec:exportRecords,
   importRec:()=>document.getElementById('recFile').click(),

@@ -230,6 +230,26 @@ tbody tr:hover>td,tbody tr:hover>th{background:var(--surface)}
 .sd-note-bold{padding:2px 10px;border:0;border-radius:var(--r-sm);background:var(--bg);font-size:14px;font-weight:700;cursor:pointer}
 .sd-note-ed{width:100%;min-height:80px;font-size:16px;line-height:1.7;color:var(--text);outline:none;word-break:break-word;white-space:pre-wrap}
 
+/* 공부 한 단위: 요점 → 도식 → 핵심 수치 → 업종별 → 함정 → 확인 퀴즈 → 더 보기 */
+.sd-key{grid-column:1/-1;padding:20px 24px;border-radius:var(--r-lg);background:var(--accent-soft)}
+.sd-key-lbl{margin-bottom:6px;font-size:14px;font-weight:700;color:var(--accent)}
+.sd-key .sd-desc{margin-bottom:12px;color:var(--text)}
+.sd-key .pt-list li{color:var(--text-2)}
+.sd-sec-title small{margin-left:6px;font-size:12px;font-weight:500;color:var(--text-4)}
+.sd-main>.sd-sec-title:first-child{margin-top:0}
+.sdq{margin-bottom:12px;padding:16px 20px;border:1px solid var(--line);border-radius:var(--r-lg)}
+.sdq-q{margin-bottom:12px;font-size:16px;font-weight:700;line-height:1.6}
+.sdq-opts{display:flex;flex-direction:column;gap:8px}
+.sdq-opt{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--bg);font-size:16px;line-height:1.5;text-align:left;cursor:pointer}
+.sdq-opt:hover:not(:disabled){background:var(--surface)}
+.sdq-opt:disabled{cursor:default;color:var(--text-4)}
+.sdq-opt.ok{border-color:var(--good);background:var(--good-soft);color:var(--good);font-weight:600}
+.sdq-opt.ng{border-color:var(--bad);background:var(--bad-soft);color:var(--bad)}
+.sdq-verdict{margin-top:12px;font-size:14px;font-weight:700}
+.sdq-verdict.ok{color:var(--good)}.sdq-verdict.ng{color:var(--bad)}
+.sd-more{margin-top:24px;border-top:1px solid var(--line);padding-top:12px}
+.sd-more summary{padding:8px 0;font-size:14px;font-weight:600;color:var(--text-3);cursor:pointer}
+.sd-more[open] summary{margin-bottom:4px}
 /* 공사·물품·용역 비교 표 (머리행 = 업종 색) */
 .cmp-tbl{margin:0 0 8px}
 .cmp-tbl table{table-layout:fixed}
