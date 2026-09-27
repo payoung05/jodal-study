@@ -19,6 +19,7 @@ f.onload=()=>{ const w=f.contentWindow,d=w.document,errs=[];w.onerror=(m)=>errs.
  click($('#qz_root [data-act=confirm][data-on="1"]')); ok($('#qz_root .qz-confirm'),'미완성 채점 확인창');
  click($('#qz_root .qz-confirm [data-act=submit]'));
  ok(/1/.test($('#qz_root .qz-score-num').textContent)&&$('#qz_root .qz-subj-tbl'),'결과: 1점 + 과목표');
+ ok(/과목 평균/.test($('#qz_root .qz-subj-avg').textContent)&&/과락 있음 — 불합격/.test($('#qz_root .qz-subj-avg').textContent),'합격 판정: 과목 평균 + 과락이면 불합격');
  ok(Object.keys(JSON.parse(w.localStorage.wrong_notes)).length===19,'오답 19개 저장');
  ok($$('#wn_root .qz-res-card').length===19,'오답노트 19개 표시');
  ok(/회/.test($('#weak_root').textContent),'약점 탭 바로 반영');

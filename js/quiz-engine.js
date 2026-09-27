@@ -149,16 +149,18 @@ function qzResultView(e){
       <div class="qz-res-hd"><span class="rv-verdict${ok?'':' ng'}">${ua===undefined?'✗ 미응답':ok?'✓ 정답':'✗ 오답'}</span><span class="qz-res-meta">${q.subject}${e.flagged.has(q.id)?' · ★':''}</span></div>
       <div class="rv-q">${qi+1}. ${q.question}</div>${rvOpts(q,ua)}${ok?'':explain(q)}</div>`;
   }).join('');
-  // 과목별 점수 + 과락(40점 미만) — 모의고사 모드에서만
+  // 과목별 점수 + 합격 판정 — 모의고사 모드에서만
+  // 필기 합격기준(Q-net): 과목마다 100점 만점 환산, 과목당 40점 이상 + 전 과목 평균 60점 이상.
+  // 과목 문제 수가 30/20/30으로 달라 전체 정답률은 평균과 다르므로 과목 점수를 평균한다.
   let subj='';
   if(e.mode==='full80'||e.mode==='mini20'){
-    const rows=QZ_SUBJ.map((s,i)=>{
-      const qs=e.qs.filter(q=>q.subject===s); if(!qs.length) return '';
-      const k=qs.filter(q=>qzOk(e,q)).length, pct=Math.round(k/qs.length*100), fail=pct<40;
-      return `<div class="qz-subj-row"><span>${i+1}과목 <span class="qz-subj-name">${s}</span></span><b class="${fail?'fail':''}">${k}/${qs.length} · ${pct}점${fail?' <span class="tag-fail">과락</span>':''}</b></div>`;
+    const sc=QZ_SUBJ.map(s=>{ const qs=e.qs.filter(q=>q.subject===s); const k=qs.filter(q=>qzOk(e,q)).length; return {s,n:qs.length,k,pct:qs.length?k/qs.length*100:0}; }).filter(x=>x.n);
+    const rows=sc.map(x=>{ const fail=x.pct<40;
+      return `<div class="qz-subj-row"><span>${QZ_SUBJ.indexOf(x.s)+1}과목 <span class="qz-subj-name">${x.s}</span></span><b class="${fail?'fail':''}">${x.k}/${x.n} · ${Math.round(x.pct)}점${fail?' <span class="tag-fail">과락</span>':''}</b></div>`;
     }).join('');
-    const avg=Math.round(rate*100);
-    subj=`<div class="qz-subj-tbl">${rows}<div class="qz-subj-avg"><span>평균</span><span class="${avg>=60?'':'fail'}">${avg}점 ${avg>=60?'· 합격선 통과':'· 60점 미달'}</span></div></div>`;
+    const avg=sc.reduce((a,x)=>a+x.pct,0)/sc.length, cut=sc.some(x=>x.pct<40), pass=!cut&&avg>=60;
+    const why=pass?'합격선 통과':cut?'과락 있음 — 불합격':'평균 60점 미달';
+    subj=`<div class="qz-subj-tbl">${rows}<div class="qz-subj-avg"><span>과목 평균</span><span class="${pass?'':'fail'}">${Math.round(avg*10)/10}점 · ${why}</span></div></div>`;
   }
   const again=`<button class="btn c-mute" data-act="start" data-k="${e.mode}">↺ 새로 풀기</button>`;
   const btns=(wn?`<button class="btn filled c-red" data-act="review" data-f="wrong">✗ 틀린 문제 (${wn})</button>`:'')+
