@@ -8,9 +8,10 @@
 
 0. 저장소의 constraints.md 를 먼저 읽는다. 이미 틀렸던 기준(계약보증금, 이의신청 기간 등)과 그 기준이 쓰인 곳이 적혀 있다.
 
-1. `node tools/law-check.mjs` 를 실행한다. 법제처 Open API로 data/law-baseline.json(법령 13개, 계약예규 6개)의 일련번호·시행일자와 현재 값을 비교해 JSON(changed, upcoming)을 출력한다.
+1. `node tools/law-check.mjs` 를 실행한다(법령·예규 단위 개정 감지). 법제처 Open API로 data/law-baseline.json(법령 13개, 계약예규 6개)의 일련번호·시행일자와 현재 값을 비교해 JSON(changed, upcoming)을 출력한다.
    - 첫 점검 예외: data/law-log.js 에 kind '기준' 항목만 있으면 이번이 첫 점검이다. 기준 항목 중 시행일자가 기준일(date)로부터 180일 이내인 법령·예규를 changed 처럼 다룬다(최근 개정이 앱에 반영됐는지 모르기 때문). 이때는 개정 전 버전 대신 법령 본문의 '제개정이유'·'개정문'으로 무엇이 바뀌었는지 파악한다.
-   - 그 외에 changed 와 upcoming 이 둘 다 비어 있으면 '변경 없음'으로 끝낸다. 브랜치·커밋·PR을 만들지 않는다.
+   - 이어서 `node tools/clause-check.mjs` 를 실행한다. data/law-refs.js 로 앱 문항에 연결된 조문(약 130개)의 현행 원문을 data/law-snap.json(저장본)과 **글자 단위로** 비교해, 달라진 조문과 거기 걸린 문항 ID·바뀐 곳 앞뒤 문장을 출력한다(달라지면 종료 코드 1). 법령 전체의 일련번호가 그대로여도 조문이 바뀌면 잡히고, 반대로 법령이 바뀌어도 앱이 쓰는 조문이 그대로면 출력이 없다. "현행에서 못 찾음"은 조 번호 이동·삭제일 수 있으니 그 조문도 달라진 것으로 다룬다.
+   - changed·upcoming 이 비어 있고 clause-check 도 '달라짐 0 · 현행에서 못 찾음 0'이면 '변경 없음'으로 끝낸다. 브랜치·커밋·PR을 만들지 않는다.
    - 네트워크 오류면 1번 다시 시도한다. 그래도 실패하면 reports/law-check-YYYY-MM-DD.md 에 실패 사유만 적어 PR(제목 '법령 점검 실패 YYYY-MM-DD')을 올리고 끝낸다.
 
 2. 바뀐 법령·예규마다 실제로 달라진 조문을 찾는다.
@@ -19,9 +20,10 @@
    - 제개정이 '타법개정'이면 다른 법 개정에 따른 자구 수정일 수 있으니, 내용(금액·비율·기한·요건·명칭)이 달라진 조문만 추린다.
    - upcoming(시행예정)은 공포됐지만 아직 시행 전이다. 무엇이 언제 바뀌는지만 보고서에 적고 앱은 고치지 않는다.
 
-3. 달라진 조문과 관련된 앱 내용을 찾는다.
-   - 대상: data/questions.js(필기), data/prac.js(실기), data/cards.js(단어카드), data/steps.js(20단계 설명·핵심 수치), data/journey.js(조달 여정 게임 업무), index.html(수치 탭·법령 탭·우대제도 표와 조문 발췌), js/tabs.js(STEP_EXTRA 체크리스트·BIZ_MATRIX·FE_EV 등), game.html(SCN 사건, GEN 문제, EV 이벤트, 스피드전 Q).
+3. 달라진 조문과 관련된 앱 내용을 찾는다. clause-check 가 출력한 문항 ID는 **반드시 모두** 원문과 대조해 표 2에 올린다(맞으면 '영향 없음', 틀리면 고칠 곳). 그 밖의 곳은 아래처럼 찾는다.
+   - 대상: data/questions.js(필기), data/prac.js(실기), data/cards.js(단어카드), data/steps.js(20단계 설명·핵심 수치), index.html(수치 탭·법령 탭·우대제도 표와 조문 발췌), js/tabs.js(STEP_EXTRA 체크리스트·BIZ_MATRIX·FE_EV 등).
    - 조문 번호('시행령 26조', '§26', '제26조', '26조①'), 약칭(국가계약법·시행령·시행규칙·지방계약법·조달사업법·집행기준·공사계약일반조건 등), 바뀐 숫자(금액·비율·기한)로 grep 한다.
+   - `python tools/check_law.py` 로 앱의 숫자가 인용 조문 원문에 있는지 본다(차이가 있으면 표로 나옴). TYPESAFE_API_KEY 가 있으면 `python tools/jev-check.py --only <문항ID,…>` 로 1차 판정을 받아도 된다(수정 후보·사람 검토는 참고일 뿐, 최종 판단은 원문 대조).
 
 4. 보고서를 reports/law-check-YYYY-MM-DD.md 에 쉬운 한국어로 쓴다.
    - 맨 위 요약 3줄: 바뀐 법령·예규, 시행일, 영향받는 앱 항목 수.
@@ -30,13 +32,14 @@
    - 해석이 필요한 것은 확신도 '낮음'으로 두고 이유를 적는다. 추측으로 정답을 바꾸지 않는다.
 
 5. PR을 두 종류로 나눈다. 사람이 Merge만 누르는 도장 찍기가 되지 않게 하기 위해서다.
-   - **목록 PR** (항상): 보고서 reports/law-check-YYYY-MM-DD.md, data/law-log.js 기록, data/law-baseline.json 갱신만 담는다. 앱의 문제·수치는 고치지 않는다.
+   - **목록 PR** (항상): 보고서 reports/law-check-YYYY-MM-DD.md, data/law-log.js 기록, data/law-baseline.json·data/law-snap.json 갱신만 담는다. 앱의 문제·수치는 고치지 않는다.
    - **수정 PR** (조건부): 고칠 곳 중 확신도 '높음'이고, 각 고친 줄마다 근거 조문의 법제처 원문 링크(https://www.law.go.kr/법령/<법령명 공백 없이>/제N조 또는 https://www.law.go.kr/행정규칙/<예규명>)와 개정 전·후 문구를 PR 본문 표에 적을 수 있는 것만 고친다. 하나라도 링크·문구를 못 채우면 그 항목은 목록 PR에만 남긴다.
    - 수정 PR에는 constraints.md 에 같은 형식으로 새 항목을 추가한다(기준·근거·원문·확인(사람 확인: [ ])·고친 내역·쓰인 곳·금지 정규식). 금지 정규식은 옛 값이 다시 들어오면 잡히도록 짧고 정확하게.
    - 문제·카드 데이터는 한 줄에 한 항목 형식을 유지한다. 문제의 answer 인덱스와 해설(explanation)이 서로 맞는지 확인한다. `node tools/check-data.mjs` 가 통과해야 한다.
    - dist/ 와 build.py 결과물은 만들지 않는다. GitHub 자동 테스트(test)가 PR마다 돌고, 실패하면 Merge가 막힌다.
 
 6. `node tools/law-check.mjs --update` 로 기준값(data/law-baseline.json)을 갱신한다. 이 명령이 data/law-log.js 맨 위에 '개정'·'예고' 기록을 자동으로 추가한다. 추가된 기록의 각 법령 항목에서 비어 있는 '요약'(바뀐 핵심 한 줄)과 '앱반영'(예: '고침 3곳 · 확인 필요 2곳', 고칠 곳 없으면 '영향 없음')을 채운다. 첫 점검이면 '기준' 항목은 그대로 두고, 최근 개정을 확인한 결과를 kind '개정'(제목 '첫 점검: 최근 개정 반영 확인') 기록으로 맨 위에 직접 추가한다.
+   - clause-check 가 달라진 조문을 냈으면, 3~4단계에서 그 조문에 걸린 문항을 모두 확인한 뒤에만 `node tools/clause-check.mjs --accept` 로 저장본(data/law-snap.json)을 현행 원문으로 갱신한다(확인 전에 갱신하면 다음 주에 다시 안 잡힌다). 새로 연결한 문항이 있으면 `--init` 으로 빠진 조문만 채운다.
 
 7. 브랜치 두 개로 커밋하고 각각 main 으로 PR을 연다. main 에 직접 푸시하지 않는다. 자동 합치기(auto-merge)를 켜지 않는다.
    - 목록 PR: 브랜치 claude/law-check-YYYYMMDD, 제목 '[목록] 법령 점검 YYYY-MM-DD: <바뀐 법령 이름>' (시행예정만 있으면 '[예고] ...'). 본문: 보고서 요약, 표 1·2.

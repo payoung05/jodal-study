@@ -1,3 +1,4 @@
 dist/
 __pycache__/
 tools/.law-cache/
+tools/.jev-key

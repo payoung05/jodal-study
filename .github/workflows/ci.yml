@@ -15,24 +15,21 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: 22 }
-      - name: 데이터 검사 (번호 중복·정답 범위·여정·constraints 금지 문구)
+      - name: 데이터 검사 (번호 중복·정답 범위·출제기준·constraints 금지 문구)
         run: node tools/check-data.mjs
-      - name: 브라우저 동작 테스트 (필기·실기·탭·카드·검색·조달 여정 완주, 업종별)
+      - name: 브라우저 동작 테스트 (필기·실기·탭·카드·검색·메모)
         run: |
           python3 -m http.server 8765 --bind 127.0.0.1 >/dev/null 2>&1 &
           sleep 1
-          fail=0
-          for q in "" "?kind=물품" "?kind=공사" "?kind=용역"; do
-            out=$(google-chrome --headless=new --no-sandbox --disable-gpu --no-first-run --force-prefers-reduced-motion \
-                  --user-data-dir="$(mktemp -d)" --virtual-time-budget=150000 --dump-dom "http://127.0.0.1:8765/test.html$q" 2>/dev/null \
-                  | sed -n '/<pre id="out">/,/<\/pre>/p' | sed 's/<[^>]*>//g')
-            echo "── test.html$q"; echo "$out" | grep -v '^PASS' || true
-            echo "PASS $(echo "$out" | grep -c '^PASS')개"
-            echo "### test.html$q — PASS $(echo "$out" | grep -c '^PASS')개" >> "$GITHUB_STEP_SUMMARY"
-            echo "$out" | grep -E '^(FAIL|ERROR)' >> "$GITHUB_STEP_SUMMARY" || true
-            if echo "$out" | grep -qE '^(FAIL|ERROR)' || ! echo "$out" | grep -q '^PASS 여정: JS 오류 없음'; then fail=1; fi
-          done
-          exit $fail
+          out=$(google-chrome --headless=new --no-sandbox --disable-gpu --no-first-run --force-prefers-reduced-motion \
+                --user-data-dir="$(mktemp -d)" --virtual-time-budget=60000 --dump-dom "http://127.0.0.1:8765/test.html" 2>/dev/null \
+                | sed -n '/<pre id="out">/,/<\/pre>/p' | sed 's/<[^>]*>//g')
+          echo "$out" | grep -v '^PASS' || true
+          echo "PASS $(echo "$out" | grep -c '^PASS')개"
+          echo "### test.html — PASS $(echo "$out" | grep -c '^PASS')개" >> "$GITHUB_STEP_SUMMARY"
+          echo "$out" | grep -E '^(FAIL|ERROR)' >> "$GITHUB_STEP_SUMMARY" || true
+          # 마지막 검사(JS 오류 없음)까지 돌았어야 통과 — 중간에 멈추면 실패
+          if echo "$out" | grep -qE '^(FAIL|ERROR)' || ! echo "$out" | grep -q '^PASS JS 오류 없음'; then exit 1; fi
       - name: 오프라인 파일 만들기
         run: python3 build.py
       - uses: actions/upload-artifact@v4

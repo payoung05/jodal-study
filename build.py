@@ -1,4 +1,4 @@
-"""index.html + css/js/data + game.html → dist/학습앱.html (오프라인용 단일 파일)
+"""index.html + css/js/data → dist/학습앱.html (오프라인용 단일 파일)
 먼저 tools/check-data.mjs로 데이터를 검사하고, 실패하면 만들지 않는다. 화면에 빌드 시각·커밋을 표시한다."""
 import base64, datetime, pathlib, re, subprocess, sys
 
@@ -28,7 +28,6 @@ inline_js = lambda s: re.sub(r'<script src="([^"]+)"></script>', lambda m: '<scr
 html = read('index.html')
 html = re.sub(r'<link rel="stylesheet" href="([^"]+)">', lambda m: '<style>\n' + fonts(read(m[1])) + '</style>', html)
 html = inline_js(html)
-html = html.replace('</body>', '<template id="gameTpl">\n' + fonts(inline_js(read('game.html'))) + '</template>\n</body>')
 
 out = R / 'dist' / '학습앱.html'
 out.parent.mkdir(exist_ok=True)

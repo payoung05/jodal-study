@@ -1,0 +1,254 @@
+[
+ {
+  "id": "S-SR12",
+  "expected": "불일치",
+  "question": "state.app 은 공공조달 학습앱의 정답·해설이고 state.clause 는 현행 법령 조문 원문이다. app 에 적힌 숫자·기한·기준일·요건·순서가 clause 와 모두 맞는가? 하나라도 조문과 다르거나 조문에 없는 기준을 단정하면 NO.",
+  "response": {
+   "model": "jev-1.13.0",
+   "answers": {
+    "matches": {
+     "type": "noul",
+     "noul": 0.08
+    }
+   },
+   "usage": {
+    "input_tokens": 1289,
+    "output_tokens": 20
+   }
+  }
+ },
+ {
+  "id": "S-S09",
+  "expected": "불일치",
+  "question": "state.app 은 공공조달 학습앱의 정답·해설이고 state.clause 는 현행 법령 조문 원문이다. app 에 적힌 숫자·기한·기준일·요건·순서가 clause 와 모두 맞는가? 하나라도 조문과 다르거나 조문에 없는 기준을 단정하면 NO.",
+  "response": {
+   "model": "jev-1.13.0",
+   "answers": {
+    "matches": {
+     "type": "noul",
+     "noul": 0.11
+    }
+   },
+   "usage": {
+    "input_tokens": 1332,
+    "output_tokens": 20
+   }
+  }
+ },
+ {
+  "id": "S-S04",
+  "expected": "불일치",
+  "question": "state.app 은 공공조달 학습앱의 정답·해설이고 state.clause 는 현행 법령 조문 원문이다. app 에 적힌 숫자·기한·기준일·요건·순서가 clause 와 모두 맞는가? 하나라도 조문과 다르거나 조문에 없는 기준을 단정하면 NO.",
+  "response": {
+   "model": "jev-1.13.0",
+   "answers": {
+    "matches": {
+     "type": "noul",
+     "noul": 0.04
+    }
+   },
+   "usage": {
+    "input_tokens": 754,
+    "output_tokens": 20
+   }
+  }
+ },
+ {
+  "id": "S-SR10",
+  "expected": "불일치",
+  "question": "state.app 은 공공조달 학습앱의 정답·해설이고 state.clause 는 현행 법령 조문 원문이다. app 에 적힌 숫자·기한·기준일·요건·순서가 clause 와 모두 맞는가? 하나라도 조문과 다르거나 조문에 없는 기준을 단정하면 NO.",
+  "response": {
+   "model": "jev-1.13.0",
+   "answers": {
+    "matches": {
+     "type": "noul",
+     "noul": 0.03
+    }
+   },
+   "usage": {
+    "input_tokens": 762,
+    "output_tokens": 20
+   }
+  }
+ },
+ {
+  "id": "S-SR34",
+  "expected": "불일치",
+  "question": "state.app 은 공공조달 학습앱의 정답·해설이고 state.clause 는 현행 법령 조문 원문이다. app 에 적힌 숫자·기한·기준일·요건·순서가 clause 와 모두 맞는가? 하나라도 조문과 다르거나 조문에 없는 기준을 단정하면 NO.",
+  "response": {
+   "model": "jev-1.13.0",
+   "answers": {
+    "matches": {
+     "type": "noul",
+     "noul": 0.05
+    }
+   },
+   "usage": {
+    "input_tokens": 954,
+    "output_tokens": 20
+   }
+  }
+ },
+ {
+  "id": "S-S34",
+  "expected": "불일치",
+  "question": "state.app 은 공공조달 학습앱의 정답·해설이고 state.clause 는 현행 법령 조문 원문이다. app 에 적힌 숫자·기한·기준일·요건·순서가 clause 와 모두 맞는가? 하나라도 조문과 다르거나 조문에 없는 기준을 단정하면 NO.",
+  "response": {
+   "model": "jev-1.13.0",
+   "answers": {
+    "matches": {
+     "type": "noul",
+     "noul": 0.04
+    }
+   },
+   "usage": {
+    "input_tokens": 1924,
+    "output_tokens": 20
+   }
+  }
+ },
+ {
+  "id": "S-S08",
+  "expected": "불일치",
+  "question": "state.app 은 공공조달 학습앱의 정답·해설이고 state.clause 는 현행 법령 조문 원문이다. app 에 적힌 숫자·기한·기준일·요건·순서가 clause 와 모두 맞는가? 하나라도 조문과 다르거나 조문에 없는 기준을 단정하면 NO.",
+  "response": {
+   "model": "jev-1.13.0",
+   "answers": {
+    "matches": {
+     "type": "noul",
+     "noul": 0.06
+    }
+   },
+   "usage": {
+    "input_tokens": 1487,
+    "output_tokens": 20
+   }
+  }
+ },
+ {
+  "id": "S-SR11",
+  "expected": "일치",
+  "question": "state.app 은 공공조달 학습앱의 정답·해설이고 state.clause 는 현행 법령 조문 원문이다. app 에 적힌 숫자·기한·기준일·요건·순서가 clause 와 모두 맞는가? 하나라도 조문과 다르거나 조문에 없는 기준을 단정하면 NO.",
+  "response": {
+   "model": "jev-1.13.0",
+   "answers": {
+    "matches": {
+     "type": "noul",
+     "noul": 0.42
+    }
+   },
+   "usage": {
+    "input_tokens": 1415,
+    "output_tokens": 20
+   }
+  }
+ },
+ {
+  "id": "S-S07",
+  "expected": "일치",
+  "question": "state.app 은 공공조달 학습앱의 정답·해설이고 state.clause 는 현행 법령 조문 원문이다. app 에 적힌 숫자·기한·기준일·요건·순서가 clause 와 모두 맞는가? 하나라도 조문과 다르거나 조문에 없는 기준을 단정하면 NO.",
+  "response": {
+   "model": "jev-1.13.0",
+   "answers": {
+    "matches": {
+     "type": "noul",
+     "noul": 0.47
+    }
+   },
+   "usage": {
+    "input_tokens": 1086,
+    "output_tokens": 20
+   }
+  }
+ },
+ {
+  "id": "S-S16",
+  "expected": "일치",
+  "question": "state.app 은 공공조달 학습앱의 정답·해설이고 state.clause 는 현행 법령 조문 원문이다. app 에 적힌 숫자·기한·기준일·요건·순서가 clause 와 모두 맞는가? 하나라도 조문과 다르거나 조문에 없는 기준을 단정하면 NO.",
+  "response": {
+   "model": "jev-1.13.0",
+   "answers": {
+    "matches": {
+     "type": "noul",
+     "noul": 0.16
+    }
+   },
+   "usage": {
+    "input_tokens": 2152,
+    "output_tokens": 20
+   }
+  }
+ },
+ {
+  "id": "S-SR22",
+  "expected": "일치",
+  "question": "state.app 은 공공조달 학습앱의 정답·해설이고 state.clause 는 현행 법령 조문 원문이다. app 에 적힌 숫자·기한·기준일·요건·순서가 clause 와 모두 맞는가? 하나라도 조문과 다르거나 조문에 없는 기준을 단정하면 NO.",
+  "response": {
+   "model": "jev-1.13.0",
+   "answers": {
+    "matches": {
+     "type": "noul",
+     "noul": 0.14
+    }
+   },
+   "usage": {
+    "input_tokens": 2917,
+    "output_tokens": 20
+   }
+  }
+ },
+ {
+  "id": "P1-120",
+  "expected": "일치",
+  "question": "state.app 은 공공조달 학습앱의 정답·해설이고 state.clause 는 현행 법령 조문 원문이다. app 에 적힌 숫자·기한·기준일·요건·순서가 clause 와 모두 맞는가? 하나라도 조문과 다르거나 조문에 없는 기준을 단정하면 NO.",
+  "response": {
+   "model": "jev-1.13.0",
+   "answers": {
+    "matches": {
+     "type": "noul",
+     "noul": 0.45
+    }
+   },
+   "usage": {
+    "input_tokens": 2045,
+    "output_tokens": 20
+   }
+  }
+ },
+ {
+  "id": "S-SR04",
+  "expected": "일치",
+  "question": "state.app 은 공공조달 학습앱의 정답·해설이고 state.clause 는 현행 법령 조문 원문이다. app 에 적힌 숫자·기한·기준일·요건·순서가 clause 와 모두 맞는가? 하나라도 조문과 다르거나 조문에 없는 기준을 단정하면 NO.",
+  "response": {
+   "model": "jev-1.13.0",
+   "answers": {
+    "matches": {
+     "type": "noul",
+     "noul": 0.59
+    }
+   },
+   "usage": {
+    "input_tokens": 1373,
+    "output_tokens": 20
+   }
+  }
+ },
+ {
+  "id": "S-SR07",
+  "expected": "일치",
+  "question": "state.app 은 공공조달 학습앱의 정답·해설이고 state.clause 는 현행 법령 조문 원문이다. app 에 적힌 숫자·기한·기준일·요건·순서가 clause 와 모두 맞는가? 하나라도 조문과 다르거나 조문에 없는 기준을 단정하면 NO.",
+  "response": {
+   "model": "jev-1.13.0",
+   "answers": {
+    "matches": {
+     "type": "noul",
+     "noul": 0.64
+    }
+   },
+   "usage": {
+    "input_tokens": 2000,
+    "output_tokens": 20
+   }
+  }
+ }
+]
