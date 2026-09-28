@@ -36,11 +36,114 @@
     <button class="sub-btn active" data-sub="sub_step" data-act="sub">단계별 상세</button>
     <button class="sub-btn" data-sub="sub_flow" data-act="sub">전체 흐름 · 이벤트</button>
     <button class="sub-btn" data-sub="sub_cmp" data-act="sub">물품·용역·공사 비교</button>
+    <button class="sub-btn" data-sub="sub_bid" data-act="sub">입찰·낙찰 방식</button>
     <button class="sub-btn" data-sub="sub_pref" data-act="sub">우대제도</button>
   </div>
   <div class="sub-content active" id="sub_step"><div class="sp-wrap"><div class="sp-index" id="step_index"></div><div class="sp-detail" id="step_root"></div></div></div>
   <div class="sub-content" id="sub_flow"><div class="page-wrap" id="flow_root"></div></div>
   <div class="sub-content" id="sub_cmp"><div class="page-wrap" id="cmp_root"></div></div>
+
+  <div class="sub-content" id="sub_bid">
+<div class="page-wrap pref">
+<div class="page-title">입찰 방식 · 낙찰자 선정방식</div>
+<p class="page-sub mb-6"><b>입찰 방식</b> = 누가 참가하고 어떻게 내나 / <b>낙찰자 선정방식</b> = 들어온 입찰 중 누구를 뽑나</p>
+<p class="page-sub page-note">※ 국가계약법 시행령(시행 2026.6.3.) 원문 대조. 낙찰 <b>방법</b>은 추정가격으로 정하고, 낙찰 <b>기준</b>은 예정가격(예정가격 이하·낙찰하한율)</p>
+
+<!-- ── 경쟁 방법 ── -->
+<div class="section-hd" style="--sc:#3268E8"><div class="s-icon"></div>① 누가 참가하나 — 경쟁 방법</div>
+<div class="tbl-wrap">
+  <table class="cmp">
+    <thead><tr><th>방식</th><th>핵심</th><th>외울 것</th></tr></thead>
+    <tbody>
+    <tr><td>일반경쟁</td><td>자격 갖춘 누구나 참가 — <b>원칙</b>, 공정성 최고</td><td>법 제7조①</td></tr>
+    <tr><td>제한경쟁</td><td>시공능력·실적·기술·지역·중소기업자 등으로 자격 제한</td><td>시행령 §21</td></tr>
+    <tr><td>지명경쟁</td><td>특수 설비·기술 보유자가 <b>10인 이내</b>일 때 등 특정 업체 지명</td><td class="v-up">5인 이상 지명 · 2인 이상 신청 (§23·§24)</td></tr>
+    <tr><td>수의계약</td><td>경쟁 없이 한 곳과 계약 (소액·긴급·특수)</td><td class="v-up">종합공사 4억↓ · 전문 2억↓ · 그 밖 공사 1.6억↓ · 물품·용역 2천만↓ (§26)</td></tr>
+    </tbody>
+  </table>
+</div>
+<p class="pref-note">수의계약 견적: 원칙 2인 이상 · <b>2천만원 이하</b> 1인 견적 가능(여성·장애인·사회적기업 등은 <b>5천만원 이하</b>) (§30①)</p>
+
+<!-- ── 입찰 형태 ── -->
+<div class="section-hd" style="--sc:#1F8A4C"><div class="s-icon"></div>② 어떻게 내나 — 입찰 형태</div>
+<div class="tbl-wrap">
+  <table class="cmp">
+    <thead><tr><th>방식</th><th>핵심</th><th>근거</th></tr></thead>
+    <tbody>
+    <tr><td>총액 · 내역입찰</td><td>공사는 산출내역서를 냄 — 추정가격 <b>100억 이상</b>은 입찰 때, 100억 미만은 낙찰 후 착공신고 때</td><td>§14⑥</td></tr>
+    <tr><td>2단계 경쟁</td><td>규격·기술입찰 먼저 → 적격자만 가격입찰 (물품·용역). 동시에 내고 규격 적격자 가격만 여는 방식도 있음</td><td>§18</td></tr>
+    <tr><td>일괄입찰 (턴키)</td><td>입찰 때 설계서까지 만들어 제출 — 설계+시공 한 업체</td><td>§79①5</td></tr>
+    <tr><td>대안입찰</td><td>정부 원안과 함께 더 싸고 공기가 길지 않은 대안 설계 허용</td><td>§79①3·4</td></tr>
+    <tr><td>기술제안입찰</td><td>발주기관 설계서를 보고 공사비 절감·공기단축 등 기술제안서 제출 (실시설계 / 기본설계)</td><td>§98</td></tr>
+    <tr><td>MAS 2단계경쟁</td><td>다수공급자 계약업체끼리 한 번 더 경쟁 — 중소기업자간 경쟁제품 <b>1억↑</b>, 그 밖 물품 <b>5천만↑</b></td><td>MAS 업무처리규정 §49①</td></tr>
+    </tbody>
+  </table>
+</div>
+<p class="pref-note">대형공사 = 총공사비 <b>300억 이상</b> 신규복합공종공사 · 300억 미만이라도 일괄·대안이 유리하면 특정공사 (§79①1·2)</p>
+
+<!-- ── 낙찰자 선정 ── -->
+<div class="section-hd" style="--sc:#D9730D"><div class="s-icon"></div>③ 누구를 뽑나 — 낙찰자 선정방식</div>
+<div class="tbl-wrap">
+  <table class="cmp">
+    <thead><tr><th>방식</th><th>누구를 뽑나</th><th>대상</th><th>근거</th></tr></thead>
+    <tbody>
+    <tr><td>적격심사</td><td>예정가격 이하 <b>최저가부터</b> 이행능력 심사 → 통과하면 낙찰</td><td>기본 방식 (공사 100억 미만 등)</td><td>§42①⑤</td></tr>
+    <tr><td>최저가</td><td>예정가격 이하 최저가 입찰자</td><td>2단계 경쟁(§18) 입찰</td><td>§42③</td></tr>
+    <tr><td>종합심사낙찰제</td><td>가격+공사수행능력+사회적 책임 <b>합산점수 최고</b></td><td>공사 100억↑ 등</td><td>§42④</td></tr>
+    <tr><td>협상에 의한 계약</td><td>제안서 평가 → 협상적격자와 협상 → 가장 유리한 자</td><td>물품·용역 (전문성·기술성·긴급성)</td><td>§43</td></tr>
+    <tr><td>경쟁적 대화</td><td>대화로 세부내용 확정 → 제안서 평가 → 가장 유리한 자</td><td>요구사항을 미리 정하기 어려운 물품·용역</td><td>§43의3</td></tr>
+    <tr><td>품질 등 종합</td><td>가격 외 품질 등을 참작해 가장 경제성 있는 가격</td><td>물품</td><td>§44</td></tr>
+    <tr><td>다량물품 매각</td><td>예정가격 이상 <b>최고가</b>부터 수량 찰 때까지</td><td>희망수량 경쟁 매각</td><td>§45</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="pref-card" style="--pc:#3268E8">
+  <div class="pref-card-hd">적격심사 — 최저가부터 차례로</div>
+  <table class="kv">
+    <tbody><tr><th>통과점수</th><td>공사 <b>95점</b> · 조달청 물품 <b>85점</b> · 중소기업자간 경쟁제품(이행능력심사) <b>88점</b></td></tr>
+    <tr><th>절차</th><td>서류 제출 <b>5일 이상</b> → 보완 <b>3일 이상</b> → 심사 <b>7일 이내</b>(3일 연장)</td></tr>
+    <tr><th>심사 항목</th><td>이행실적·기술능력·재무상태·신인도 + 입찰가격</td></tr>
+  </tbody></table>
+  <div class="tbl-wrap mb-0">
+  <table class="cmp">
+    <thead><tr><th>낙찰하한율 대상</th><th class="c">하한율</th></tr></thead>
+    <tbody>
+    <tr><td>공사 10억 미만</td><td class="c v-up">89.745%</td></tr>
+    <tr><td>공사 10억~50억</td><td class="c v-up">88.745%</td></tr>
+    <tr><td>공사 50억~100억</td><td class="c v-up">87.495%</td></tr>
+    <tr><td>공사 100억 이상</td><td class="c">없음 → 종합심사</td></tr>
+    <tr><td>물품(조달청) 고시금액 이상</td><td class="c v-up">82.495%</td></tr>
+    <tr><td>물품(조달청) 고시금액 미만</td><td class="c v-up">86.245%</td></tr>
+    <tr><td>물품 중소기업자간 경쟁제품</td><td class="c v-up">89.995%</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="law-alert-foot">공사는 건설·전기·정보통신·소방·국가유산공사 공통, 2026.1.30 입찰공고분부터. 하한율보다 낮게 쓰면 낙찰 대상에서 빠짐.</p>
+</div>
+
+<div class="pref-card" style="--pc:#D9730D">
+  <div class="pref-card-hd">종합심사낙찰제 — 합산점수 최고</div>
+  <table class="kv">
+    <tbody><tr><th>공사</th><td>추정가격 <b>100억 이상</b> · 국가유산청장이 정하는 국가유산수리</td></tr>
+    <tr><th>용역</th><td>건설사업관리 <b>50억↑</b> · 기본계획·기본설계 <b>30억↑</b> · 실시설계 <b>40억↑</b></td></tr>
+    <tr class="pt"><th>시험 포인트</th><td>공사는 <b>100억</b>에서 갈림 — 미만 적격심사, 이상 종합심사</td></tr>
+  </tbody></table>
+</div>
+
+<div class="pref-card" style="--pc:#1F8A4C">
+  <div class="pref-card-hd">협상에 의한 계약 — 전문 용역(IT 등)</div>
+  <table class="kv">
+    <tbody><tr><th>배점</th><td>기술 <b>70</b> : 가격 <b>30</b> 기본 (사업 특성에 따라 조정)</td></tr>
+    <tr><th>협상적격자</th><td>기술점수 배점의 <b>85% 이상</b> + 예산(예정가격) 이하</td></tr>
+    <tr><th>협상기간</th><td>통보일부터 <b>15일</b> 이내, 안 되면 10일 범위 연장</td></tr>
+    <tr><th>공고</th><td>제안서 마감 <b>40일 전</b> (고시금액 미만 등 10일 전)</td></tr>
+    <tr class="pt"><th>시험 포인트</th><td>지식기반사업(엔지니어링·정보통신·정보화 등)은 협상 우선 적용 가능 (§43의2)</td></tr>
+  </tbody></table>
+</div>
+
+</div>
+  </div>
 
   <div class="sub-content" id="sub_pref">
 <div class="page-wrap pref">
