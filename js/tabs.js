@@ -720,11 +720,21 @@ function renderCmp() {
   }).join('');
   // 2. 20단계 비교 테이블
   let rows = STEPS.map(s => '<tr><td>'+s.id+'. '+s.name+'</td><td>'+s.compare.gs+'</td><td>'+s.compare.mp+'</td><td>'+s.compare.yy+'</td></tr>').join('');
+  // 3. 맨 위 요점 — 값은 BIZ_MATRIX 일반 공사·물품·용역 행과 같음
+  const KEY=[['공사','gs',[['소액 수의','종합 4억↓'],['지체상금률','0.05%/일'],['낙찰','100억 기준']]],
+             ['물품','mp',[['소액 수의','2천만↓'],['지체상금률','0.075%/일'],['낙찰','적격심사']]],
+             ['용역','yy',[['소액 수의','2천만↓'],['지체상금률','0.125%/일'],['낙찰','적격·협상']]]];
+  const keyHtml='<div class="pop-key"><div class="sd-key-lbl">먼저 외울 것 — 업종별 숫자</div><div class="pop-stats">'+
+    KEY.map(k=>'<div class="pop-biz '+k[1]+'"><div class="pop-biz-hd">'+k[0]+'</div>'+k[2].map(r=>'<div class="pop-biz-row"><span>'+r[0]+'</span><b>'+r[1]+'</b></div>').join('')+'</div>').join('')+
+    '</div></div>';
+  const hd=(n,t,d)=>'<div class="pop-hd"><span class="pop-n">'+n+'</span><span class="pop-t">'+t+'</span><span class="pop-d">'+d+'</span></div>';
+  root.classList.add('pop');
   root.innerHTML = '<div class="page-title">물품 · 용역 · 공사 비교</div>'+
     '<div class="page-sub">사업 유형별로 따라붙는 절차 한눈에 + 20단계 비교</div>'+
-    '<div class="section-hd">사업 유형별 절차 매트릭스</div>'+
+    keyHtml+
+    hd(1,'업종별 절차','일반형과 특수한 방식')+
     matrixHtml+
-    '<div class="section-hd">20단계 비교 테이블</div>'+
+    hd(2,'20단계 비교','같은 단계에서 업종마다 다른 점')+
     '<div class="tbl-wrap"><table class="cmptab"><thead><tr><th class="th-step">단계</th><th class="gs">공사</th><th class="mp">물품</th><th class="yy">용역</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
 }
 
