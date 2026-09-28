@@ -730,3 +730,23 @@ tbody tr:hover>td,tbody tr:hover>th{background:var(--surface)}
   body[data-memo] #new-sticky-btn{right:424px}
 }
 @media(prefers-reduced-motion:reduce){*{transition:none!important}.btn:active,.menu-card:active,.fc-ans:active,.fc-cat:active{transform:none}}
+/* 입찰·낙찰 방식 페이지 — 요점 숫자·구역 띠·하한율 타일 */
+.bid .bid-key{margin:8px 0 8px;padding:20px 24px;border-radius:var(--r-lg);background:var(--accent-soft)}
+.bid .bid-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:8px}
+.bid .bid-stat{padding:16px 18px;border-radius:var(--r-md);background:var(--bg)}
+.bid .bid-stat b{display:block;font-size:36px;font-weight:800;line-height:1.1;color:var(--accent)}
+.bid .bid-stat span{display:block;margin-top:8px;font-size:15px;line-height:1.6;color:var(--text-2)}
+.bid .bid-stat em{font-style:normal;font-weight:700;color:var(--text)}
+.bid .bid-hd{display:flex;align-items:baseline;gap:12px;margin:48px 0 16px;padding:14px 20px;border-radius:var(--r-lg);background:var(--accent-soft)}
+.bid .bid-n{font-size:30px;font-weight:800;line-height:1;color:var(--accent)}
+.bid .bid-t{font-size:22px;font-weight:800;color:var(--text)}
+.bid .bid-d{font-size:15px;color:var(--text-3)}
+.bid table.cmp td:first-child{font-size:17px;font-weight:800}
+.bid .bid-sub{margin-top:20px}
+.bid .bid-rates{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.bid .bid-rate{padding:12px 14px;border-radius:var(--r-md);background:var(--bg)}
+.bid .bid-rate span{display:block;font-size:14px;color:var(--text-3)}
+.bid .bid-rate b{display:block;margin-top:4px;font-size:24px;font-weight:800;color:var(--accent)}
+.bid .bid-rate.off b{color:var(--text-3)}
+@media(max-width:860px){.bid .bid-stat{padding:14px}.bid .bid-stat b{font-size:28px}.bid .bid-stat span{font-size:14px}}
+@media(max-width:560px){.bid .bid-stats{grid-template-columns:1fr}.bid .bid-rates{grid-template-columns:repeat(2,1fr)}}

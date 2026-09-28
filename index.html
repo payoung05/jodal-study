@@ -44,13 +44,22 @@
   <div class="sub-content" id="sub_cmp"><div class="page-wrap" id="cmp_root"></div></div>
 
   <div class="sub-content" id="sub_bid">
-<div class="page-wrap pref">
+<div class="page-wrap pref bid">
 <div class="page-title">입찰 방식 · 낙찰자 선정방식</div>
 <p class="page-sub mb-6"><b>입찰 방식</b> = 누가 참가하고 어떻게 내나 / <b>낙찰자 선정방식</b> = 들어온 입찰 중 누구를 뽑나</p>
 <p class="page-sub page-note">※ 국가계약법 시행령(시행 2026.6.3.) 원문 대조. 낙찰 <b>방법</b>은 추정가격으로 정하고, 낙찰 <b>기준</b>은 예정가격(예정가격 이하·낙찰하한율)</p>
 
+<div class="bid-key">
+  <div class="sd-key-lbl">먼저 외울 것 3개</div>
+  <div class="bid-stats">
+    <div class="bid-stat"><b>100억</b><span>공사 낙찰방식이 갈리는 선<br>미만 <em>적격심사</em> · 이상 <em>종합심사</em></span></div>
+    <div class="bid-stat"><b>95 · 85 · 88</b><span>적격심사 통과점수<br>공사 · 물품 · 이행능력심사</span></div>
+    <div class="bid-stat"><b>70 : 30</b><span>협상 계약 기술 : 가격<br>협상적격자는 기술 <em>85%</em> 이상</span></div>
+  </div>
+</div>
+
 <!-- ── 경쟁 방법 ── -->
-<div class="section-hd" style="--sc:#3268E8"><div class="s-icon"></div>① 누가 참가하나 — 경쟁 방법</div>
+<div class="bid-hd"><span class="bid-n">1</span><span class="bid-t">누가 참가하나</span><span class="bid-d">경쟁 방법</span></div>
 <div class="tbl-wrap">
   <table class="cmp">
     <thead><tr><th>방식</th><th>핵심</th><th>외울 것</th></tr></thead>
@@ -65,7 +74,7 @@
 <p class="pref-note">수의계약 견적: 원칙 2인 이상 · <b>2천만원 이하</b> 1인 견적 가능(여성·장애인·사회적기업 등은 <b>5천만원 이하</b>) (§30①)</p>
 
 <!-- ── 입찰 형태 ── -->
-<div class="section-hd" style="--sc:#1F8A4C"><div class="s-icon"></div>② 어떻게 내나 — 입찰 형태</div>
+<div class="bid-hd"><span class="bid-n">2</span><span class="bid-t">어떻게 내나</span><span class="bid-d">입찰 형태</span></div>
 <div class="tbl-wrap">
   <table class="cmp">
     <thead><tr><th>방식</th><th>핵심</th><th>근거</th></tr></thead>
@@ -82,7 +91,7 @@
 <p class="pref-note">대형공사 = 총공사비 <b>300억 이상</b> 신규복합공종공사 · 300억 미만이라도 일괄·대안이 유리하면 특정공사 (§79①1·2)</p>
 
 <!-- ── 낙찰자 선정 ── -->
-<div class="section-hd" style="--sc:#D9730D"><div class="s-icon"></div>③ 누구를 뽑나 — 낙찰자 선정방식</div>
+<div class="bid-hd"><span class="bid-n">3</span><span class="bid-t">누구를 뽑나</span><span class="bid-d">낙찰자 선정방식</span></div>
 <div class="tbl-wrap">
   <table class="cmp">
     <thead><tr><th>방식</th><th>누구를 뽑나</th><th>대상</th><th>근거</th></tr></thead>
@@ -105,21 +114,17 @@
     <tr><th>절차</th><td>서류 제출 <b>5일 이상</b> → 보완 <b>3일 이상</b> → 심사 <b>7일 이내</b>(3일 연장)</td></tr>
     <tr><th>심사 항목</th><td>이행실적·기술능력·재무상태·신인도 + 입찰가격</td></tr>
   </tbody></table>
-  <div class="tbl-wrap mb-0">
-  <table class="cmp">
-    <thead><tr><th>낙찰하한율 대상</th><th class="c">하한율</th></tr></thead>
-    <tbody>
-    <tr><td>공사 10억 미만</td><td class="c v-up">89.745%</td></tr>
-    <tr><td>공사 10억~50억</td><td class="c v-up">88.745%</td></tr>
-    <tr><td>공사 50억~100억</td><td class="c v-up">87.495%</td></tr>
-    <tr><td>공사 100억 이상</td><td class="c">없음 → 종합심사</td></tr>
-    <tr><td>물품(조달청) 고시금액 이상</td><td class="c v-up">82.495%</td></tr>
-    <tr><td>물품(조달청) 고시금액 미만</td><td class="c v-up">86.245%</td></tr>
-    <tr><td>물품 중소기업자간 경쟁제품</td><td class="c v-up">89.995%</td></tr>
-    </tbody>
-  </table>
+  <div class="sd-key-lbl bid-sub">낙찰하한율 — 이보다 낮게 쓰면 탈락</div>
+  <div class="bid-rates">
+    <div class="bid-rate"><span>공사 · 10억 미만</span><b>89.745%</b></div>
+    <div class="bid-rate"><span>공사 · 10억~50억</span><b>88.745%</b></div>
+    <div class="bid-rate"><span>공사 · 50억~100억</span><b>87.495%</b></div>
+    <div class="bid-rate off"><span>공사 · 100억 이상</span><b>종합심사</b></div>
+    <div class="bid-rate"><span>물품 · 조달청 고시금액 이상</span><b>82.495%</b></div>
+    <div class="bid-rate"><span>물품 · 조달청 고시금액 미만</span><b>86.245%</b></div>
+    <div class="bid-rate"><span>물품 · 중소기업자간 경쟁제품</span><b>89.995%</b></div>
   </div>
-  <p class="law-alert-foot">공사는 건설·전기·정보통신·소방·국가유산공사 공통, 2026.1.30 입찰공고분부터. 하한율보다 낮게 쓰면 낙찰 대상에서 빠짐.</p>
+  <p class="law-alert-foot">공사는 건설·전기·정보통신·소방·국가유산공사 공통, 2026.1.30 입찰공고분부터. 100억 이상은 하한율이 아니라 종합심사로 뽑음.</p>
 </div>
 
 <div class="pref-card" style="--pc:#D9730D">
